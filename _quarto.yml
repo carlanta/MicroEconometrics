@@ -1,0 +1,76 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Manual de Microeconometría"
+  author: "Carlos de Anta Puig"
+  date: "2026"
+
+  chapters:
+    - index.qmd
+    - 00-fundamentos.qmd
+    - 01-vd-limitada.qmd
+    - 02-eleccion-discreta.qmd
+    - 03-tobit.qmd
+    - 04-recuento.qmd
+    - 05-panel.qmd
+#    - 06-tablas.qmd
+#    - 99-anexos.qmd
+    - references.qmd
+#    - autor.tex
+
+#  appendices:
+#    - 06-tablas.qmd
+#    - 99-anexos.qmd
+
+#  back-matter:
+#    - references.qmd
+#    - autor.tex
+
+
+
+bibliography: references.bib
+csl: https://www.zotero.org/styles/chicago-author-date
+
+# 🔥 SOLO control global seguro
+execute:
+  warning: false
+  message: false
+
+format:
+  pdf:
+    dpi: 600
+    documentclass: book
+    fontsize: 11pt
+
+    tbl-colwidths: auto
+
+    geometry:
+      - paperwidth=17cm
+      - paperheight=24cm
+      - margin=2.5cm
+
+    number-sections: true
+    toc: true
+    toc-title: "Índice"
+    titlepage: false
+
+    echo: false   # 👈 SOLO aquí
+
+    include-in-header: preamble.tex
+    include-before-body: cover.tex
+
+    header-includes:
+      - \usepackage{booktabs}
+      - \usepackage{longtable}
+      - \usepackage{float}
+
+  html:
+    theme: default
+    css: styles.css
+    page-layout: full
+    toc: false
+
+    echo: true        # 👈 código visible
+    code-fold: true   # 👈 plegable (MUY recomendable)

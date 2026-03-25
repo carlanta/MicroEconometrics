@@ -1,0 +1,6 @@
+
+# Índices
+
+\listoffigures
+\newpage
+\listoftables

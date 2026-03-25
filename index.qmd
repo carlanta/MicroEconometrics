@@ -1,0 +1,72 @@
+
+```{=latex}
+\frontmatter
+```
+
+```{r}
+#| include: false
+library(tidyverse)
+library(kableExtra)
+library(plm)
+```
+
+# Prólogo {.unnumbered}
+
+Este manual nació de una frustración y de una convicción.
+
+La frustración es la que siente cualquier profesor que, tras años de enseñanza, constata que los materiales disponibles no terminan de funcionar. Los manuales internacionales de referencia — Cameron y Trivedi, Wooldridge, Greene — son obras maestras, pero están escritos para investigadores, no para alumnos que se enfrentan por primera vez a un modelo Logit o a un panel de datos. Los apuntes de las universidades, por su parte, suelen pecar de lo contrario: son telegráficos, dan por supuestos conceptos que el alumno no domina, y saltan de la fórmula al código sin detenerse a explicar el porqué de cada paso.
+
+La convicción es que la microeconometría puede explicarse de otra manera. Con rigor, sí — las derivaciones formales están aquí, completas y sin atajos —, pero también con claridad pedagógica, con ejemplos numéricos resueltos paso a paso, con gráficos que iluminan la intuición detrás de las fórmulas, y con un hilo narrativo que conecta cada modelo con los problemas económicos reales que lo motivaron.
+
+Este manual está escrito pensando en mis alumnos. En los que llegan al curso con buena base de estadística pero nunca han visto una variable latente. En los que saben ejecutar `lm()` en R pero no entienden qué pasa cuando la variable dependiente es binaria. En los que necesitan no solo saber *qué* hace un modelo, sino *por qué* lo hace, *cuándo* usarlo y *cómo* interpretar sus resultados de forma que un economista — no un estadístico — pueda tomar decisiones informadas.
+
+Cada capítulo sigue una estructura deliberada: primero la motivación económica del problema, después la formulación del modelo con sus supuestos explícitos, a continuación la estimación y sus propiedades, luego la interpretación detallada de los resultados (que es donde la mayoría de los manuales se quedan cortos), los diagnósticos necesarios para validar el modelo, y finalmente un ejemplo práctico completo en R que el alumno puede reproducir íntegramente. Los scripts de R que acompañan cada capítulo están disponibles en el repositorio del manual:
+
+```{=latex}
+\begin{center}
+\textbf{https://github.com/carlanta/MicroEconometrics}
+\end{center}
+```
+
+El primer tomo cubre los modelos fundamentales: elección discreta (Probit y Logit), datos censurados (Tobit), datos de recuento (Poisson y Binomial Negativa) y datos de panel (efectos fijos y aleatorios). Un segundo tomo, actualmente en preparación, abordará variables instrumentales, modelos de duración, datos cualitativos y extensiones avanzadas.
+
+Escribir este manual ha sido un trabajo enorme — mucho mayor de lo que imaginé cuando comencé. Pero cada vez que un alumno me dice que por fin entiende qué son los efectos marginales, o que ahora sabe interpretar un odds ratio, o que ha conseguido replicar un paper con los modelos del curso, siento que el esfuerzo ha merecido la pena. Si este libro consigue que algún alumno más disfrute aprendiendo microeconometría, habrá cumplido su propósito.
+
+```{=latex}
+\vspace{1cm}
+\begin{flushright}
+\textit{Carlos de Anta Puig}\\
+\textit{Madrid, marzo de 2026}
+\end{flushright}
+```
+
+\newpage
+
+## Contenido del Tomo I {.unnumbered}
+
+El tomo se organiza en seis capítulos:
+
+* **Capítulo 0**: Fundamentos
+* **Capítulo 1**: Variable dependiente limitada
+* **Capítulo 2**: Elección discreta
+* **Capítulo 3**: Tobit
+* **Capítulo 4**: Recuento
+* **Capítulo 5**: Panel
+
+## Material complementario {.unnumbered}
+
+Scripts disponibles en:
+
+**https://github.com/carlanta/MicroEconometrics**
+
+## Convenciones {.unnumbered}
+
+* Ecuaciones numeradas por capítulo
+* Tablas y figuras por capítulo
+* Código R oculto
+
+```{=latex}
+\cleardoublepage
+\pagestyle{plain}
+\mainmatter
+```

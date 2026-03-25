@@ -1,0 +1,1480 @@
+# Modelos de Elección Discreta
+
+## Introducción: ¿por qué modelos de elección discreta?
+
+En muchas situaciones económicas, la variable que queremos explicar no es continua (como el salario o el PIB), sino que toma un número finito de valores. Los casos más habituales son las **decisiones binarias**:
+
+-   ¿Trabaja esta persona o no? ($y = 1$ o $y = 0$)
+-   ¿Se concede un crédito o se deniega?
+-   ¿Compra el consumidor el producto o no?
+
+Cuando la variable dependiente es binaria, el modelo de regresión lineal clásico (MCO) presenta **problemas graves**. Los modelos de elección discreta —Probit y Logit— resuelven estos problemas y son la herramienta estándar en microeconometría aplicada.
+
+En estos apuntes seguiremos un hilo conductor muy claro:
+
+1.  Primero entenderemos los **fundamentos estadísticos** que hay detrás (variable aleatoria, densidad, distribución, verosimilitud).
+2.  Después veremos el **Modelo Lineal de Probabilidad (MLP)** y sus limitaciones.
+3.  A continuación, los modelos **Probit** y **Logit**, que resuelven esas limitaciones.
+4.  Finalmente, aprenderemos a **interpretar** los resultados (efectos marginales, odds ratios) y a **evaluar** la calidad del modelo (pseudo-R², contrastes).
+
+Todo se ilustrará con un ejemplo aplicado: la **participación laboral** en España.
+
+\newpage
+
+## Fundamentos estadísticos
+
+Antes de estimar ningún modelo, necesitamos repasar cuatro conceptos clave que aparecen constantemente en el tema.
+
+### Variable aleatoria
+
+Una **variable aleatoria** es una variable cuyo valor depende del resultado de un fenómeno aleatorio. En nuestro contexto:
+
+$$y_i = \text{¿Trabaja la persona } i?$$
+
+Antes de observar a la persona, **no sabemos** si $y_i$ será 0 o 1. Después de observarla, tenemos un dato fijo. La estadística nos permite modelar esa incertidumbre.
+
+Hay dos tipos:
+
+-   **Discreta**: toma valores contables (0, 1, 2, ...). Ejemplo: $y \in \{0, 1\}$.
+-   **Continua**: toma cualquier valor en un intervalo. Ejemplo: el salario.
+
+```{r t02-tipos-var, echo=FALSE, fig.height=3.5, fig.cap="Variable discreta (Bernoulli) y continua (Normal)."}
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+barplot(c(0.28, 0.72),
+        names.arg = c("y = 0\n(no trabaja)", "y = 1\n(trabaja)"),
+        col = c("#E74C3C", "#2ECC71"), ylim = c(0, 1),
+        ylab = "Probabilidad", main = "Discreta: Bernoulli(p=0.72)",
+        border = "white")
+abline(h = 0)
+x <- seq(-4, 4, length.out = 300)
+plot(x, dnorm(x), type = "l", lwd = 3, col = "#3498DB",
+     xlab = "x", ylab = "Densidad f(x)", main = "Continua: Normal(0,1)")
+polygon(c(x, rev(x)), c(dnorm(x), rep(0, length(x))),
+        col = rgb(0.2, 0.6, 1, 0.2), border = NA)
+abline(h = 0, col = "gray50")
+par(mfrow = c(1, 1))
+```
+
+### La distribución de Bernoulli
+
+Cuando $y$ solo puede ser 0 o 1, sigue una distribución **Bernoulli(p)**:
+
+$$P(y = 1) = p \qquad\qquad P(y = 0) = 1 - p$$
+
+En una sola expresión compacta:
+
+$$\boxed{P(y) = p^{\,y} \cdot (1-p)^{1-y}}$$
+
+Comprobación rápida:
+
+-   Si $y = 1$: $p^1 \cdot (1-p)^0 = p$ ✓
+-   Si $y = 0$: $p^0 \cdot (1-p)^1 = 1-p$ ✓
+
+Esta fórmula compacta es **exactamente** la que aparece dentro de la función de verosimilitud (sección 2.5). La clave de todo el tema es que, en lugar de asumir que $p$ es la misma para todos los individuos, haremos que **dependa de sus características**: $p_i = F(x_i'\beta)$.
+
+```{r t02-bernoulli, echo=FALSE, fig.height=3, fig.cap="Distribución Bernoulli con distintos valores de p."}
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+for (p in c(0.2, 0.5, 0.8)) {
+  barplot(c(1-p, p), names.arg = c("y=0", "y=1"),
+          col = c("#E74C3C", "#2ECC71"), ylim = c(0, 1),
+          ylab = "Probabilidad",
+          main = sprintf("Bernoulli(p = %.1f)", p),
+          border = "white", cex.main = 1.2)
+  abline(h = 0)
+  text(0.7, 1-p + 0.05, sprintf("%.1f", 1-p), font = 2)
+  text(1.9, p + 0.05,   sprintf("%.1f", p),   font = 2)
+}
+par(mfrow = c(1, 1))
+```
+
+### Función de densidad
+
+Para variables **continuas**, no tiene sentido hablar de $P(X = 2.317...)$ (esa probabilidad es siempre cero). En su lugar usamos la **función de densidad** $f(x)$:
+
+$$P(a < X < b) = \int_a^b f(x)\, dx = \text{área bajo la curva}$$
+
+La distribución continua más importante en estadística es la **Normal** (campana de Gauss):
+
+$$f(x) = \frac{1}{\sqrt{2\pi}\,\sigma} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+
+La **Normal estándar** $N(0,1)$ — con $\mu = 0$ y $\sigma = 1$ — es la que utiliza el modelo **Probit**.
+
+```{r t02-densidad, echo=FALSE, fig.height=3.5, fig.cap="La probabilidad es el área bajo la curva de densidad."}
+x <- seq(-4, 4, length.out = 300)
+plot(x, dnorm(x), type = "l", lwd = 3, col = "#2C3E50",
+     xlab = "x", ylab = "f(x)",
+     main = "La probabilidad es el ÁREA bajo la curva", ylim = c(0, 0.45))
+zona <- x[x >= -1 & x <= 1]
+polygon(c(-1, zona, 1), c(0, dnorm(zona), 0),
+        col = rgb(0.2, 0.8, 0.4, 0.5), border = NA)
+zona2 <- x[x >= 1 & x <= 2]
+polygon(c(1, zona2, 2), c(0, dnorm(zona2), 0),
+        col = rgb(0.9, 0.3, 0.3, 0.4), border = NA)
+text(0,   0.15, "P(-1 < X < 1)\n= 68%",  col = "#1E8449", font = 2, cex = 1)
+text(1.5, 0.10, "P(1<X<2)\n= 14%",       col = "#C0392B", font = 2, cex = 0.85)
+abline(h = 0, col = "gray50")
+```
+
+### Función de distribución acumulada (CDF)
+
+La **CDF** responde a la pregunta: *¿cuál es la probabilidad de obtener un valor* $\leq x$?
+
+$$F(x) = P(X \leq x) = \int_{-\infty}^{x} f(t)\, dt$$
+
+**Propiedad fundamental**: $F(x)$ siempre está en $[0, 1]$. Esto la hace **perfecta para modelar probabilidades**.
+
+Cada modelo usa una CDF diferente:
+
+-   **Probit** $\rightarrow$ $\Phi(x'\beta)$, la CDF de la Normal estándar.
+-   **Logit** $\rightarrow$ $\Lambda(x'\beta) = \frac{1}{1 + e^{-x'\beta}}$, la CDF de la distribución logística.
+
+```{r t02-cdf, echo=FALSE, fig.height=3.5, fig.cap="Densidad y distribución acumulada de la Normal estándar."}
+x <- seq(-4, 4, length.out = 300)
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+plot(x, dnorm(x), type = "l", lwd = 3, col = "#3498DB",
+     xlab = "x", ylab = "f(x)", main = "Densidad f(x)")
+zona <- x[x <= 1]
+polygon(c(min(zona), zona, 1), c(0, dnorm(zona), 0),
+        col = rgb(0.2, 0.6, 1, 0.4), border = NA)
+abline(v = 1, lty = 2, col = "#E74C3C", lwd = 2)
+text(-1.5, 0.1, sprintf("F(1) = %.0f%%", pnorm(1)*100),
+     col = "#1A5276", font = 2, cex = 1)
+abline(h = 0, col = "gray50")
+
+plot(x, pnorm(x), type = "l", lwd = 3, col = "#2ECC71",
+     xlab = "x", ylab = expression(F(x) == P(X <= x)),
+     main = "Distribución acumulada F(x)")
+abline(h = c(0, 0.5, 1), lty = 3, col = "gray70")
+points(1, pnorm(1), pch = 19, col = "#E74C3C", cex = 2)
+text(1.3, pnorm(1) - 0.07, sprintf("F(1) = %.2f", pnorm(1)),
+     col = "#C0392B", font = 2)
+par(mfrow = c(1, 1))
+```
+
+### La verosimilitud: corazón de la estimación
+
+#### Intuición
+
+Imaginemos que lanzamos una moneda 3 veces y observamos: **Cara, Cara, Cruz**. ¿Cuál es la probabilidad $p$ de cara más compatible con este resultado?
+
+La **verosimilitud** $L(p)$ mide exactamente eso: *dado un valor del parámetro, ¿qué tan probable es haber observado estos datos?*
+
+$$L(p) = p \cdot p \cdot (1-p) = p^2(1-p)$$
+
+El **estimador de máxima verosimilitud (MV)** elige el valor de $p$ que maximiza $L(p)$. En este ejemplo: $\hat{p} = 2/3$ (la proporción muestral de caras).
+
+```{r t02-verosimilitud, echo=FALSE, fig.height=3.5, fig.cap="Verosimilitud de observar [Cara, Cara, Cruz] según el parámetro p."}
+p_vals <- seq(0.01, 0.99, length.out = 200)
+L_vals <- p_vals^2 * (1 - p_vals)
+idx_max <- which.max(L_vals)
+p_mv <- p_vals[idx_max]
+plot(p_vals, L_vals, type = "l", lwd = 3, col = "#3498DB",
+     xlab = "Parámetro p", ylab = "L(p)",
+     main = "Verosimilitud: el MV elige el máximo")
+points(p_mv, L_vals[idx_max], pch = 19, col = "#E74C3C", cex = 2)
+abline(v = p_mv, lty = 2, col = "#C0392B", lwd = 2)
+text(p_mv + 0.05, L_vals[idx_max] * 0.85,
+     sprintf("MV: p = %.2f", p_mv), col = "#C0392B", font = 2)
+abline(h = 0, col = "gray50")
+```
+
+#### De la verosimilitud a la log-verosimilitud
+
+Con $N$ observaciones independientes, la verosimilitud es un **producto**:
+
+$$L(\beta) = \prod_{i=1}^N p_i^{\,y_i} \cdot (1-p_i)^{1-y_i}$$
+
+**Problema práctico**: multiplicar muchos números entre 0 y 1 produce números minúsculos que el ordenador no puede manejar (underflow numérico).
+
+**Solución**: tomar logaritmos. El logaritmo convierte el producto en suma, y **el máximo se conserva** (el logaritmo es una función creciente):
+
+$$\boxed{\ln L(\beta) = \sum_{i=1}^N \left[ y_i \ln(p_i) + (1-y_i)\ln(1-p_i) \right]}$$
+
+Esta es la **función objetivo** que maximizan Probit y Logit. El término $ll_i = y_i \ln(p_i) + (1-y_i)\ln(1-p_i)$ es la **contribución** del individuo $i$ a la log-verosimilitud:
+
+-   Si $y_i = 1$ y el modelo predice $\hat{P}_i$ alto $\rightarrow$ $\ln(\hat{P}_i)$ es cercano a 0 $\rightarrow$ **bien**.
+-   Si $y_i = 1$ pero el modelo predice $\hat{P}_i$ bajo $\rightarrow$ $\ln(\hat{P}_i)$ es muy negativo $\rightarrow$ **mal**.
+
+El estimador MV busca los $\beta$ que hacen la log-verosimilitud **lo menos negativa posible**.
+
+\newpage
+
+## El Modelo Lineal de Probabilidad (MLP)
+
+### Planteamiento
+
+El enfoque más simple para modelar una variable binaria es tratar $y$ como si fuera continua y aplicar MCO:
+
+$$P(y_i = 1 \,|\, x_i) = x_i'\beta = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \cdots$$
+
+Es decir, la probabilidad es una **función lineal** de las variables explicativas. Este modelo se llama **Modelo Lineal de Probabilidad (MLP)**.
+
+**Ventaja**: es extremadamente sencillo. Los coeficientes **son directamente los efectos marginales**: $\beta_j$ indica cuánto cambia la probabilidad al aumentar $x_j$ en una unidad.
+
+### Limitaciones del MLP
+
+El MLP tiene **tres problemas graves**:
+
+#### Problema 1: Probabilidades fuera de \[0, 1\]
+
+Una recta puede tomar cualquier valor real. Nada impide que el modelo prediga $\hat{P} = -0.15$ o $\hat{P} = 1.30$, lo cual **no tiene sentido** como probabilidad.
+
+#### Problema 2: Heterocedasticidad
+
+Si $y \sim \text{Bernoulli}(p_i)$, entonces $\text{Var}(\varepsilon_i) = p_i(1-p_i)$, que depende de $x_i$. Los errores **no son homocedásticos**, lo que invalida la inferencia estándar (los errores estándar y los p-valores del MCO son incorrectos).
+
+#### Problema 3: Efecto marginal constante
+
+El MLP asume que el efecto de, por ejemplo, un año más de educación es **siempre el mismo**, independientemente de si la persona tiene 6 años o 18 años de educación. Económicamente, esto no es realista: el efecto debería ser mayor en la zona intermedia (donde hay más incertidumbre) y menor en los extremos (donde la decisión ya está prácticamente tomada).
+
+### El modelo que vamos a estimar
+
+A lo largo de todo este tema utilizaremos un mismo modelo aplicado: la **participación laboral**. La variable dependiente es binaria:
+
+$$y_i = \begin{cases} 1 & \text{si la persona } i \text{ trabaja} \\ 0 & \text{si no trabaja} \end{cases}$$
+
+El modelo que estimaremos relaciona la probabilidad de trabajar con seis variables explicativas:
+
+$$P(\text{trabaja}_i = 1) = F(\beta_0 + \beta_1 \, \text{educación}_i + \beta_2 \, \text{edad}_i + \beta_3 \, \text{sexo}_i + \beta_4 \, \text{experiencia}_i + \beta_5 \, \text{hijos}_i + \beta_6 \, \text{ingreso\_familiar}_i)$$
+
+donde $F(\cdot)$ es la función de enlace: la identidad en el MLP, $\Phi$ en el Probit y $\Lambda$ en el Logit. Las variables son:
+
+-   **educación**: años de educación completados.
+-   **edad**: edad en años.
+-   **sexo**: variable dummy (1 = Mujer, 0 = Hombre).
+-   **experiencia**: años de experiencia laboral.
+-   **hijos**: número de hijos menores de edad.
+-   **ingreso_familiar**: ingreso del hogar no procedente del trabajo del individuo (en miles de euros).
+
+Estimaremos este mismo modelo con los tres métodos (MLP, Probit, Logit) para poder comparar resultados.
+
+### Ejemplo en R
+
+```{r t02-mlp}
+datos <- read.csv("participacion_laboral.csv", stringsAsFactors = TRUE)
+
+mlp <- lm(trabaja ~ educacion + edad + sexo +
+            experiencia + hijos + ingreso_familiar, data = datos)
+
+## Tabla de coeficientes
+knitr::kable(round(summary(mlp)$coefficients, 4),
+             caption = "Coeficientes del MLP (estimados por MCO)",
+             escape = TRUE)
+```
+
+**Interpretación** (recuerda: en el MLP, los coeficientes = efectos marginales):
+
+-   **educación**: un año más de educación aumenta la probabilidad de trabajar en `r round(coef(mlp)["educacion"]*100, 1)` puntos porcentuales.
+-   **sexo (Mujer)**: ser mujer reduce la probabilidad en `r round(abs(coef(mlp)["sexoMujer"])*100, 1)` pp.
+
+```{r t02-mlp-problemas, echo=FALSE, fig.height=3.5, fig.cap="Limitaciones del MLP: predicciones fuera de [0,1] y efecto marginal constante."}
+datos$prob_mlp <- predict(mlp)
+n_fuera <- sum(datos$prob_mlp < 0 | datos$prob_mlp > 1)
+
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+hist(datos$prob_mlp, breaks = 30, col = "#3498DB", border = "white",
+     main = sprintf("MLP: %d predicciones fuera [0,1]", n_fuera),
+     xlab = expression(hat(P)(trabaja == 1)), ylab = "Frecuencia")
+abline(v = c(0, 1), col = "red", lty = 2, lwd = 2)
+
+edu_seq <- seq(6, 20, length.out = 100)
+logit_simple <- glm(trabaja ~ educacion, data = datos, family = binomial)
+mlp_simple   <- lm(trabaja ~ educacion, data = datos)
+plot(edu_seq, predict(mlp_simple, newdata = data.frame(educacion = edu_seq)),
+     type = "l", col = "#E74C3C", lwd = 2, ylim = c(-0.1, 1.1),
+     xlab = "Años de educación", ylab = expression(P(trabaja == 1)),
+     main = "MLP (lineal) vs Logit (no lineal)")
+lines(edu_seq,
+      predict(logit_simple, newdata = data.frame(educacion = edu_seq), type = "response"),
+      col = "#2980B9", lwd = 2, lty = 2)
+abline(h = c(0, 1), col = "gray70", lty = 3)
+legend("topleft", legend = c("MLP", "Logit"), col = c("#E74C3C", "#2980B9"),
+       lty = c(1, 2), lwd = 2, bty = "n")
+par(mfrow = c(1, 1))
+```
+
+> **Conclusión**: El MLP sirve como referencia rápida, pero sus limitaciones teóricas son serias. Necesitamos modelos que **garanticen** $\hat{P} \in [0, 1]$ y capturen la no linealidad. Esos modelos son el Probit y el Logit.
+
+\newpage
+
+## El modelo Probit
+
+### Planteamiento
+
+El modelo Probit resuelve los tres problemas del MLP **envolviendo** el índice lineal $x'\beta$ con la CDF de la Normal estándar $\Phi(\cdot)$:
+
+$$\boxed{P(y_i = 1 \,|\, x_i) = \Phi(x_i'\beta) = \Phi(\beta_0 + \beta_1 x_{1i} + \cdots)}$$
+
+donde $\Phi(z) = \int_{-\infty}^{z} \frac{1}{\sqrt{2\pi}} e^{-t^2/2}\, dt$
+
+Dado que $\Phi(\cdot)$ siempre devuelve valores en $[0, 1]$, **las predicciones siempre son probabilidades válidas**.
+
+#### ¿Cómo se estima?
+
+**No por MCO**, sino por **máxima verosimilitud (MV)**. Se buscan los $\hat{\beta}$ que maximizan:
+
+$$\ln L(\beta) = \sum_{i=1}^N \left[ y_i \ln\Phi(x_i'\beta) + (1-y_i)\ln(1-\Phi(x_i'\beta)) \right]$$
+
+Este problema no tiene solución cerrada — se resuelve numéricamente mediante algoritmos iterativos (Newton-Raphson, BFGS, etc.). En R, la función `glm()` hace todo el trabajo.
+
+### Estimación en R
+
+```{r t02-probit}
+probit <- glm(trabaja ~ educacion + edad + sexo +
+                experiencia + hijos + ingreso_familiar,
+              data = datos, family = binomial(link = "probit"))
+
+knitr::kable(round(summary(probit)$coefficients, 4),
+             caption = "Coeficientes del modelo Probit (estimados por MV)", escape = TRUE)
+```
+
+#### ¿Cómo se interpretan los coeficientes?
+
+**¡Cuidado!** A diferencia del MLP, los coeficientes del Probit **NO** son efectos marginales. Solo nos dicen la **dirección** del efecto:
+
+-   $\hat{\beta}_j > 0$ $\rightarrow$ la variable $x_j$ **aumenta** la probabilidad.
+-   $\hat{\beta}_j < 0$ $\rightarrow$ la variable $x_j$ **disminuye** la probabilidad.
+
+Para saber **cuánto** cambia la probabilidad, necesitamos calcular los **efectos marginales** (sección 6).
+
+\newpage
+
+## El modelo Logit
+
+### Planteamiento
+
+El modelo Logit es conceptualmente idéntico al Probit, pero usa la **función logística** $\Lambda(\cdot)$ en lugar de la Normal:
+
+$$\boxed{P(y_i = 1 \,|\, x_i) = \Lambda(x_i'\beta) = \frac{1}{1 + e^{-x_i'\beta}} = \frac{e^{x_i'\beta}}{1 + e^{x_i'\beta}}}$$
+
+#### Ventajas del Logit respecto al Probit
+
+1.  **Fórmula cerrada**: $\Lambda(z) = 1/(1+e^{-z})$ se calcula directamente, sin integrales.
+2.  **Interpretación vía odds ratios**: los coeficientes tienen una interpretación directa en términos de log-odds (veremos esto en la sección 7).
+3.  **El más usado** en la práctica por estas dos razones.
+
+#### Logit vs Probit: ¿cuál elegir?
+
+En la práctica, ambos producen resultados **prácticamente idénticos**. La función logística y la Normal acumulada son casi iguales en el rango central, donde se concentra la mayoría de los datos. Solo difieren ligeramente en las colas (la logística tiene colas más gruesas).
+
+```{r t02-logit-vs-probit, echo=FALSE, fig.height=3.5, fig.cap="Logit y Probit son casi idénticos en el rango central."}
+x_seq <- seq(-4, 4, length.out = 300)
+plot(x_seq, pnorm(x_seq), type = "l", lwd = 3, col = "#2ECC71",
+     xlab = expression("Índice "~x*"'"*beta), ylab = "P(y = 1)", ylim = c(0, 1),
+     main = "Logit y Probit: casi idénticos")
+lines(x_seq, plogis(x_seq), lwd = 3, col = "#3498DB", lty = 2)
+rect(-1.5, -0.05, 1.5, 1.05, col = rgb(1,1,0,0.15), border = NA)
+text(0, 0.15, "Zona donde se\nconcentran los datos\n~ casi iguales",
+     col = "#7D6608", font = 2, cex = 0.85)
+abline(h = 0.5, lty = 3, col = "gray60")
+legend("topleft", bty = "n", lwd = 3, lty = c(1, 2),
+       col = c("#2ECC71", "#3498DB"),
+       legend = c(expression("Probit: "*Phi(x*"'"*beta)), expression("Logit: "*Lambda(x*"'"*beta))))
+```
+
+**Regla práctica**: la elección entre Logit y Probit es una **convención** del área de investigación. En economía del trabajo y salud suele usarse Probit; en marketing, finanzas y machine learning se prefiere Logit.
+
+### Estimación en R
+
+```{r t02-logit}
+logit <- glm(trabaja ~ educacion + edad + sexo +
+               experiencia + hijos + ingreso_familiar,
+             data = datos, family = binomial(link = "logit"))
+
+knitr::kable(round(summary(logit)$coefficients, 4),
+             caption = "Coeficientes del modelo Logit (estimados por MV)", escape = TRUE)
+```
+
+\newpage
+
+## El flujo completo: de las X a la probabilidad
+
+Para que quede completamente claro cómo funcionan estos modelos, veamos el flujo paso a paso:
+
+**PASO 1 — Índice lineal**: se calcula $x_i'\hat{\beta} = \hat{\beta}_0 + \hat{\beta}_1 x_{1i} + \cdots$ (esto es como el $\hat{y}$ del MCO).
+
+**PASO 2 — Función de enlace**: el índice se "pasa" por la función $F(\cdot)$: $\Phi$ para Probit o $\Lambda$ para Logit.
+
+**PASO 3 — Probabilidad**: el resultado es $\hat{P}_i = F(x_i'\hat{\beta}) \in [0, 1]$.
+
+```{r t02-flujo, echo=FALSE, fig.height=3.5, fig.cap="Del índice lineal a la probabilidad: el flujo completo."}
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 0.5))
+edu <- seq(6, 20, length.out = 100)
+b0 <- -3; b1 <- 0.25
+xb <- b0 + b1 * edu
+plot(edu, xb, type = "l", lwd = 3, col = "#E74C3C",
+     xlab = "Educación (años)", ylab = expression(x*"'"*beta),
+     main = "PASO 1: Índice lineal")
+abline(h = 0, lty = 2, col = "gray50")
+
+xb_seq <- seq(-4, 4, length.out = 300)
+plot(xb_seq, plogis(xb_seq), type = "l", lwd = 3, col = "#9B59B6",
+     xlab = expression("Índice "~x*"'"*beta), ylab = expression(Lambda(x*"'"*beta)),
+     main = "PASO 2: Función logística")
+abline(h = 0.5, lty = 2, col = "gray50")
+
+pred_p <- plogis(xb)
+plot(edu, pred_p, type = "l", lwd = 3, col = "#2ECC71",
+     xlab = "Educación (años)", ylab = "P(trabaja = 1)",
+     main = "PASO 3: Probabilidad", ylim = c(0, 1))
+abline(h = c(0, 0.5, 1), lty = c(2, 2, 2), col = c("gray70", "gray50", "gray70"))
+par(mfrow = c(1, 1))
+```
+
+\newpage
+
+## Efectos marginales
+
+### El problema: ¿qué significan realmente los coeficientes?
+
+Empecemos con una pregunta concreta. Hemos estimado el modelo Logit y obtenemos $\hat{\beta}_{\text{educacion}} = 0.35$. Un alumno pregunta: *"¿Entonces un año más de educación aumenta la probabilidad de trabajar en 0.35?"*
+
+**La respuesta es NO.** Y entender por qué es la clave de toda esta sección.
+
+#### En el MLP sí funcionaba así
+
+En el MLP (regresión lineal), el modelo es:
+
+$$P(y_i = 1) = \beta_0 + \beta_1 \cdot \text{educacion}_i + \cdots$$
+
+Si $\beta_1 = 0.04$, entonces un año más de educación **siempre** aumenta la probabilidad en 0.04 (4 puntos porcentuales), sin importar nada más. El efecto es **constante**.
+
+#### En el Logit/Probit ya no funciona así
+
+En el Logit, el modelo es:
+
+$$P(y_i = 1) = \Lambda(\beta_0 + \beta_1 \cdot \text{educacion}_i + \cdots)$$
+
+La función $\Lambda(\cdot)$ es una curva en forma de S, **no** una recta. Por eso, el efecto de un año más de educación **depende de dónde estés en la curva**.
+
+### Ejemplo numérico paso a paso
+
+Veamos esto con números concretos. Supongamos un modelo Logit simple:
+
+$$P(\text{trabaja} = 1) = \Lambda(-3 + 0.25 \cdot \text{educacion})$$
+
+#### Persona A: 8 años de educación (nivel bajo)
+
+$$x'\beta = -3 + 0.25 \times 8 = -1.0 \qquad \Rightarrow \qquad P = \Lambda(-1.0) = \frac{1}{1+e^{1}} = 0.269$$
+
+Si pasa a **9 años**: $$x'\beta = -3 + 0.25 \times 9 = -0.75 \qquad \Rightarrow \qquad P = \Lambda(-0.75) = 0.321$$
+
+**Efecto marginal** = 0.321 − 0.269 = **+5.2 puntos porcentuales**.
+
+#### Persona B: 12 años de educación (nivel medio)
+
+$$x'\beta = -3 + 0.25 \times 12 = 0.0 \qquad \Rightarrow \qquad P = \Lambda(0) = 0.500$$
+
+Si pasa a **13 años**: $$x'\beta = -3 + 0.25 \times 13 = 0.25 \qquad \Rightarrow \qquad P = \Lambda(0.25) = 0.562$$
+
+**Efecto marginal** = 0.562 − 0.500 = **+6.2 puntos porcentuales**.
+
+#### Persona C: 18 años de educación (nivel alto)
+
+$$x'\beta = -3 + 0.25 \times 18 = 1.5 \qquad \Rightarrow \qquad P = \Lambda(1.5) = 0.818$$
+
+Si pasa a **19 años**: $$x'\beta = -3 + 0.25 \times 19 = 1.75 \qquad \Rightarrow \qquad P = \Lambda(1.75) = 0.852$$
+
+**Efecto marginal** = 0.852 − 0.818 = **+3.4 puntos porcentuales**.
+
+#### ¿Qué acabamos de ver?
+
+El mismo cambio (+1 año de educación) produce efectos **muy diferentes** según el punto de partida:
+
+|     Persona     |      Educación      | P antes | P después | Efecto marginal |
+|:---------------:|:-------------------:|:-------:|:---------:|:---------------:|
+| A (nivel bajo)  |  8 $\rightarrow$ 9  |  26.9%  |   32.1%   |   **+5.2 pp**   |
+| B (nivel medio) | 12 $\rightarrow$ 13 |  50.0%  |   56.2%   |   **+6.2 pp**   |
+| C (nivel alto)  | 18 $\rightarrow$ 19 |  81.8%  |   85.2%   |   **+3.4 pp**   |
+
+**El efecto es máximo en la zona intermedia** (donde $P \approx 0.5$) y se reduce en los extremos. Esto tiene todo el sentido económico: si alguien ya tiene un 95% de probabilidad de trabajar, un año más de educación apenas puede subirla; pero si está en el 50%, el mismo año puede marcar una gran diferencia.
+
+```{r t02-me-ejemplo-numerico, fig.height=4.5, fig.cap="El efecto de +1 año de educación depende del punto de partida: máximo en la zona intermedia, mínimo en los extremos."}
+## Modelo Logit simple: P = Lambda(-3 + 0.25 * educacion)
+b0 <- -3;  b1 <- 0.25
+edu_seq <- seq(4, 22, length.out = 300)
+prob_seq <- plogis(b0 + b1 * edu_seq)
+
+par(mfrow = c(1, 2), mar = c(4, 4.5, 3.5, 1))
+
+## --- Panel izquierdo: la curva y los tres puntos ---
+plot(edu_seq, prob_seq, type = "l", lwd = 3, col = "#3498DB",
+     xlab = "Años de educación", ylab = "P(trabaja = 1)",
+     main = "Curva Logit: el efecto depende\ndel punto de partida",
+     ylim = c(0, 1))
+abline(h = 0.5, lty = 3, col = "grey60")
+
+## Persona A (8 años)
+p_A0 <- plogis(b0 + b1 * 8);  p_A1 <- plogis(b0 + b1 * 9)
+arrows(8, p_A0, 9, p_A1, col = "#E74C3C", lwd = 2.5, length = 0.08)
+points(8, p_A0, pch = 19, col = "#E74C3C", cex = 1.5)
+text(9.3, (p_A0+p_A1)/2, sprintf("+%.1f pp", (p_A1-p_A0)*100),
+     col = "#C0392B", font = 2, cex = 0.85)
+
+## Persona B (12 años)
+p_B0 <- plogis(b0 + b1 * 12); p_B1 <- plogis(b0 + b1 * 13)
+arrows(12, p_B0, 13, p_B1, col = "#27AE60", lwd = 2.5, length = 0.08)
+points(12, p_B0, pch = 19, col = "#27AE60", cex = 1.5)
+text(13.3, (p_B0+p_B1)/2, sprintf("+%.1f pp", (p_B1-p_B0)*100),
+     col = "#1E8449", font = 2, cex = 0.85)
+
+## Persona C (18 años)
+p_C0 <- plogis(b0 + b1 * 18); p_C1 <- plogis(b0 + b1 * 19)
+arrows(18, p_C0, 19, p_C1, col = "#8E44AD", lwd = 2.5, length = 0.08)
+points(18, p_C0, pch = 19, col = "#8E44AD", cex = 1.5)
+text(19.3, (p_C0+p_C1)/2, sprintf("+%.1f pp", (p_C1-p_C0)*100),
+     col = "#6C3483", font = 2, cex = 0.85)
+
+legend("topleft", bty = "n", pch = 19, pt.cex = 1.3,
+       col = c("#E74C3C", "#27AE60", "#8E44AD"),
+       legend = c("A: 8 años (nivel bajo)",
+                  "B: 12 años (nivel medio)",
+                  "C: 18 años (nivel alto)"), cex = 0.8)
+
+## --- Panel derecho: efecto marginal en cada punto ---
+edu_grid <- seq(4, 22, length.out = 200)
+me_grid  <- dlogis(b0 + b1 * edu_grid) * b1 * 100   # en pp
+
+plot(edu_grid, me_grid, type = "l", lwd = 3, col = "#2C3E50",
+     xlab = "Años de educación",
+     ylab = "Efecto marginal (pp por año adicional)",
+     main = "El efecto marginal cambia\nsegún la educación de partida")
+
+## Marcar los tres puntos
+me_A <- dlogis(b0 + b1 * 8)  * b1 * 100
+me_B <- dlogis(b0 + b1 * 12) * b1 * 100
+me_C <- dlogis(b0 + b1 * 18) * b1 * 100
+
+points(8,  me_A, pch = 19, col = "#E74C3C", cex = 1.5)
+points(12, me_B, pch = 19, col = "#27AE60", cex = 1.5)
+points(18, me_C, pch = 19, col = "#8E44AD", cex = 1.5)
+
+text(8,  me_A + 0.25, sprintf("A: %.1f pp", me_A), col = "#C0392B", font = 2, cex = 0.8)
+text(12, me_B + 0.25, sprintf("B: %.1f pp", me_B), col = "#1E8449", font = 2, cex = 0.8)
+text(18, me_C + 0.25, sprintf("C: %.1f pp", me_C), col = "#6C3483", font = 2, cex = 0.8)
+
+abline(h = mean(me_grid), lty = 2, col = "grey50")
+text(20, mean(me_grid) + 0.2, "Media", col = "grey40", cex = 0.75)
+
+par(mfrow = c(1, 1))
+```
+
+### La fórmula general del efecto marginal
+
+Lo que acabamos de ver con las tres personas tiene una fórmula exacta. Recordemos qué hicimos: para cada persona calculamos la probabilidad *antes* y *después* de añadir un año de educación, y restamos. Eso es una aproximación discreta de la **derivada parcial**:
+
+$$\boxed{\frac{\partial P(y=1)}{\partial x_j} = f(x'\beta) \cdot \beta_j}$$
+
+Vamos a desmontar esta fórmula pieza a pieza:
+
+**Pieza 1:** $\beta_j$ — es el coeficiente estimado de la variable $x_j$. Nos dice la **dirección** del efecto (positivo o negativo) y su **intensidad en la escala latente** (en el mundo del índice $x'\beta$).
+
+**Pieza 2:** $f(x'\beta)$ — es un **factor de escala** que "traduce" el efecto del mundo latente al mundo de las probabilidades. Este factor **cambia de persona a persona** porque depende de $x'\beta$, es decir, de las características de cada individuo.
+
+¿Qué es exactamente $f$? Es la **función de densidad** que corresponde a la CDF del modelo:
+
+-   En el **Logit**, la CDF es $\Lambda(z)$, y su densidad es $f(z) = \Lambda(z) \cdot [1 - \Lambda(z)] = P \cdot (1-P)$.
+-   En el **Probit**, la CDF es $\Phi(z)$, y su densidad es $f(z) = \phi(z)$ (la campana de Gauss).
+-   En el **MLP**, la CDF es la identidad, y su "densidad" es $f = 1$ siempre. Por eso en el MLP el efecto marginal es simplemente $\beta_j$.
+
+#### ¿Cuánto vale ese factor de escala?
+
+Veámoslo con el ejemplo del Logit. El factor es $f(z) = P(1-P)$:
+
++-----------------------------------+-------------------------------------+--------------------+
+| Probabilidad $P$ del individuo    | Factor $f = P(1-P)$                 | ¿Grande o pequeño? |
++:=================================:+:===================================:+:===================+
+| 0.05 (casi seguro que no trabaja) | $0.05 \times 0.95 = 0.048$          | Muy pequeño        |
++-----------------------------------+-------------------------------------+--------------------+
+| 0.25                              | $0.25 \times 0.75 = 0.188$          | Moderado           |
++-----------------------------------+-------------------------------------+--------------------+
+| **0.50** (máxima incertidumbre)   | $0.50 \times 0.50 = \mathbf{0.250}$ | **Máximo**         |
++-----------------------------------+-------------------------------------+--------------------+
+| 0.75                              | $0.75 \times 0.25 = 0.188$          | Moderado           |
++-----------------------------------+-------------------------------------+--------------------+
+| 0.95 (casi seguro que trabaja)    | $0.95 \times 0.05 = 0.048$          | Muy pequeño        |
++-----------------------------------+-------------------------------------+--------------------+
+
+**Intuición clave**: el factor es máximo cuando $P = 0.50$ (máxima incertidumbre) y se acerca a cero en los extremos. Esto significa que **un año más de educación "mueve" más la probabilidad de las personas que están en la zona de duda** que de las que ya tienen la decisión prácticamente tomada.
+
+#### Volviendo al ejemplo numérico
+
+Retomemos las tres personas con $\beta_{\text{educacion}} = 0.25$:
+
+-   **Persona A** ($P = 0.269$): EM $= 0.269 \times 0.731 \times 0.25 = 0.049$ $\rightarrow$ **4.9 pp**
+-   **Persona B** ($P = 0.500$): EM $= 0.500 \times 0.500 \times 0.25 = 0.063$ $\rightarrow$ **6.3 pp** (máximo)
+-   **Persona C** ($P = 0.818$): EM $= 0.818 \times 0.182 \times 0.25 = 0.037$ $\rightarrow$ **3.7 pp**
+
+Son exactamente los valores que habíamos calculado antes "a bruto" restando probabilidades. La fórmula simplemente nos da el atajo matemático.
+
+### ¿Cómo resumir el efecto en un solo número?
+
+Ya tenemos claro que el efecto marginal es **distinto para cada individuo**. Pero cuando presentamos resultados necesitamos un solo número que diga "el efecto de la educación es de X puntos porcentuales". ¿Cómo lo obtenemos?
+
+Hay dos estrategias. Veamos cada una con un ejemplo numérico para que quede claro qué hace cada una.
+
+#### Opción 1: Efecto marginal en la media (MEM)
+
+**¿Qué hace?** Inventa un "individuo promedio" — uno que tenga exactamente la educación media de la muestra, la edad media, etc. — y calcula el efecto marginal solo para él.
+
+$$\text{MEM}_j = f(\bar{x}'\hat{\beta}) \cdot \hat{\beta}_j$$
+
+**Ejemplo**: si en nuestra muestra la educación media es 13 años, la edad media es 41 años, etc., el MEM toma esa persona ficticia, calcula su $x'\beta$, obtiene su factor $f$, y multiplica por $\beta_j$. Un solo cálculo, un solo número.
+
+**¿Cuándo falla?** El "individuo promedio" puede no existir. Por ejemplo, si el sexo medio es 0.48 (48% mujeres), ¿qué es una persona con sexo = 0.48? No tiene sentido. Otro problema: si la distribución de probabilidades en la muestra es muy asimétrica, el individuo medio puede no ser representativo del efecto típico.
+
+En R se obtiene con la opción `atmean = TRUE`.
+
+#### Opción 2: Efecto marginal promedio (AME) ★ RECOMENDADO
+
+**¿Qué hace?** En lugar de inventar una persona ficticia, calcula el efecto marginal para **cada una de las N personas reales** de la muestra, y luego toma el promedio:
+
+$$\text{AME}_j = \frac{1}{N} \sum_{i=1}^N \underbrace{f(x_i'\hat{\beta})}_{\text{factor del individuo } i} \cdot \hat{\beta}_j$$
+
+**Ejemplo con N = 5 personas** (simplificado):
+
++----------------+----------------+---------------------------+----------------------------+
+| Individuo      | $P_i$          | Factor $f_i = P_i(1-P_i)$ | EM$_i$ = $f_i \times 0.25$ |
++:==============:+:==============:+:=========================:+:==========================:+
+| 1              | 0.30           | 0.210                     | 0.053                      |
++----------------+----------------+---------------------------+----------------------------+
+| 2              | 0.55           | 0.248                     | 0.062                      |
++----------------+----------------+---------------------------+----------------------------+
+| 3              | 0.80           | 0.160                     | 0.040                      |
++----------------+----------------+---------------------------+----------------------------+
+| 4              | 0.45           | 0.248                     | 0.062                      |
++----------------+----------------+---------------------------+----------------------------+
+| 5              | 0.70           | 0.210                     | 0.053                      |
++----------------+----------------+---------------------------+----------------------------+
+
+$$\text{AME} = \frac{0.053 + 0.062 + 0.040 + 0.062 + 0.053}{5} = 0.054 \quad \text{(5.4 pp)}$$
+
+**¿Por qué es mejor?** Porque usa personas reales, no ficticias. No hay ningún "individuo promedio inventado" — simplemente se promedian los efectos de todos. Es el método **recomendado** en la literatura aplicada.
+
+En R se obtiene con la opción `atmean = FALSE`.
+
+#### ¿Y para variables categóricas (como sexo)?
+
+La educación es continua: podemos hablar de "un año más" y calcular una derivada. Pero el sexo es una categoría: no podemos hablar de "un poquito más de mujer", ni tiene sentido calcular una derivada respecto al sexo. Entonces, **¿cómo medimos el efecto de ser mujer?**
+
+La idea es sencilla: **simulamos el cambio**. Para cada individuo, calculamos qué probabilidad tendría si fuera hombre y qué probabilidad tendría si fuera mujer, y restamos. Veámoslo paso a paso.
+
+**Paso 1 — Tomamos un individuo cualquiera** (por ejemplo, el individuo 1: 14 años de educación, 35 años, 2 hijos, etc.).
+
+**Paso 2 — Calculamos su probabilidad "como hombre"**: ponemos sexo = Hombre, dejamos todo lo demás igual, y evaluamos el modelo:
+
+$$P_1^{\text{hombre}} = \Lambda(\hat{\beta}_0 + \hat{\beta}_1 \cdot 14 + \hat{\beta}_2 \cdot 35 + \hat{\beta}_3 \cdot 0 + \cdots) = 0.78$$
+
+**Paso 3 — Calculamos su probabilidad "como mujer"**: cambiamos *solo* el sexo a Mujer:
+
+$$P_1^{\text{mujer}} = \Lambda(\hat{\beta}_0 + \hat{\beta}_1 \cdot 14 + \hat{\beta}_2 \cdot 35 + \hat{\beta}_3 \cdot 1 + \cdots) = 0.65$$
+
+**Paso 4 — Restamos**: el efecto marginal del sexo para este individuo es:
+
+$$\text{EM}_1 = P_1^{\text{mujer}} - P_1^{\text{hombre}} = 0.65 - 0.78 = -0.13 \quad (-13 \text{ pp})$$
+
+Es decir, *esta persona en concreto*, si fuera mujer en lugar de hombre, tendría 13 puntos porcentuales menos de probabilidad de trabajar.
+
+**Paso 5 — Repetimos para todos y promediamos (AME)**: hacemos lo mismo para los 500 individuos de la muestra. Cada uno tendrá un efecto diferente (porque sus demás características son distintas). El AME es el promedio:
+
++----------------+---------------------+--------------------+-----------------+
+| Individuo      | $P^{\text{hombre}}$ | $P^{\text{mujer}}$ | Efecto del sexo |
++:==============:+:===================:+:==================:+:===============:+
+| 1              | 0.78                | 0.65               | −13 pp          |
++----------------+---------------------+--------------------+-----------------+
+| 2              | 0.45                | 0.32               | −13 pp          |
++----------------+---------------------+--------------------+-----------------+
+| 3              | 0.92                | 0.86               | −6 pp           |
++----------------+---------------------+--------------------+-----------------+
+| 4              | 0.60                | 0.46               | −14 pp          |
++----------------+---------------------+--------------------+-----------------+
+| ...            | ...                 | ...                | ...             |
++----------------+---------------------+--------------------+-----------------+
+| **AME**        |                     |                    | **≈ −12 pp**    |
++----------------+---------------------+--------------------+-----------------+
+
+Fíjate que **el efecto no es igual para todos**: para el individuo 3 (que ya tenía una probabilidad muy alta) el efecto es menor (−6 pp), mientras que para el 4 (en zona intermedia) es mayor (−14 pp). Esto es coherente con todo lo que hemos visto: el efecto es mayor donde hay más incertidumbre.
+
+> **En resumen**: para variables categóricas, el efecto marginal es la diferencia de probabilidades "encendiendo y apagando" la categoría, manteniendo todo lo demás constante. El AME promedia esa diferencia para todos los individuos.
+
+### Cálculo en R de los efectos marginales
+
+Todo lo explicado anteriormente se implementa en R. Primero veremos cómo hacerlo "a mano" (para entender qué hace R por dentro) y después con el paquete `mfx` (lo que usaremos en la práctica).
+
+#### Cálculo "a mano"
+
+El procedimiento para calcular el efecto marginal de educación en el modelo Logit es:
+
+1.  Para **un individuo**: obtener su índice $x'\hat{\beta}$, calcular su probabilidad $P = \Lambda(x'\hat{\beta})$, obtener el factor $f = P(1-P)$, y multiplicar por $\hat{\beta}_{\text{edu}}$.
+2.  Para **el AME**: repetir lo anterior para los N individuos de la muestra y promediar.
+
+Internamente, R ejecuta exactamente esos dos pasos — primero para un individuo concreto y luego para todos.
+
+```{r t02-me-a-mano, results='hide'}
+## --- Efecto marginal para UN individuo (el nº 1) ---
+xb_1   <- predict(logit, newdata = datos[1, ], type = "link")  # x'b
+P_1    <- plogis(xb_1)                                          # P = L(x'b)
+f_1    <- P_1 * (1 - P_1)                                       # factor de escala
+me_1   <- f_1 * coef(logit)["educacion"]                        # EM individual
+
+cat(sprintf("Individuo 1: x'b = %.3f --> P = %.3f --> f = %.3f --> EM = %.4f (%.2f pp)\n",
+            xb_1, P_1, f_1, me_1, me_1*100))
+
+## --- AME: repetimos para TODOS los individuos y promediamos ---
+xb_todos     <- predict(logit, type = "link")
+P_todos      <- plogis(xb_todos)
+f_todos      <- P_todos * (1 - P_todos)
+me_edu_todos <- f_todos * coef(logit)["educacion"]
+
+cat(sprintf("\nAME de educación (N = %d individuos):\n", length(me_edu_todos)))
+cat(sprintf("  Mínimo:   %.2f pp\n", min(me_edu_todos)*100))
+cat(sprintf("  Máximo:   %.2f pp\n", max(me_edu_todos)*100))
+cat(sprintf("  PROMEDIO: %.2f pp  <-- este es el AME que reportamos\n",
+            mean(me_edu_todos)*100))
+```
+
+```{r t02-me-histograma, echo=FALSE, fig.height=3.5, fig.cap="Distribución del efecto marginal de educación en la muestra: cada individuo tiene su propio efecto. El AME es el promedio."}
+hist(me_edu_todos * 100, breaks = 30, col = "#3498DB", border = "white",
+     main = "Distribución del efecto marginal de educación",
+     xlab = "Efecto marginal (pp por año adicional)",
+     ylab = "Número de individuos")
+abline(v = mean(me_edu_todos) * 100, col = "#E74C3C", lwd = 3, lty = 2)
+text(mean(me_edu_todos)*100, par("usr")[4]*0.85,
+     sprintf("  AME = %.2f pp", mean(me_edu_todos)*100),
+     col = "#C0392B", font = 2, adj = 0, cex = 1)
+```
+
+#### Con el paquete `mfx` (lo que haremos en la práctica)
+
+En la práctica no hace falta calcular nada a mano. Todo lo anterior se obtiene automáticamente con una sola línea:
+
+```{r t02-efectos-marginales, results='hide'}
+library(mfx)
+
+## AME (atmean = FALSE): promedia el efecto de cada individuo
+logit_mfx <- logitmfx(trabaja ~ educacion + edad + sexo +
+                         experiencia + hijos + ingreso_familiar,
+                       data = datos, atmean = FALSE)
+print(logit_mfx)
+```
+
+#### Interpretación completa de los resultados
+
+```{r t02-me-interpretacion, echo=FALSE}
+em <- logit_mfx$mfxest
+tabla_me <- data.frame(
+  Variable = c("Educación", "Edad", "Experiencia",
+               "Sexo (Mujer)", "Hijos", "Ingreso familiar"),
+  Cambio = c("+1 año educ.", "+1 año edad", "+1 año exp.",
+             "Mujer vs Hombre", "+1 hijo menor",
+             "+1.000 EUR ingreso"),
+  AME_pp = sprintf("%+.2f", c(
+    em["educacion", "dF/dx"],
+    em["edad", "dF/dx"],
+    em["experiencia", "dF/dx"],
+    em["sexoMujer", "dF/dx"],
+    em["hijos", "dF/dx"],
+    em["ingreso_familiar", "dF/dx"]
+  ) * 100)
+)
+knitr::kable(tabla_me,
+             col.names = c("Variable", "Cambio unitario", "AME (pp)"),
+             caption = "Efectos marginales promedio (AME) del modelo Logit",
+             align = c("l", "l", "r"))
+```
+
+> **Regla para recordar**: en Logit/Probit, **nunca interpretes el coeficiente directamente**. Siempre calcula los efectos marginales. El coeficiente te dice la dirección (+/−); el efecto marginal te dice **cuánto** cambia la probabilidad.
+
+\newpage
+
+## Odds ratios (solo Logit)
+
+### ¿Qué es el odds?
+
+El **odds** es la razón entre la probabilidad de que algo ocurra y la de que no ocurra:
+
+$$\text{Odds} = \frac{P}{1-P}$$
+
+| Probabilidad $P$ | Odds | Lectura coloquial     |
+|:----------------:|:----:|:----------------------|
+|       0.50       | 1.0  | "50-50", equiprobable |
+|       0.75       | 3.0  | "3 a 1 a favor"       |
+|       0.25       | 0.33 | "1 a 3 en contra"     |
+|       0.90       | 9.0  | "9 a 1 a favor"       |
+
+### Los log-odds y el modelo Logit: demostración
+
+El modelo Logit tiene una propiedad única que lo distingue del Probit: el índice lineal $x'\beta$ es directamente el **logaritmo del odds** (log-odds). Vamos a demostrarlo paso a paso.
+
+#### Paso 1: partimos de la función logística
+
+En el modelo Logit, la probabilidad de éxito es:
+
+$$P = \Lambda(x'\beta) = \frac{1}{1 + e^{-x'\beta}} = \frac{e^{x'\beta}}{1 + e^{x'\beta}}$$
+
+#### Paso 2: calculamos $1 - P$
+
+$$1 - P = 1 - \frac{e^{x'\beta}}{1 + e^{x'\beta}} = \frac{1 + e^{x'\beta} - e^{x'\beta}}{1 + e^{x'\beta}} = \frac{1}{1 + e^{x'\beta}}$$
+
+#### Paso 3: formamos el odds $\frac{P}{1-P}$
+
+$$\text{Odds} = \frac{P}{1-P} = \frac{\frac{e^{x'\beta}}{1 + e^{x'\beta}}}{\frac{1}{1 + e^{x'\beta}}} = e^{x'\beta}$$
+
+Los $(1 + e^{x'\beta})$ se cancelan y queda simplemente $e^{x'\beta}$.
+
+#### Paso 4: tomamos logaritmo
+
+$$\ln\!\left(\frac{P}{1-P}\right) = x'\beta = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots$$
+
+**Resultado clave**: en el modelo Logit, el logaritmo del odds es una función **lineal** de las variables explicativas. Esto NO ocurre en el Probit.
+
+#### Paso 5: demostramos que $e^{\beta_j}$ es el odds ratio
+
+Queremos ver qué pasa con el odds cuando $x_j$ aumenta en una unidad (de $x_j$ a $x_j + 1$), manteniendo todo lo demás constante.
+
+**Odds cuando** $x_j$ toma su valor original:
+
+$$\text{Odds}_{\text{antes}} = e^{\beta_0 + \cdots + \beta_j \, x_j + \cdots}$$
+
+**Odds cuando** $x_j$ aumenta en 1 unidad:
+
+$$\text{Odds}_{\text{después}} = e^{\beta_0 + \cdots + \beta_j \, (x_j + 1) + \cdots}$$
+
+**El odds ratio es el cociente**:
+
+$$OR_j = \frac{\text{Odds}_{\text{después}}}{\text{Odds}_{\text{antes}}} = \frac{e^{\beta_0 + \cdots + \beta_j(x_j+1) + \cdots}}{e^{\beta_0 + \cdots + \beta_j \, x_j + \cdots}}$$
+
+Al dividir exponenciales con la misma base, se restan los exponentes. Todos los términos se cancelan excepto el que contiene $\beta_j$:
+
+$$OR_j = e^{\beta_j(x_j + 1) - \beta_j \, x_j} = e^{\beta_j \, x_j + \beta_j - \beta_j \, x_j} = \boxed{e^{\beta_j}}$$
+
+**Resultado fundamental**: el odds ratio $e^{\beta_j}$ **no depende del punto de evaluación** $x_j$. Es constante para cualquier individuo. Esta es la gran ventaja interpretativa del Logit frente al Probit.
+
+#### Qué significa exactamente el odds ratio: ejemplo numérico
+
+Supongamos que estimamos un Logit donde $y$ = "trabaja" (1) o "no trabaja" (0), y una de las variables es **educación** (años). Obtenemos $\hat{\beta}_{\text{edu}} = 0.30$.
+
+El odds ratio es: $OR = e^{0.30} = 1.350$
+
+**Pregunta**: ¿Qué significa exactamente $OR = 1.350$?
+
+Imaginemos dos personas idénticas en todo (misma edad, sexo, experiencia...) excepto que la Persona B tiene **un año más** de educación que la Persona A.
+
++------------------------------+----------------------+-----------------------------+
+|                              | Persona A            | Persona B                   |
+|                              |                      |                             |
+|                              | (12 años edu.)       | (13 años edu.)              |
++:=============================+:====================:+:===========================:+
+| Probabilidad de trabajar $P$ | 0.60                 | ?                           |
++------------------------------+----------------------+-----------------------------+
+| Odds = $P/(1-P)$             | $0.60/0.40 = 1.50$   | $1.50 \times 1.350 = 2.025$ |
++------------------------------+----------------------+-----------------------------+
+| Probabilidad resultante      | 0.60                 | $2.025/3.025 = 0.669$       |
++------------------------------+----------------------+-----------------------------+
+
+**Lectura**: cada año adicional de educación **multiplica** el odds de trabajar por 1.35. Es decir, el odds de la Persona B es un **35% mayor** que el de la Persona A.
+
+#### Pero, ¿qué es el odds exactamente? La analogía del hipódromo
+
+Es habitual confundir el **odds** con la **probabilidad**. No son lo mismo. Para entenderlo de forma intuitiva, pensemos en un **hipódromo**.
+
+Un caballo tiene un 80% de probabilidades de ganar una carrera.
+
+-   **Probabilidad**: 80%. De cada 10 carreras, gana 8.
+-   **Odds**: 8 victorias / 2 derrotas = **4 a 1** a favor.
+
+El odds nos dice: **"por cada vez que pierde, gana 4 veces"**. Es la ventaja a favor del evento.
+
++------------------+------------------+-------------------------+
+| Probabilidad $P$ | Odds = $P/(1-P)$ | Lectura                 |
++:================:+:================:+:========================+
+| 0.50             | 1.0              | "50-50": gana 1 vez     |
+|                  |                  |                         |
+|                  |                  | por cada vez que pierde |
++------------------+------------------+-------------------------+
+| 0.75             | 3.0              | "3 a 1": gana 3 veces   |
+|                  |                  |                         |
+|                  |                  | por cada vez que pierde |
++------------------+------------------+-------------------------+
+| 0.80             | 4.0              | "4 a 1": gana 4 veces   |
+|                  |                  |                         |
+|                  |                  | por cada vez que pierde |
++------------------+------------------+-------------------------+
+| 0.90             | 9.0              | "9 a 1": gana 9 veces   |
+|                  |                  |                         |
+|                  |                  | por cada vez que pierde |
++------------------+------------------+-------------------------+
+
+#### ¿Qué es entonces el odds ratio? Seguimos en el hipódromo
+
+El **odds ratio** responde a la pregunta: **si cambio algo, ¿cuánto se multiplica esa ventaja?**
+
+**Ejemplo con OR \> 1**: le ponemos un **mejor jinete** al caballo. El OR del jinete es 2.0.
+
+-   **Antes** (jinete normal): odds = 4 ("gana 4 por cada 1 que pierde")
+-   **Después** (mejor jinete): odds = $4 \times 2.0 = 8$ ("gana 8 por cada 1 que pierde")
+
+El mejor jinete ha **duplicado la ventaja**. Eso es $OR = 2$.
+
+**Ejemplo con OR \< 1**: ahora llueve. El OR de la lluvia es 0.50.
+
+-   **Antes** (seco): odds = 4 ("gana 4 por cada 1 que pierde")
+-   **Después** (lluvia): odds = $4 \times 0.50 = 2$ ("gana 2 por cada 1 que pierde")
+
+La lluvia ha **reducido la ventaja a la mitad**. Eso es $OR = 0.5$.
+
+**Ejemplo con OR = 1**: le cambiamos la silla de montar. El OR de la silla es 1.0.
+
+-   **Antes**: odds = 4. **Después**: odds = $4 \times 1.0 = 4$. No cambia nada.
+
+La silla no afecta. $OR = 1$ significa "sin efecto".
+
+#### Del hipódromo a la econometría
+
+El razonamiento es exactamente el mismo. Si en un Logit de participación laboral obtenemos:
+
+-   **Educación**: $OR = 1.35$. Cada año de educación adicional **mejora la ventaja** de trabajar vs. no trabajar un 35%. Como pasar de "gano 4 a 1" a "gano 5.4 a 1".
+-   **Hijos**: $OR = 0.67$. Cada hijo **recorta la ventaja** de trabajar un 33%. Como pasar de "gano 4 a 1" a "gano 2.7 a 1".
+
+Volvamos al ejemplo numérico de las Personas A y B:
+
+-   Persona A (12 años edu., $P = 0.60$): odds = $0.60/0.40 = 1.50$ ("trabaja 1.5 veces por cada vez que no trabaja")
+-   Persona B (13 años edu.): odds = $1.50 \times 1.35 = 2.025$ ("trabaja 2 veces por cada vez que no trabaja")
+-   Probabilidad resultante de B: $P = 2.025 / 3.025 = 0.669$
+
+#### Odds ratio $\neq$ cambio en probabilidad
+
+Atención a un punto que se presta a confusión:
+
+$$\text{El odds subió un 35\%} \quad \neq \quad \text{la probabilidad subió un 35\%}$$
+
+La probabilidad pasó de 60.0% a 66.9%: solo subió **\~7 puntos porcentuales**. ¿Por qué? Porque odds y probabilidad están relacionados de forma **no lineal**: $P = \text{Odds} / (1 + \text{Odds})$.
+
+El OR te dice cuánto cambia la **ventaja relativa** (la "apuesta"), no cuánto cambia la probabilidad directamente. Para conocer el cambio en probabilidad, se utilizan los **efectos marginales** (sección 7).
+
+> **Regla de oro**: el **OR** comunica cuánto se *multiplica la ventaja*. Los **efectos marginales** comunican cuánto cambia la *probabilidad* en puntos porcentuales. Son complementarios.
+
+**Fórmula general para interpretar el cambio porcentual del odds**:
+
+$$\text{Cambio \% en el odds} = (OR - 1) \times 100$$
+
+#### Guía de interpretación según el valor del OR
+
+**Cuando** $OR > 1$ (el coeficiente $\beta_j$ es positivo):
+
+-   $OR = 1.10$: el odds aumenta un 10% por cada unidad adicional de $x_j$.
+-   $OR = 1.50$: el odds aumenta un 50%.
+-   $OR = 2.00$: el odds se **duplica**.
+-   $OR = 3.00$: el odds se **triplica**.
+
+**Cuando** $OR < 1$ (el coeficiente $\beta_j$ es negativo):
+
+Este caso se presta a confusión. Veámoslo con cuidado.
+
+Si $\hat{\beta}_{\text{hijos}} = -0.40$, entonces $OR = e^{-0.40} = 0.670$.
+
+Esto significa que cada hijo adicional **multiplica** el odds por $0.670$. Es decir, el nuevo odds es solo el 67% del anterior: **se reduce un 33%**.
+
+Ejemplo numérico: supongamos que una mujer sin hijos tiene $P = 0.80$ de trabajar:
+
+| Situación   |             Odds             |  Cálculo  |     P resultante      |
+|:------------|:----------------------------:|:---------:|:---------------------:|
+| Sin hijos   |      $0.80/0.20 = 4.00$      | (partida) |         0.800         |
+| Con 1 hijo  |  $4.00 \times 0.670 = 2.68$  |           |  $2.68/3.68 = 0.728$  |
+| Con 2 hijos | $2.68 \times 0.670 = 1.796$  |           | $1.796/2.796 = 0.642$ |
+| Con 3 hijos | $1.796 \times 0.670 = 1.203$ |           | $1.203/2.203 = 0.546$ |
+
+**Lectura**: cada hijo adicional reduce el odds de trabajar un 33%. Observa que el efecto es **multiplicativo**: no se restan 33 puntos porcentuales, sino que el odds se multiplica por 0.67 cada vez.
+
+-   $OR = 0.90$: el odds se reduce un 10%.
+-   $OR = 0.50$: el odds se reduce un 50% (se divide por 2).
+-   $OR = 0.25$: el odds se reduce un 75% (se divide por 4).
+
+**Cuando** $OR = 1$ (el coeficiente $\beta_j = 0$):
+
+La variable no tiene efecto. El odds no cambia. Esto equivale a decir que la variable es irrelevante para predecir $y$.
+
+> **Atención**: el odds ratio mide el cambio en el **odds** (razón $P/(1-P)$), NO en la probabilidad directamente. Un $OR = 2$ no significa que la probabilidad se duplique. Para conocer el cambio en probabilidad, hay que calcular los efectos marginales (sección 7).
+
+> **Recordatorio**: los odds ratios solo tienen interpretación directa en el modelo **Logit**, porque es el único donde $\ln(\text{Odds}) = x'\beta$ (lineal). En el Probit no se calculan odds ratios --- se usan directamente los efectos marginales.
+
+```{r t02-odds-ratios}
+OR <- exp(coef(logit))
+IC <- exp(confint.default(logit))
+
+tabla_or <- data.frame(
+  Variable = names(OR),
+  OR       = round(OR, 3),
+  IC_95_inf = round(IC[, 1], 3),
+  IC_95_sup = round(IC[, 2], 3)
+)
+knitr::kable(tabla_or, caption = "Odds Ratios del modelo Logit con IC al 95%",
+             row.names = FALSE, escape = TRUE)
+```
+
+**Ejemplo de interpretación**:
+
+```{r t02-or-interpretacion, echo=FALSE}
+OR_vals <- exp(coef(logit))[-1]
+tabla_or_interp <- data.frame(
+  Variable = names(OR_vals),
+  OR = sprintf("%.3f", OR_vals),
+  Cambio_odds = sprintf("%+.1f%%", (OR_vals - 1) * 100)
+)
+knitr::kable(tabla_or_interp,
+             col.names = c("Variable", "OR", "Cambio en odds"),
+             caption = "Interpretación de los Odds Ratios del modelo Logit",
+             align = c("l", "r", "r"))
+```
+
+\newpage
+
+## Bondad de ajuste: Pseudo-R² de McFadden
+
+### ¿Por qué no podemos usar el R² clásico?
+
+El $R^2$ clásico del MCO mide la proporción de varianza explicada, pero en modelos binarios estimados por MV no existe una descomposición análoga de la varianza. En su lugar se usa el **Pseudo-R² de McFadden**:
+
+$$\boxed{\tilde{R}^2 = 1 - \frac{\ln L_{SR}}{\ln L_R}}$$
+
+donde:
+
+-   $\ln L_R$ es la log-verosimilitud del modelo **restringido** (solo la constante, sin variables explicativas).
+-   $\ln L_{SR}$ es la log-verosimilitud del modelo **sin restringir** (completo, con todas las variables).
+
+#### Guía de interpretación
+
+|   Pseudo-R²    | Interpretación                            |
+|:--------------:|:------------------------------------------|
+|    $< 0.10$    | Ajuste débil                              |
+| $[0.10, 0.20]$ | Ajuste aceptable                          |
+| $[0.20, 0.40]$ | Buen ajuste                               |
+|    $> 0.40$    | Ajuste excelente (raro en datos sociales) |
+
+> **¡Cuidado!** No se puede comparar directamente con el $R^2$ del MCO. Un pseudo-$R^2$ de 0.20 es un resultado perfectamente respetable en microeconometría.
+
+### Criterios de información: AIC y BIC
+
+Además del pseudo-$R^2$, existen dos criterios que permiten comparar modelos de forma más rigurosa: el **Criterio de Información de Akaike (AIC)** y el **Criterio de Información Bayesiano (BIC)**. Ambos parten de la log-verosimilitud pero incorporan una **penalización por complejidad**: cuantos más parámetros tenga el modelo, mayor es la penalización, lo que desincentiva el sobreajuste.
+
+El **AIC** se define como:
+
+$$\text{AIC} = -2 \ln L(\hat{\beta}) + 2k$$
+
+donde $\ln L(\hat{\beta})$ es la log-verosimilitud maximizada del modelo y $k$ es el número de parámetros estimados (incluida la constante). El primer término mide la bondad de ajuste (menor \$= \$ mejor) y el segundo penaliza la complejidad.
+
+El **BIC** (también llamado criterio de Schwarz) incorpora además el tamaño muestral:
+
+$$\text{BIC} = -2 \ln L(\hat{\beta}) + k \ln(n)$$
+
+donde $n$ es el número de observaciones. Dado que $\ln(n) > 2$ para cualquier muestra de más de 7 observaciones, el BIC penaliza la complejidad **más severamente** que el AIC y tiende a seleccionar modelos más parsimoniosos.
+
+La interpretación de ambos criterios es sencilla: **menor es mejor**. Al comparar dos modelos estimados sobre los mismos datos, se prefiere el que presente un AIC (o BIC) inferior. Ambos criterios no tienen una escala absoluta — solo tienen sentido como herramienta de comparación relativa entre modelos alternativos.
+
+En la práctica, AIC y BIC no siempre seleccionan el mismo modelo. Cuando discrepan, el AIC suele preferir modelos ligeramente más complejos, mientras que el BIC tiende a ser más conservador. La elección entre uno y otro depende de si se prioriza la capacidad predictiva (AIC) o la parsimonia (BIC).
+
+### Cálculo en R
+
+```{r t02-pseudo-r2, echo=FALSE}
+pseudoR2_logit  <- 1 - logit$deviance  / logit$null.deviance
+pseudoR2_probit <- 1 - probit$deviance / probit$null.deviance
+
+tabla_gof <- data.frame(
+  Modelo = c("Logit", "Probit"),
+  Pseudo_R2 = sprintf("%.4f", c(pseudoR2_logit, pseudoR2_probit)),
+  AIC = sprintf("%.1f", c(AIC(logit), AIC(probit))),
+  BIC = sprintf("%.1f", c(BIC(logit), BIC(probit)))
+)
+knitr::kable(tabla_gof,
+             col.names = c("Modelo", "Pseudo-$R^2$ McFadden", "AIC", "BIC"),
+             escape = FALSE,
+             caption = "Bondad de ajuste: Pseudo-$R^2$ de McFadden, AIC y BIC",
+             align = c("l", "r", "r", "r"))
+```
+
+Además, la **tabla de clasificación** proporciona una medida intuitiva de la capacidad predictiva:
+
+```{r t02-tabla-clasificacion, echo=FALSE}
+datos$pred_logit <- ifelse(predict(logit, type = "response") > 0.5, 1, 0)
+tabla_clasif <- table(Observado = datos$trabaja, Predicho = datos$pred_logit)
+tasa_acierto <- 100 * sum(diag(tabla_clasif)) / sum(tabla_clasif)
+
+clasif_df <- as.data.frame.matrix(tabla_clasif)
+clasif_df <- cbind(Observado = rownames(clasif_df), clasif_df)
+knitr::kable(clasif_df,
+             caption = sprintf("Tabla de clasificación (umbral = 0,5). Tasa de aciertos: %.1f%%%%",
+                               tasa_acierto),
+             row.names = FALSE,
+             align = c("c", "c", "c"))
+```
+
+\newpage
+
+## Contrastes de hipótesis
+
+### Significación individual: el test $z$ (o test de Wald individual)
+
+Antes de contrastar grupos de variables, la pregunta más básica es: **¿es significativa esta variable concreta?** Es decir, ¿contribuye a explicar $y$?
+
+#### Planteamiento
+
+Para cada coeficiente $\beta_j$ del modelo, contrastamos:
+
+$$H_0: \beta_j = 0 \qquad \text{(la variable } x_j \text{ NO influye en } y\text{)}$$ $$H_1: \beta_j \neq 0 \qquad \text{(la variable } x_j \text{ SÍ influye en } y\text{)}$$
+
+#### El estadístico
+
+$$z_j = \frac{\hat{\beta}_j}{\text{SE}(\hat{\beta}_j)} \quad \xrightarrow{d} \quad N(0,1) \qquad \text{bajo } H_0$$
+
+donde $\text{SE}(\hat{\beta}_j)$ es el error estándar del coeficiente estimado.
+
+**Regla de decisión**: rechazamos $H_0$ (la variable es significativa) si $|z_j| > z_{\alpha/2}$. Para un nivel del 5%, el valor crítico es $z_{0.025} = 1.96$.
+
+**Equivalentemente**, rechazamos si el **p-valor** $< \alpha$ (habitualmente $\alpha = 0.05$).
+
+#### Dónde aparece en R
+
+Al hacer `summary(modelo)`, R muestra una tabla con cuatro columnas para cada coeficiente:
+
++----------------------------------+-----------------------------------------------------------------+
+| Columna                          | Significado                                                     |
++:=================================+:================================================================+
+| `Estimate`                       | $\hat{\beta}_j$ (coeficiente estimado)                          |
++----------------------------------+-----------------------------------------------------------------+
+| `Std. Error`                     | $\text{SE}(\hat{\beta}_j)$ (error estándar)                     |
++----------------------------------+-----------------------------------------------------------------+
+| `z value`                        | El estadístico $z_j = \hat{\beta}_j / \text{SE}(\hat{\beta}_j)$ |
++----------------------------------+-----------------------------------------------------------------+
+| `Pr(>|z|)`                       | El p-valor del contraste bilateral                              |
++----------------------------------+-----------------------------------------------------------------+
+
+Los asteriscos al final de cada fila resumen la significación:
+
+-   `***` : p \< 0.001 (muy significativo)
+-   `**` : p \< 0.01
+-   `*` : p \< 0.05
+-   `.` : p \< 0.10 (significativo solo al 10%)
+-   (vacío) : no significativo
+
+#### Tabla resumen: coeficiente, efecto marginal, odds ratio e interpretación
+
+Para fijar ideas, supongamos un modelo Logit estimado sobre participación laboral ($y$ = trabaja). La tabla siguiente resume los resultados estadísticos:
+
+| Variable     | $\hat{\beta}$ |    p-valor    |  EM (pp)  |  OR  |
+|:-------------|:-------------:|:-------------:|:---------:|:----:|
+| educación    |     +0.30     | \<0.001\*\*\* |   +5.2    | 1.35 |
+| sexo (Mujer) |   \$-\$0.88   |   0.002\*\*   | \$-\$15.1 | 0.41 |
+| hijos        |   \$-\$0.40   |    0.013\*    | \$-\$6.8  | 0.67 |
+| experiencia  |     +0.05     |     0.230     |   +0.9    | 1.05 |
+
+**Interpretación de cada variable**:
+
+La **educación** es altamente significativa ($p < 0.001$). Cada año adicional de educación aumenta la probabilidad de trabajar en 5.2 puntos porcentuales y multiplica el odds por 1.35 (un incremento del 35% en la ventaja relativa).
+
+El **sexo** también es significativo ($p = 0.002$). Ser mujer, respecto a ser hombre y manteniendo el resto constante, reduce la probabilidad de trabajar en 15.1 puntos porcentuales. El odds de trabajar de una mujer es un 59% inferior al de un hombre con idénticas características ($OR = 0.41$).
+
+Cada **hijo** adicional reduce la probabilidad en 6.8 puntos porcentuales y el odds en un 33% ($OR = 0.67$, $p = 0.013$).
+
+La **experiencia**, en cambio, no resulta significativa ($p = 0.230$): no se detecta evidencia estadística de que influya en la participación laboral en este modelo.
+
+> **Nota**: el coeficiente $\hat{\beta}$ indica la dirección del efecto y permite calcular el OR (exponenciando), pero su magnitud NO es directamente interpretable como cambio en probabilidad. Para eso sirven los efectos marginales.
+
+#### Ejemplo en R
+
+```{r t02-significacion-individual, echo=FALSE}
+resumen <- summary(logit)
+coefs <- coef(resumen)
+tabla_sig <- data.frame(
+  Variable = rownames(coefs)[-1],
+  Coeficiente = sprintf("%.4f", coefs[-1, "Estimate"]),
+  SE = sprintf("%.4f", coefs[-1, "Std. Error"]),
+  p_valor = sprintf("%.4f", coefs[-1, "Pr(>|z|)"]),
+  OR = sprintf("%.3f", exp(coefs[-1, "Estimate"]))
+)
+knitr::kable(tabla_sig,
+             col.names = c("Variable", "$\\hat{\\beta}$", "SE", "$p$", "OR"),
+             escape = TRUE,
+             caption = "Test de significación individual (test z) — Modelo Logit",
+             align = c("l", "r", "r", "r", "r"))
+```
+
+### Test de Wald (significación conjunta)
+
+#### ¿Qué pregunta responde?
+
+El test $z$ individual que acabamos de ver contrasta si **una sola** variable es significativa. Pero con frecuencia queremos contrastar si **un grupo de variables** es conjuntamente significativo. Por ejemplo: ¿contribuyen conjuntamente las variables demográficas (edad, sexo, hijos) a explicar la participación laboral? Es posible que ninguna de ellas sea individualmente significativa, pero que juntas sí aporten información relevante.
+
+El **test de Wald** responde exactamente a esta pregunta. Su hipótesis nula establece que **todos los coeficientes del grupo** son simultáneamente cero:
+
+$$H_0: \beta_{j_1} = \beta_{j_2} = \cdots = \beta_{j_r} = 0$$
+
+Si rechazamos $H_0$, concluimos que al menos una de las variables del grupo tiene un efecto significativo sobre $y$.
+
+#### El estadístico
+
+El estadístico de Wald mide la distancia entre los coeficientes estimados y los valores que impone la hipótesis nula (en este caso, cero), ponderada por la precisión de la estimación:
+
+$$W = \hat{d}'\,\hat{V}_d^{-1}\,\hat{d}$$
+
+donde $\hat{d} = R\hat{\beta} - q$ es el vector de desviaciones respecto a $H_0$ (si $H_0: \beta = 0$, entonces $\hat{d} = \hat{\beta}$) y $\hat{V}_d = R\,\widehat{\text{Var}}(\hat{\beta})\,R'$ es la matriz de varianzas-covarianzas de esas desviaciones.
+
+Bajo $H_0$, el estadístico sigue asintóticamente una distribución **chi-cuadrado** con $r$ grados de libertad:
+
+$$W \sim \chi^2_r \qquad \text{bajo } H_0$$
+
+donde $r$ es el **número de restricciones** que impone la hipótesis nula, es decir, el número de coeficientes que estamos contrastando simultáneamente. Si contrastamos que 3 variables son conjuntamente nulas, $r = 3$ y el estadístico se compara con una $\chi^2_3$.
+
+#### Ejemplo numérico
+
+Supongamos que nuestro modelo Logit de participación laboral tiene 6 variables explicativas (educación, edad, sexo, experiencia, hijos, ingreso familiar) y queremos contrastar si **todas ellas** son conjuntamente significativas. La hipótesis nula es $H_0: \beta_1 = \beta_2 = \cdots = \beta_6 = 0$, lo que impone $r = 6$ restricciones.
+
+El test calcula $W$ y lo compara con la distribución $\chi^2_6$. Si $W = 85.3$ y el p-valor asociado es $p < 0.001$, rechazamos $H_0$: las variables, en conjunto, sí explican la participación laboral. Un modelo con solo la constante sería significativamente peor.
+
+#### Cálculo en R
+
+```{r t02-wald, results='hide'}
+library(aod)
+
+## H0: todos los coeficientes (excepto la constante) son cero
+## Terms = 2:7 indica que contrastamos los coeficientes 2 a 7 (las 6 variables)
+wald_logit <- wald.test(b = coef(logit), Sigma = vcov(logit), Terms = 2:7)
+print(wald_logit)
+```
+
+#### Interpretación del resultado
+
+El output de `wald.test()` muestra el valor del estadístico $W$, los grados de libertad ($r = 6$, porque contrastamos 6 coeficientes) y el p-valor. Si el p-valor es inferior a 0.05, rechazamos $H_0$ y concluimos que el modelo en su conjunto es significativo: al menos una de las seis variables influye en la probabilidad de trabajar.
+
+Conviene destacar que el test de Wald solo necesita estimar el modelo **completo** (sin restricciones). No requiere estimar el modelo restringido, lo que lo hace computacionalmente eficiente.
+
+### Test de Razón de Verosimilitud (LR)
+
+#### ¿Qué pregunta responde?
+
+El test de Razón de Verosimilitud (LR, *Likelihood Ratio*) responde a la misma pregunta que el test de Wald — ¿es significativo un grupo de variables? — pero utiliza una lógica diferente. En lugar de medir la distancia entre los coeficientes estimados y cero, el test LR **compara directamente cuánto mejora el ajuste** del modelo al incluir las variables en cuestión.
+
+La idea es intuitiva: si añadir las variables mejora sustancialmente la log-verosimilitud, es que aportan información relevante.
+
+#### El estadístico
+
+Se necesitan dos modelos:
+
+-   **Modelo restringido** ($M_R$): el modelo bajo $H_0$, sin las variables que queremos contrastar. Si la hipótesis es que todas las variables son nulas, el modelo restringido contiene solo la constante.
+-   **Modelo sin restringir** ($M_{SR}$): el modelo completo, con todas las variables.
+
+El estadístico LR mide el doble de la diferencia de log-verosimilitudes:
+
+$$LR = 2\left[\ln L(\hat{\beta}_{SR}) - \ln L(\hat{\beta}_{R})\right]$$
+
+donde $\ln L(\hat{\beta}_{SR})$ es la log-verosimilitud del modelo completo y $\ln L(\hat{\beta}_{R})$ la del modelo restringido. Dado que el modelo completo siempre ajusta al menos tan bien como el restringido, esta diferencia es siempre $\geq 0$. Cuanto mayor sea, más evidencia hay contra $H_0$.
+
+Bajo $H_0$, el estadístico sigue asintóticamente una distribución chi-cuadrado:
+
+$$LR \sim \chi^2_r \qquad \text{bajo } H_0$$
+
+donde $r$ es, de nuevo, el número de restricciones (parámetros que se fijan a cero bajo $H_0$). Los grados de libertad coinciden con la diferencia en el número de parámetros entre los dos modelos: $r = k_{SR} - k_R$.
+
+#### Ejemplo numérico
+
+Retomemos nuestro modelo Logit con 6 variables. El modelo completo tiene $k_{SR} = 7$ parámetros (6 coeficientes + la constante) y una log-verosimilitud de, por ejemplo, $\ln L_{SR} = -210.5$. El modelo restringido (solo la constante) tiene $k_R = 1$ parámetro y $\ln L_R = -253.2$.
+
+El estadístico LR es:
+
+$$LR = 2 \times [-210.5 - (-253.2)] = 2 \times 42.7 = 85.4$$
+
+Los grados de libertad son $r = 7 - 1 = 6$ (las 6 variables que añadimos). El p-valor se obtiene de la distribución $\chi^2_6$: con $LR = 85.4$, el p-valor es prácticamente cero ($p < 0.001$), por lo que rechazamos $H_0$ con total contundencia. Las seis variables, en conjunto, mejoran significativamente el modelo.
+
+#### Cálculo en R
+
+```{r t02-lr-test, results='hide'}
+## Modelo restringido: solo la constante (ninguna variable explicativa)
+logit_nulo <- glm(trabaja ~ 1, data = datos, family = binomial)
+
+## Estadistico LR
+LR_stat <- 2 * as.numeric(logLik(logit) - logLik(logit_nulo))
+
+## Grados de libertad: diferencia en numero de parametros
+LR_df   <- length(coef(logit)) - length(coef(logit_nulo))
+
+## P-valor de la chi-cuadrado
+LR_pval <- pchisq(LR_stat, df = LR_df, lower.tail = FALSE)
+
+cat(sprintf("LR = %.2f,  gl = %d,  p-valor = %.2e\n", LR_stat, LR_df, LR_pval))
+if (LR_pval < 0.05) cat("--> Rechazamos H0: el modelo es conjuntamente significativo.\n")
+```
+
+#### Wald vs LR: ¿cuál usar?
+
+Ambos tests son **asintóticamente equivalentes**: para muestras grandes producen resultados prácticamente idénticos. Las diferencias son de carácter práctico. El test de Wald solo necesita estimar un modelo (el completo), lo que lo hace más eficiente cuando el modelo restringido es costoso de estimar. El test LR, en cambio, requiere estimar ambos modelos, pero es conceptualmente más directo y, en general, se considera ligeramente más fiable en muestras finitas.
+
+En la práctica, la mayoría de los investigadores reportan ambos, y es habitual que conduzcan a las mismas conclusiones.
+
+\newpage
+
+## Comparación completa: MLP vs Probit vs Logit
+
+### Coeficientes
+
+Los coeficientes de los tres modelos **no son directamente comparables** porque están en escalas diferentes. Lo que debe coincidir (y coincide) es:
+
+-   El **signo** de cada coeficiente.
+-   La **significatividad** estadística.
+
+```{r t02-comparacion-coefs, echo=FALSE}
+comp_coef <- data.frame(
+  Variable = names(coef(mlp)),
+  MLP    = round(coef(mlp), 4),
+  Probit = round(coef(probit), 4),
+  Logit  = round(coef(logit), 4)
+)
+knitr::kable(comp_coef, row.names = FALSE,
+             caption = "Coeficientes de los tres modelos (escalas NO comparables)")
+```
+
+### Efectos marginales (sí son comparables)
+
+Los efectos marginales **sí** se pueden comparar directamente entre los tres modelos:
+
+```{r t02-comparacion-em, echo=FALSE}
+probit_mfx <- probitmfx(trabaja ~ educacion + edad + sexo +
+                           experiencia + hijos + ingreso_familiar,
+                         data = datos, atmean = FALSE)
+
+em_mlp    <- coef(mlp)[-1] * 100
+em_probit <- probit_mfx$mfxest[, "dF/dx"] * 100
+em_logit  <- logit_mfx$mfxest[, "dF/dx"] * 100
+
+comp_em <- data.frame(
+  Variable      = names(em_mlp),
+  MLP_pp        = round(em_mlp, 2),
+  Probit_pp     = round(em_probit, 2),
+  Logit_pp      = round(em_logit, 2)
+)
+rownames(comp_em) <- NULL
+knitr::kable(comp_em, caption = "Efectos marginales (pp): los tres modelos dan resultados similares")
+```
+
+### Gráfico comparativo
+
+```{r t02-comparacion-grafica, echo=FALSE, fig.height=4.5, fig.cap="Los tres modelos ajustados sobre los datos. Probit y Logit son casi idénticos; el MLP puede salir de [0,1]."}
+edu_seq <- seq(6, 20, length.out = 200)
+datos_grid <- data.frame(
+  educacion = edu_seq, edad = mean(datos$edad),
+  sexo = factor("Hombre", levels = levels(datos$sexo)),
+  experiencia = mean(datos$experiencia), hijos = 1,
+  ingreso_familiar = mean(datos$ingreso_familiar))
+
+pred_mlp    <- predict(mlp,    newdata = datos_grid)
+pred_probit <- predict(probit, newdata = datos_grid, type = "response")
+pred_logit  <- predict(logit,  newdata = datos_grid, type = "response")
+
+set.seed(42)
+plot(datos$educacion + runif(nrow(datos), -0.3, 0.3),
+     datos$trabaja + runif(nrow(datos), -0.02, 0.02),
+     pch = 16, cex = 0.4, col = rgb(0.5, 0.5, 0.5, 0.3),
+     xlab = "Años de educación", ylab = "P(trabaja = 1)",
+     main = "MLP, Probit y Logit: curvas ajustadas\n(hombre, demás variables en la media)",
+     ylim = c(-0.1, 1.1))
+lines(edu_seq, pred_mlp,    col = "#E74C3C", lwd = 2.5)
+lines(edu_seq, pred_probit, col = "#2ECC71", lwd = 2.5, lty = 2)
+lines(edu_seq, pred_logit,  col = "#3498DB", lwd = 2.5, lty = 3)
+abline(h = c(0, 1), col = "gray40", lty = 2)
+legend("topleft", bty = "n", lwd = 2.5, cex = 0.85,
+       legend = c("MLP (lineal)", "Probit", "Logit"),
+       col = c("#E74C3C", "#2ECC71", "#3498DB"), lty = 1:3)
+```
+
+### Resumen comparativo
+
+**MLP** $\rightarrow$ Simple, rápido, pero con problemas teóricos serios (predicciones fuera de \[0,1\], heterocedasticidad, efecto marginal constante). Útil como referencia inicial.
+
+**Probit** $\rightarrow$ Basado en la distribución Normal estándar. Teóricamente sólido. Interpretación vía efectos marginales. Habitual en economía del trabajo.
+
+**Logit** $\rightarrow$ Basado en la distribución logística. Coeficientes interpretables como log-odds. Cálculo más sencillo. El más popular en aplicaciones prácticas.
+
+**Conclusión**: Probit y Logit producen resultados **prácticamente idénticos**. La elección depende de la convención del área de investigación y de si interesa interpretar odds ratios ($\rightarrow$ Logit).
+
+\newpage
+
+## Resumen: lo esencial en 10 puntos
+
+1.  **Variable aleatoria binaria** $y \in \{0, 1\}$ $\rightarrow$ sigue una distribución Bernoulli($p$).
+
+2.  **Función de densidad** $f(x)$: la probabilidad de variables continuas es el **área bajo la curva**.
+
+3.  **CDF** $F(x) = P(X \leq x)$: siempre en $[0, 1]$ $\rightarrow$ perfecta para modelar probabilidades.
+
+4.  **Probit**: $P(y=1) = \Phi(x'\beta)$. **Logit**: $P(y=1) = \Lambda(x'\beta) = 1/(1+e^{-x'\beta})$.
+
+5.  **Estimación por MV**: maximizar $\ln L(\beta) = \sum[y_i \ln P_i + (1-y_i)\ln(1-P_i)]$.
+
+6.  **Coeficientes** $\rightarrow$ solo indican la *dirección* del efecto ($\beta > 0 \Rightarrow \uparrow P$); NO son efectos marginales.
+
+7.  **Efectos marginales** $\rightarrow$ $\frac{\partial P}{\partial x_j} = f(x'\beta) \cdot \beta_j$; dependen del punto de evaluación; usar AME.
+
+8.  **Odds Ratios** (solo Logit) $\rightarrow$ $OR = e^{\beta}$; $OR > 1$ aumenta odds, $OR < 1$ reduce odds.
+
+9.  **Pseudo-R² McFadden** $\rightarrow$ $1 - \ln L_{SR}/\ln L_R$; valores $[0.2, 0.4]$ = buen ajuste.
+
+10. **Contrastes** $\rightarrow$ Wald y LR $\sim \chi^2_r$ bajo $H_0$; asintóticamente equivalentes.
+
+\vspace{1cm}
+\hrule
+\vspace{0.3cm}
+\footnotesize
+
+**Material complementario**: el script `T02_mECO_Script_Eleccion.R` y la práctica `T02_mECO_Practica_CdeA.Rmd` (en la carpeta `tema2/`) contienen la implementación paso a paso de todo lo desarrollado en estos apuntes.
+
+\newpage
+
+## Funciones esenciales en R
+
+A continuación se recogen las funciones de R más relevantes para los modelos de elección discreta tratados en este tema. Su uso detallado se desarrolla en la práctica y el script asociados.
+
+### Estimación
+
+-   `glm(y ~ x1 + x2, family = binomial(link = "probit"), data = datos)` — estima un modelo **Probit**.
+-   `glm(y ~ x1 + x2, family = binomial(link = "logit"), data = datos)` — estima un modelo **Logit**.
+-   `lm(y ~ x1 + x2, data = datos)` — estima el **Modelo Lineal de Probabilidad** (MLP) por MCO.
+
+### Predicción
+
+-   `predict(modelo, type = "response")` — probabilidades estimadas $\hat{P}(y=1|X)$.
+-   `fitted(modelo)` — equivalente a `predict()` con `type = "response"` para los datos de estimación.
+
+### Efectos marginales
+
+-   `margins::margins(modelo)` — calcula los **efectos marginales medios** (AME).
+-   `margins::margins(modelo, at = list(x1 = valor))` — efecto marginal en un punto concreto (MEM).
+-   `summary(margins(modelo))` — tabla con AME, errores estándar e intervalos de confianza.
+
+### Odds ratios (solo Logit)
+
+-   `exp(coef(modelo))` — odds ratios a partir de los coeficientes estimados.
+-   `exp(confint(modelo))` — intervalos de confianza para los odds ratios.
+
+### Bondad de ajuste
+
+-   `pscl::pR2(modelo)` — pseudo-R² de McFadden y otros.
+-   `AIC(modelo)` / `BIC(modelo)` — criterios de información.
+-   `logLik(modelo)` — log-verosimilitud del modelo.
+
+### Contrastes de hipótesis
+
+-   `summary(modelo)` — contrastes individuales de Wald ($z$-test) para cada coeficiente.
+-   `lmtest::waldtest(modelo_completo, modelo_restringido)` — contraste de Wald conjunto.
+-   `lmtest::coeftest(modelo)` — tabla de contrastes con errores estándar robustos si se combinan con `sandwich::vcovHC()`.
+
+### Clasificación
+
+-   `ifelse(predict(modelo, type = "response") > 0.5, 1, 0)` — clasificación con umbral 0.5.
+-   `table(observado, predicho)` — matriz de confusión.
+-   `caret::confusionMatrix(factor(predicho), factor(observado))` — métricas completas (accuracy, sensibilidad, especificidad).
+
+### Código R del capítulo {.unnumbered}
+
+El script completo de este capítulo (`T02_mECO_Script_A01_LOGIT_USA_Help_v2.R`) está disponible en el repositorio de material complementario del manual:
+
+[**https://github.com/carlanta/MicroEconometrics**](https://github.com/carlanta/MicroEconometrics)
+
+El alumno puede descargar el script directamente desde la carpeta `scripts/` del repositorio y ejecutarlo en RStudio de forma interactiva.

@@ -1,0 +1,1015 @@
+# Modelos para Datos de Recuento
+
+## Introducción: ¿Por qué modelos para datos de recuento?
+
+En los temas anteriores hemos estudiado modelos para distintos tipos de variables dependientes: variables continuas sin restricciones (Tema 1), variables binarias (Tema 2) y variables continuas limitadas por censura (Tema 3). Ahora abordamos un nuevo y muy relevante tipo de variables dependientes: aquellas que toman valores **enteros no negativos** (0, 1, 2, 3, ...), es decir, **datos de recuento** o **count data**.
+
+Este tipo de datos es extremadamente frecuente en aplicaciones económicas, empresariales y de política pública:
+
+```{r t04-tabla-ejemplos-recuento, echo=FALSE}
+ejemplos <- data.frame(
+  Contexto = c("Salud", "Innovación", "Laboral", "Financiero", "Educativo", "Demográfico"),
+  Variable = c("Visitas al médico/año", "Patentes solicitadas", "Accidentes laborales", 
+               "Quejas de clientes", "Faltas de asistencia", "Número de hijos"),
+  Rango = c("0-50+", "0-100+", "0-10+", "0-1000+", "0-180", "0-15+"),
+  Características = c("Muchos ceros", "Sobredispersión", "Datos raros", "Exceso ceros", 
+                      "Límite superior", "Distribución asimétrica")
+)
+knitr::kable(ejemplos, caption = "Ejemplos de variables de recuento en economía")
+```
+
+Este tipo de datos presenta características que hacen inadecuado el uso de la regresión lineal clásica. En primer lugar, la variable dependiente solo toma valores **enteros no negativos**: no tiene sentido predecir 2.7 visitas al médico o $-1$ accidentes laborales. Sin embargo, MCO puede generar predicciones fraccionarias e incluso negativas, lo que viola la naturaleza del fenómeno. En segundo lugar, la **distribución** de los datos de recuento es típicamente asimétrica, con una acumulación de observaciones en valores bajos (muchos ceros y unos) y una cola derecha que se extiende hacia valores altos. La distribución normal, que MCO asume implícitamente, no captura esta forma. En tercer lugar, existe una **relación intrínseca entre la media y la varianza**: en datos de recuento, los individuos con media alta tienden a mostrar también mayor variabilidad. Esta heterocedasticidad es estructural, no un defecto del modelo, y MCO la ignora.
+
+Si aplicamos MCO directamente a datos de recuento, obtendremos estimaciones **sesgadas e inconsistentes**, intervalos de confianza incorrectos, y predicciones que pueden violar las restricciones naturales del problema.
+
+### El modelo Poisson: concepto fundamental
+
+El **modelo de Poisson** y la **regresión Binomial Negativa** son herramientas diseñadas específicamente para modelar datos de recuento. El Poisson fue propuesto inicialmente para estos problemas porque proporciona un marco probabilístico natural basado en la distribución de Poisson.
+
+En estos apuntes se presenta en primer lugar la distribución de Poisson y sus propiedades, con especial énfasis en el concepto de equidispersión. A continuación se desarrolla el modelo de regresión de Poisson, su especificación, estimación por máxima verosimilitud e interpretación de los coeficientes. El tema aborda después el problema de la sobredispersión, frecuente en datos reales, y presenta el modelo Binomial Negativo como extensión flexible del Poisson. La sección de inferencia estadística incluye los tests de hipótesis, la comparación de modelos y las medidas de bondad de ajuste, todos ilustrados con ejemplos numéricos resueltos paso a paso.
+
+\newpage
+
+## Conceptos fundamentales de datos de recuento
+
+### ¿Qué es un dato de recuento?
+
+Una variable de **recuento** (count data) mide el número de ocurrencias de un evento en un período o contexto determinado. Formalmente:
+
+$$Y_i \in \{0, 1, 2, 3, \ldots\}$$
+
+El espacio de la variable es el conjunto de números enteros no negativos. No hay límite superior teórico, aunque en la práctica los datos pueden estar acotados.
+
+**Ejemplos intuitivos:**
+
+- **Número de visitas al médico en un año**: Un paciente puede no visitar al médico (0 visitas), o tener múltiples visitas según su estado de salud.
+- **Número de patentes solicitadas por una empresa**: Mide la innovación. Muchas empresas no solicitan patentes, pero las que innovan lo hacen múltiples veces.
+- **Número de accidentes laborales**: En una empresa pequeña puede haber 0 accidentes; en una fábrica grande pueden ocurrir varios.
+- **Número de empresas competidoras en un mercado local**: Define la estructura de mercado.
+
+### Propiedades estadísticas clave
+
+Para una variable de recuento $Y_i$, necesitamos entender cuatro propiedades fundamentales:
+
+#### 1. Media y Varianza
+
+- **Media**: $E[Y_i]$ = promedio del número de ocurrencias. Si modelamos visitas al médico, $E[Y_i] = 3$ significa que en promedio un paciente visita 3 veces.
+- **Varianza**: $\text{Var}(Y_i)$ = dispersión alrededor de la media. Mide cómo varían los recuentos entre individuos.
+
+#### 2. Equidispersión
+
+En la distribución de Poisson existe una propiedad especial: **media igual a varianza**.
+
+$$E[Y_i] = \text{Var}(Y_i) = \lambda$$
+
+Esto significa que, en Poisson, si el promedio de eventos es 3, la varianza también debe ser 3. Esta es la **equidispersión**.
+
+#### 3. Sobredispersión
+
+En datos reales, **frecuentemente la varianza excede la media**:
+
+$$\text{Var}(Y_i) > E[Y_i]$$
+
+Esto ocurre cuando hay heterogeneidad no observada entre individuos, variables omitidas, o errores de especificación.
+
+> **Ejemplo intuitivo**: Si algunas personas tienen predisposición genética a ciertas enfermedades (no observada), tendrán visitas al médico más variables que lo predicho por Poisson puro. Dos personas con $E[Y_i] = 3$ pueden tener realidades muy diferentes: una visita casi siempre (poco variable), otra va cuando está enferma (muy variable).
+
+#### 4. Subdispersión
+
+Menos común, pero posible: $\text{Var}(Y_i) < E[Y_i]$. Ocurre cuando los datos están fuertemente acotados o cuando hay mecanismos reguladores.
+
+\newpage
+
+## La distribución de Poisson
+
+### Concepto y propiedades matemáticas
+
+La **distribución de Poisson** es el modelo probabilístico natural para datos de recuento. Describe el número de eventos que ocurren en un intervalo fijo de tiempo o espacio, bajo condiciones específicas.
+
+#### Condiciones para una distribución Poisson
+
+Para que un proceso genere datos Poisson deben cumplirse:
+
+1. **Independencia**: Los eventos ocurren **independientemente**. El que ocurra un evento no afecta la probabilidad de otro.
+2. **Tasa constante**: Existe una **tasa promedio constante** de ocurrencia, denotada $\lambda$ (lambda).
+3. **No simultaneidad**: Es **prácticamente imposible** que dos eventos ocurran exactamente al mismo tiempo.
+4. **Estacionariedad**: La tasa $\lambda$ no cambia durante el período observado.
+
+En la práctica, estas condiciones son idealizaciones, pero muchos procesos reales se aproximan a ellas.
+
+#### Definición matemática
+
+Una variable $Y$ sigue una **distribución de Poisson** con parámetro $\lambda > 0$ si su función de probabilidad es:
+
+$$P(Y = y) = \frac{e^{-\lambda} \lambda^y}{y!}, \quad y = 0, 1, 2, \ldots$$
+
+donde $e \approx 2.71828$ es la base del logaritmo natural, y $y!$ es el factorial.
+
+#### Propiedades fundamentales
+
+**Media:**
+$$E[Y] = \lambda$$
+
+**Varianza:**
+$$\text{Var}(Y) = \lambda$$
+
+**Función característica recursiva:**
+$$P(Y = y+1) = \frac{\lambda}{y+1} P(Y = y)$$
+
+Esta última propiedad es útil computacionalmente: permite calcular probabilidades de forma recursiva.
+
+#### Interpretación de $\lambda$
+
+El parámetro $\lambda$ es la **intensidad** o **tasa** del proceso:
+
+- Si $\lambda = 2$, en promedio ocurren 2 eventos por unidad de tiempo.
+- Si $\lambda = 0.5$, en promedio ocurre medio evento (o equivalentemente, 1 evento cada 2 unidades).
+
+Visualmente, cuando $\lambda$ es pequeño (ej. $\lambda = 1$), la distribución está concentrada en valores bajos (muchos ceros). Cuando $\lambda$ es grande (ej. $\lambda = 10$), la distribución se extiende más y parece más simétrica.
+
+### Ejemplos de cálculo
+
+Supongamos que el número de accidentes laborales por mes en una fábrica sigue una distribución Poisson con $\lambda = 2.5$.
+
+**Probabilidad de exactamente 3 accidentes:**
+$$P(Y = 3) = \frac{e^{-2.5} \cdot 2.5^3}{3!} = \frac{0.0821 \cdot 15.625}{6} = 0.2138$$
+
+Es decir, hay aproximadamente un 21.4% de probabilidad de observar exactamente 3 accidentes.
+
+\newpage
+
+## Modelo de regresión de Poisson
+
+### Especificación del modelo
+
+El modelo de **regresión de Poisson** extiende la distribución de Poisson para permitir que el parámetro $\lambda$ dependa de variables explicativas.
+
+#### Forma básica
+
+Sea $y_i$ el recuento observado para la unidad $i$, y sea $\mathbf{x}_i = (x_{i1}, \ldots, x_{iK})^T$ el vector de variables explicativas.
+
+**Distribución condicional:**
+$$y_i | \mathbf{x}_i \sim \text{Poisson}(\lambda_i)$$
+
+**Función de esperanza condicional (no-lineal):**
+$$E[y_i | \mathbf{x}_i] = \lambda_i = e^{\mathbf{x}_i \boldsymbol{\beta}}$$
+
+**Forma logarítmica (lineal en parámetros):**
+$$\ln(\lambda_i) = \beta_0 + \beta_1 x_{i1} + \cdots + \beta_K x_{iK} = \mathbf{x}_i \boldsymbol{\beta}$$
+
+#### Interpretación de la forma logarítmica
+
+La forma logarítmica es crucial porque:
+
+1. **Garantiza positividad**: Como $\lambda_i = e^{\mathbf{x}_i \boldsymbol{\beta}}$ siempre es positivo (exponencial), nunca obtenemos predicciones negativas.
+2. **Link canónico**: Es la "función de enlace" natural para la distribución Poisson.
+3. **Interpretación elasticidad**: Un cambio de 1 unidad en $x_j$ aumenta $\ln(\lambda_i)$ en $\beta_j$, lo que corresponde a un cambio multiplicativo de $e^{\beta_j}$ en $\lambda_i$.
+
+### Estimación por máxima verosimilitud
+
+El modelo Poisson se estima por **máxima verosimilitud** (MV), no por MCO.
+
+#### Función de verosimilitud
+
+Para una muestra de $n$ observaciones:
+
+$$L(\boldsymbol{\beta}) = \prod_{i=1}^{n} \frac{e^{-\lambda_i} \lambda_i^{y_i}}{y_i!}$$
+
+#### Log-verosimilitud
+
+Es más conveniente trabajar con la log-verosimilitud:
+
+$$\ell(\boldsymbol{\beta}) = \sum_{i=1}^{n} \left[ y_i \ln(\lambda_i) - \lambda_i - \ln(y_i!) \right]$$
+
+Sustituyendo $\lambda_i = e^{\mathbf{x}_i \boldsymbol{\beta}}$:
+
+$$\ell(\boldsymbol{\beta}) = \sum_{i=1}^{n} \left[ y_i (\mathbf{x}_i \boldsymbol{\beta}) - e^{\mathbf{x}_i \boldsymbol{\beta}} - \ln(y_i!) \right]$$
+
+#### Condiciones de primer orden
+
+El estimador MV $\hat{\boldsymbol{\beta}}$ satisface:
+
+$$\frac{\partial \ell}{\partial \boldsymbol{\beta}} = \sum_{i=1}^{n} (y_i - \lambda_i) \mathbf{x}_i = \mathbf{0}$$
+
+Equivalentemente:
+
+$$\sum_{i=1}^{n} (y_i - \hat{\lambda}_i) x_{ij} = 0, \quad j = 0, 1, \ldots, K$$
+
+Esto significa que el residuo medio ponderado por cada variable explicativa debe ser cero.
+
+#### Propiedades del estimador MV
+
+Bajo especificación correcta del modelo Poisson:
+
+1. **Consistencia**: $\hat{\boldsymbol{\beta}} \xrightarrow{p} \boldsymbol{\beta}_0$ cuando $n \to \infty$.
+2. **Normalidad asintótica**: $\sqrt{n}(\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}_0) \xrightarrow{d} N(0, \mathbf{I}^{-1})$, donde $\mathbf{I}$ es la matriz de información.
+3. **Eficiencia**: Es el estimador de menor varianza entre estimadores consistentes.
+
+Sin embargo, estas propiedades dependen de que el modelo esté **correctamente especificado**. Si hay sobredispersión, los errores estándar seran demasiado pequeños.
+
+### Interpretación de coeficientes
+
+Esta es una sección crucial para la práctica.
+
+#### Efecto marginal
+
+El **efecto marginal** de un cambio unitario en $x_j$ en la media condicional es:
+
+$$\frac{\partial E[y_i | \mathbf{x}_i]}{\partial x_{ij}} = \beta_j \cdot \lambda_i = \beta_j \cdot E[y_i | \mathbf{x}_i]$$
+
+**Nota importante**: El efecto marginal **no es constante**; depende del nivel de $\lambda_i$ (o equivalentemente, del nivel de las otras variables).
+
+> **Ejemplo**: Si $\hat{\beta}_{\text{edad}} = 0.03$ en un modelo de visitas al médico, y la media predicha para un individuo es $\hat{\lambda} = 4$, entonces aumentar 1 año de edad aumenta el número esperado de visitas en $0.03 \times 4 = 0.12$ visitas. Para otro individuo con $\hat{\lambda} = 2$, el efecto sería solo $0.03 \times 2 = 0.06$ visitas.
+
+#### Efecto en logaritmos (semi-elasticidad)
+
+Como $\ln(\lambda_i) = \mathbf{x}_i \boldsymbol{\beta}$:
+
+$$\frac{\partial \ln(\lambda_i)}{\partial x_{ij}} = \beta_j$$
+
+Esto se interpreta como: **un cambio de 1 unidad en $x_j$ causa un cambio de $100 \cdot \beta_j$ por ciento en la media predicha**.
+
+> **Ejemplo**: Si $\hat{\beta}_{\text{edad}} = 0.03$, entonces cada año adicional de edad aumenta el número esperado de visitas al médico en un $3\%$ (aproximadamente; exactamente es $(e^{0.03} - 1) \times 100\% = 3.05\%$).
+
+#### Elasticidad
+
+Si $x_j$ es continua, la **elasticidad** es:
+
+$$\varepsilon_j = \frac{\partial E[y_i]}{\partial x_j} \cdot \frac{x_j}{E[y_i]} = \beta_j \cdot x_j$$
+
+Esto mide el **cambio porcentual en la media** resultante de un **cambio porcentual de 1%** en $x_j$.
+
+\newpage
+
+## Modelo de regresión Binomial Negativa
+
+### Motivación: El problema de la sobredispersión
+
+#### Cuando Poisson falla
+
+En la práctica, los datos reales con frecuencia violan el supuesto de equidispersión de Poisson. Cuando **observamos que la varianza muestral excede la media muestral**, decimos que hay **sobredispersión**.
+
+$$\text{Var}(y_i) > E[y_i]$$
+
+#### Causas de la sobredispersión
+
+Existen varias razones por las que podemos observar sobredispersión:
+
+1. **Heterogeneidad no observada**: Los individuos difieren en características que no observamos (predisposiciones genéticas, preferencias latentes, etc.). Esto introduce variabilidad adicional.
+
+2. **Variables omitidas**: Si el modelo verdadero tiene más variables explicativas que las que incluimos, los residuos capturan esa variabilidad no modelada.
+
+3. **Datos agregados**: Si los datos representan sumas sobre períodos o grupos, la variabilidad será mayor que la de datos individuales.
+
+4. **Errores de especificación**: Forma funcional incorrecta del modelo, distribución asimétrica no capturada, etc.
+
+5. **Exceso de ceros**: Muchos datos de recuento tienen proporción de ceros superior a la predicha por Poisson. Esto se trata con modelos hurdle o zero-inflated.
+
+#### Consecuencias de ignorar la sobredispersión
+
+Si estimamos un modelo Poisson cuando los datos presentan sobredispersión, las consecuencias son asimétricas. Los coeficientes estimados $\hat{\boldsymbol{\beta}}$ siguen siendo **consistentes**, lo que significa que convergen a sus valores verdaderos al aumentar la muestra. Esta es la buena noticia. La mala noticia es que los **errores estándar quedan sesgados a la baja**: el modelo Poisson, al imponer que la varianza sea igual a la media, subestima la verdadera dispersión de los datos y, en consecuencia, calcula errores estándar demasiado pequeños. Esto provoca que los intervalos de confianza resulten artificialmente estrechos y que los p-valores sean menores de lo que deberían. El resultado práctico es un exceso de **falsos positivos** (errores de Tipo I): el investigador concluye que una variable es significativa cuando en realidad no lo es, simplemente porque la inferencia está basada en una varianza infraestimada.
+
+Por esta razón, detectar y corregir la sobredispersión es un paso ineludible en el análisis de datos de recuento.
+
+### Especificación del modelo Binomial Negativo
+
+El modelo **Binomial Negativo** es una generalización del Poisson que permite sobredispersión.
+
+#### Forma básica
+
+Se define el modelo condicional como:
+
+$$y_i | \mathbf{x}_i \sim \text{NB}(\lambda_i, \alpha)$$
+
+con función de esperanza condicional:
+
+$$E[y_i | \mathbf{x}_i] = \lambda_i = e^{\mathbf{x}_i \boldsymbol{\beta}}$$
+
+(igual que en Poisson) y función de varianza condicional:
+
+$$\text{Var}(y_i | \mathbf{x}_i) = \lambda_i + \alpha \lambda_i^2 = \lambda_i(1 + \alpha \lambda_i)$$
+
+donde $\alpha \geq 0$ es el **parámetro de dispersión**.
+
+#### Relación con Poisson
+
+Observemos qué ocurre en casos límite:
+
+- Si $\alpha = 0$: $\text{Var}(y_i) = \lambda_i$, recuperamos el modelo Poisson (equidispersión).
+- Si $\alpha > 0$: $\text{Var}(y_i) = \lambda_i + \alpha \lambda_i^2 > \lambda_i$, tenemos sobredispersión.
+
+Cuanto mayor sea $\alpha$, mayor es la sobredispersión relativa.
+
+#### Parametrización alternativa
+
+A veces el NB se parametriza con el "tamaño" $\theta = 1/\alpha$:
+
+$$\text{Var}(y_i) = \lambda_i + \frac{\lambda_i^2}{\theta}$$
+
+Con esta parametrización, cuanto **menor** sea $\theta$, mayor es la sobredispersión (cuando $\theta \to \infty$, recuperamos Poisson).
+
+### Estimación del modelo NB
+
+#### Log-verosimilitud
+
+La función de log-verosimilitud del NB es más compleja que la del Poisson, pero el principio es el mismo: máxima verosimilitud.
+
+Los parámetros $\boldsymbol{\beta}$ y $\alpha$ se estiman simultáneamente maximizando:
+
+$$\ell(\boldsymbol{\beta}, \alpha) = \sum_{i=1}^{n} \left[ y_i \ln(\lambda_i) - (y_i + 1/\alpha)\ln(1 + \alpha \lambda_i) + \text{términos en factoriales} \right]$$
+
+#### Propiedades
+
+Bajo especificación correcta:
+
+- El estimador MV es **consistente, asintóticamente normal y eficiente**.
+- La **matriz de covarianzas** de $(\hat{\boldsymbol{\beta}}, \hat{\alpha})$ se estima consistentemente usando el Hessiano.
+
+\newpage
+
+## Inferencia estadística y comparación de modelos
+
+En esta sección explicamos con detalle los principales contrastes de hipótesis para modelos de recuento. Cada test se presenta con su **planteamiento formal**, **fórmula**, **ejemplo numérico resuelto paso a paso** y **criterio de decisión**.
+
+Para los ejemplos usaremos unos resultados hipotéticos (pero realistas) de un modelo de **visitas al médico** ($n = 4406$), que luego replicaremos con datos reales en la sección práctica:
+
+```{r t04-tabla-resultados-hipoteticos, echo=FALSE}
+tabla_hip <- data.frame(
+  Variable = c("(Intercepto)", "edad", "cronico", "seguro", "educacion"),
+  Beta = c(1.028, 0.019, 0.245, 0.306, -0.028),
+  SE = c(0.065, 0.004, 0.012, 0.043, 0.005),
+  z = c(15.82, 4.75, 20.42, 7.12, -5.60),
+  p_valor = c("<0.001", "<0.001", "<0.001", "<0.001", "<0.001")
+)
+knitr::kable(tabla_hip,
+             col.names = c("Variable", "$\\hat{\\beta}$", "Error estándar",
+                          "z", "p-valor"),
+             escape = FALSE,
+             caption = "Resultados hipotéticos del modelo Poisson (visitas al médico)")
+```
+
+Además, supongamos las siguientes log-verosimilitudes:
+
+- Modelo Poisson completo: $\ell_{Poisson} = -12\,215.6$ (con 5 parámetros: intercepto + 4 variables).
+- Modelo NB completo: $\ell_{NB} = -11\,478.3$ (con 6 parámetros: 5 + $\alpha$).
+- Modelo Poisson sin `cronico` ni `seguro`: $\ell_R = -12\,540.2$ (con 3 parámetros).
+- Modelo solo con constante: $\ell_0 = -13\,890.1$ (con 1 parámetro).
+
+
+### Test de Wald (significación individual)
+
+#### Planteamiento del contraste
+
+El test de Wald evalúa si **una variable individual** contribuye significativamente al modelo.
+
+**Hipótesis:**
+
+- $H_0: \beta_j = 0$ (la variable $x_j$ **no** tiene efecto sobre el recuento esperado).
+- $H_1: \beta_j \neq 0$ (la variable $x_j$ **sí** tiene efecto).
+
+**Estadístico:**
+
+$$W_j = \frac{\hat{\beta}_j}{\text{se}(\hat{\beta}_j)}$$
+
+**Distribución bajo $H_0$:** $W_j \sim^a N(0, 1)$ (equivalentemente, $W_j^2 \sim^a \chi^2_1$).
+
+**Regla de decisión (al nivel $\alpha = 0.05$):** Rechazamos $H_0$ si $|W_j| > z_{0.025} = 1.96$. Equivalentemente, rechazamos si el p-valor $< 0.05$.
+
+#### Ejemplo 1: ¿Es significativa la variable `cronico`?
+
+Datos del problema: $\hat{\beta}_{\text{cronico}} = 0.245$, $\text{se}(\hat{\beta}_{\text{cronico}}) = 0.012$.
+
+**Paso 1.** Planteamos las hipótesis:
+
+- $H_0: \beta_{\text{cronico}} = 0$ (las condiciones crónicas no afectan las visitas).
+- $H_1: \beta_{\text{cronico}} \neq 0$ (sí afectan).
+
+**Paso 2.** Calculamos el estadístico:
+
+$$W = \frac{0.245}{0.012} = 20.42$$
+
+**Paso 3.** Comparamos con el valor crítico:
+
+$$|20.42| > 1.96 \implies \text{Rechazamos } H_0$$
+
+**Paso 4.** Conclusión: La variable `cronico` es **altamente significativa** ($p < 0.001$). Cada condición crónica adicional aumenta significativamente el número de visitas al médico.
+
+#### Ejemplo 2: ¿Es significativa la variable `educacion`?
+
+Datos: $\hat{\beta}_{\text{educ}} = -0.028$, $\text{se} = 0.005$.
+
+$$W = \frac{-0.028}{0.005} = -5.60$$
+
+$$|-5.60| > 1.96 \implies \text{Rechazamos } H_0$$
+
+Conclusión: `educacion` es significativa ($p < 0.001$). El signo negativo indica que más años de educación se asocian con **menos** visitas al médico.
+
+> **Nota importante:** El test de Wald evalúa variables **una a una**. Para evaluar si un **grupo de variables** es conjuntamente significativo, necesitamos el test de razón de verosimilitud.
+
+
+### Test de razón de verosimilitud (significación conjunta)
+
+#### Planteamiento del contraste
+
+El test LR compara un modelo **completo** (sin restricciones) con un modelo **reducido** (restringido) para evaluar si un grupo de variables contribuye significativamente.
+
+**Hipótesis:**
+
+- $H_0: \beta_{j_1} = \beta_{j_2} = \cdots = \beta_{j_q} = 0$ (las $q$ variables no aportan nada al modelo).
+- $H_1:$ al menos uno de los $\beta_{j_k} \neq 0$ (al menos una variable es relevante).
+
+**Estadístico:**
+
+$$LR = 2\left[\ell(\hat{\boldsymbol{\beta}}_U) - \ell(\hat{\boldsymbol{\beta}}_R)\right]$$
+
+donde $\ell_U$ es la log-verosimilitud del modelo completo y $\ell_R$ la del modelo reducido.
+
+**Distribución bajo $H_0$:** $LR \sim^a \chi^2_q$, donde $q$ es el número de restricciones (variables eliminadas).
+
+**Regla de decisión:** Rechazamos $H_0$ si $LR > \chi^2_{q, \alpha}$, donde $\chi^2_{q, \alpha}$ es el valor crítico de la distribución chi-cuadrado con $q$ grados de libertad al nivel $\alpha$.
+
+#### Ejemplo: ¿Son `cronico` y `seguro` conjuntamente significativas?
+
+Datos del problema:
+
+- Modelo completo (con `cronico` y `seguro`): $\ell_U = -12\,215.6$, $k_U = 5$ parámetros.
+- Modelo reducido (sin `cronico` ni `seguro`): $\ell_R = -12\,540.2$, $k_R = 3$ parámetros.
+- Número de restricciones: $q = k_U - k_R = 5 - 3 = 2$.
+
+**Paso 1.** Planteamos las hipótesis:
+
+- $H_0: \beta_{\text{cronico}} = \beta_{\text{seguro}} = 0$.
+- $H_1:$ al menos uno es distinto de cero.
+
+**Paso 2.** Calculamos el estadístico LR:
+
+$$LR = 2\left[(-12\,215.6) - (-12\,540.2)\right] = 2 \times 324.6 = 649.2$$
+
+**Paso 3.** Buscamos el valor crítico $\chi^2_{2, 0.05} = 5.991$:
+
+$$649.2 > 5.991 \implies \text{Rechazamos } H_0$$
+
+**Paso 4.** Conclusión: Las variables `cronico` y `seguro` son **conjuntamente muy significativas**. El estadístico (649.2) excede enormemente el valor crítico (5.99), lo que indica que su contribución al modelo es muy importante.
+
+> **¿Cuándo usar LR en vez de Wald?** El test LR es preferible cuando se quiere evaluar la significación **conjunta** de varias variables. Para variables individuales, ambos tests dan resultados muy similares, pero el LR es más fiable en muestras pequeñas.
+
+
+### Test de sobredispersión: Poisson vs Binomial Negativo
+
+#### Planteamiento del contraste
+
+Este es uno de los tests más importantes en modelos de recuento. Evalúa si la **varianza de los datos excede la media** (sobredispersión), lo que invalidaría los errores estándar del modelo Poisson.
+
+**Hipótesis:**
+
+- $H_0: \alpha = 0$ (equidispersión → el modelo **Poisson** es adecuado).
+- $H_1: \alpha > 0$ (sobredispersión → el modelo **Binomial Negativo** es necesario).
+
+Recordemos que en el NB: $\text{Var}(y_i) = \lambda_i + \alpha \lambda_i^2$. Si $\alpha = 0$, la varianza es $\lambda_i$ (Poisson).
+
+#### Método 1: Test LR (Poisson vs NB)
+
+**Estadístico:**
+
+$$LR = 2\left[\ell_{NB} - \ell_{Poisson}\right]$$
+
+**Distribución bajo $H_0$:** Aproximadamente $\chi^2_1$ (un grado de libertad porque solo se restringe $\alpha$).
+
+#### Ejemplo de cálculo
+
+Datos:
+
+- $\ell_{Poisson} = -12\,215.6$
+- $\ell_{NB} = -11\,478.3$
+
+**Paso 1.** Calculamos:
+
+$$LR = 2\left[(-11\,478.3) - (-12\,215.6)\right] = 2 \times 737.3 = 1\,474.6$$
+
+**Paso 2.** Valor crítico $\chi^2_{1, 0.05} = 3.841$:
+
+$$1\,474.6 \gg 3.841 \implies \text{Rechazamos } H_0 \text{ rotundamente}$$
+
+**Paso 3.** Conclusión: La sobredispersión es **masiva**. El modelo Poisson es completamente inadecuado para estos datos; el Binomial Negativo es muy superior.
+
+#### Método 2: Estadístico de dispersión de Pearson
+
+Una forma rápida y visual de detectar sobredispersión:
+
+$$\text{Dispersión} = \frac{\sum_{i=1}^{n} \frac{(y_i - \hat{\lambda}_i)^2}{\hat{\lambda}_i}}{n - k}$$
+
+**Regla práctica:**
+
+- $\approx 1$: equidispersión (Poisson OK).
+- $> 1.5$: sobredispersión moderada.
+- $> 2$: sobredispersión importante → usar NB o quasi-Poisson.
+
+#### Método 3: Test de Cameron y Trivedi (1990)
+
+Contrasta formalmente la equidispersión regresando una función de los residuos:
+
+$$\frac{(y_i - \hat{\lambda}_i)^2 - y_i}{\hat{\lambda}_i} = \alpha_0 + \alpha_1 \hat{\lambda}_i + \varepsilon_i$$
+
+- $H_0: \alpha_1 = 0$ (equidispersión).
+- $H_1: \alpha_1 > 0$ (sobredispersión).
+
+Se contrasta con un test $t$ ordinario sobre $\hat{\alpha}_1$. En R: `dispersiontest(modelo_poisson)` del paquete `AER`.
+
+
+### Medidas de bondad de ajuste
+
+En modelos de regresión lineal clásica, el coeficiente de determinación $R^2$ mide la proporción de variabilidad explicada por el modelo. Sin embargo, en modelos de recuento (Poisson, Binomial Negativo), **el $R^2$ clásico no es apropiado** por dos razones fundamentales:
+
+1. **La función media condicional es no lineal**: $E[y_i | \mathbf{x}_i] = \exp(\mathbf{x}_i \boldsymbol{\beta})$, por lo que la descomposición $TSS = ESS + RSS$ no se mantiene.
+2. **Heterocedasticidad inherente**: en Poisson, $\text{Var}(y_i) = \lambda_i = E[y_i]$; los residuos no son homocedásticos.
+
+Por ello, se han desarrollado medidas alternativas de bondad de ajuste específicas para modelos de recuento, que presentamos a continuación de menor a mayor sofisticación.
+
+
+#### Desviación (Deviance)
+
+La **desviación** (deviance) es la medida fundamental de bondad de ajuste en modelos lineales generalizados. Compara el modelo estimado con el **modelo saturado** (aquel que tiene tantos parámetros como observaciones y ajusta perfectamente los datos).
+
+##### Definición formal
+
+Para una observación individual $i$, la **contribución a la desviación** es:
+
+$$d_i = 2\left[y_i \ln\left(\frac{y_i}{\hat{\lambda}_i}\right) - (y_i - \hat{\lambda}_i)\right]$$
+
+donde por convención $0 \cdot \ln(0) = 0$. Nótese que $d_i \geq 0$ siempre, y $d_i = 0$ solo cuando $y_i = \hat{\lambda}_i$ (ajuste perfecto).
+
+La **desviación total** (o deviance residual) del modelo es la suma:
+
+$$D = \sum_{i=1}^{n} d_i = 2\sum_{i=1}^{n}\left[y_i \ln\left(\frac{y_i}{\hat{\lambda}_i}\right) - (y_i - \hat{\lambda}_i)\right]$$
+
+**Interpretación intuitiva:** La desviación mide cuánto "se pierde" al usar el modelo estimado en lugar del modelo saturado. Es análoga a la suma de cuadrados residual (RSS) en regresión lineal, pero para modelos GLM.
+
+##### Desviación nula y desviación residual
+
+- **Desviación nula** ($D_0$): desviación del modelo que solo incluye la constante (sin variables explicativas). Mide la variabilidad total a explicar.
+- **Desviación residual** ($D$): desviación del modelo completo con las $k$ variables. Mide la variabilidad **no explicada** por el modelo.
+
+La diferencia $D_0 - D$ mide cuánta variabilidad explican las variables incluidas.
+
+##### Test de bondad de ajuste basado en la desviación
+
+Si el modelo Poisson es correcto, la desviación residual sigue **aproximadamente** una distribución chi-cuadrado:
+
+$$D \sim \chi^2(n - k) \quad \text{(bajo } H_0 \text{: modelo correctamente especificado)}$$
+
+**Contraste:**
+
+- $H_0$: El modelo se ajusta adecuadamente a los datos.
+- $H_1$: El modelo no se ajusta bien (posible sobredispersión o mala especificación).
+- **Criterio:** Rechazar $H_0$ si $D > \chi^2_{n-k, \alpha}$.
+
+> **Precaución:** Este test tiene baja potencia en muestras pequeñas y es sensible a la presencia de muchos ceros. Un rechazo puede deberse a sobredispersión (no necesariamente a una mala elección de variables).
+
+##### Ejemplo de cálculo manual
+
+Supongamos nuestro modelo Poisson con $n = 4{,}406$ observaciones y $k = 5$ parámetros.
+
+**Datos reportados por R:**
+
+- Desviación nula: $D_0 = 8{,}127.5$ con $n - 1 = 4{,}405$ grados de libertad.
+- Desviación residual: $D = 6{,}531.2$ con $n - k = 4{,}401$ grados de libertad.
+
+**Test:**
+
+$$D = 6{,}531.2 \quad \text{vs} \quad \chi^2_{4401, 0.05} \approx 4{,}401 + 2\sqrt{2 \times 4{,}401} \approx 4{,}538.8$$
+
+$$6{,}531.2 \gg 4{,}538.8 \implies \text{Rechazamos } H_0$$
+
+**Conclusión:** El modelo Poisson **no** se ajusta bien. La desviación residual es mucho mayor que los grados de libertad, lo cual indica **sobredispersión** (la varianza observada supera la predicha por Poisson). La razón $D/(n-k) = 6{,}531.2/4{,}401 = 1.484$ confirma que la varianza es un 48% mayor que la media.
+
+> **Regla rápida:** Si $D/(n-k) \approx 1$, el modelo Poisson es adecuado. Si $D/(n-k) \gg 1$, hay sobredispersión y se debería considerar el modelo Binomial Negativo.
+
+
+#### Estadístico $\chi^2$ de Pearson
+
+El estadístico chi-cuadrado de Pearson es la alternativa clásica a la desviación. Mientras que la desviación se basa en la log-verosimilitud, el estadístico de Pearson se basa directamente en la **diferencia entre valores observados y esperados**.
+
+##### Definición
+
+$$X^2 = \sum_{i=1}^{n} \frac{(y_i - \hat{\lambda}_i)^2}{\hat{\lambda}_i}$$
+
+Este es el **estadístico clásico de Pearson**, idéntico conceptualmente al $\chi^2$ usado en tablas de contingencia. Bajo $H_0$ (modelo correcto):
+
+$$X^2 \sim \chi^2(n - k)$$
+
+##### Relación con la desviación
+
+Ambas medidas convergen a la misma distribución asintóticamente, pero difieren en muestras finitas:
+
+- La **desviación** pondera más las observaciones con $y_i$ grande.
+- El **$\chi^2$ de Pearson** es más sensible a observaciones con $\hat{\lambda}_i$ pequeño (donde un residuo incluso moderado genera un cociente grande).
+
+En la práctica, ambas suelen dar resultados similares. Los programas como R reportan la desviación por defecto, pero el $\chi^2$ de Pearson se obtiene fácilmente:
+
+En R, el estadístico se calcula con `sum(residuals(modelo, type = "pearson")^2)` y su p-valor con `pchisq(X2, df = modelo$df.residual, lower.tail = FALSE)`.
+
+##### Ejemplo de cálculo manual
+
+Con $X^2 = 6{,}582.7$ y $n - k = 4{,}401$:
+
+$$\frac{X^2}{n-k} = \frac{6{,}582.7}{4{,}401} = 1.495$$
+
+Dado que $1.495 > 1$, se confirma la presencia de sobredispersión. Este valor es consistente con el obtenido vía desviación ($1.484$), lo cual es habitual.
+
+
+#### Medidas de $R^2$ para modelos de recuento
+
+Aunque el $R^2$ clásico no es aplicable, se han propuesto diversas adaptaciones. Presentamos tres, de menor a mayor sofisticación.
+
+##### $R^2$ basado en residuos estandarizados
+
+Una primera aproximación, propuesta como extensión directa del $R^2$ lineal:
+
+$$R^2_{res} = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{\lambda}_i)^2 / \hat{\lambda}_i}{\sum_{i=1}^{n} (y_i - \bar{y})^2 / \bar{y}}$$
+
+Esta medida compara el ajuste del modelo completo (numerador) con el de un modelo que solo incluye la constante (denominador).
+
+**Ventajas:** Intuitivo, análogo al $R^2$ clásico.
+
+**Limitaciones:**
+
+- Puede ser **negativo** (si el modelo ajusta peor que la media).
+- Puede **aumentar** al eliminar variables relevantes.
+
+##### Pseudo $R^2$ de McFadden
+
+Es la medida más utilizada en la práctica:
+
+$$R^2_{McF} = 1 - \frac{\ell(\hat{\boldsymbol{\beta}})}{\ell(\hat{\beta}_0)}$$
+
+donde $\ell(\hat{\boldsymbol{\beta}})$ es la log-verosimilitud del modelo completo y $\ell(\hat{\beta}_0)$ es la del modelo solo con constante.
+
+**Interpretación:** Proporción de la log-verosimilitud explicada por las variables del modelo. Está acotado superiormente por 1 (ajuste perfecto), pero **nunca alcanza 1** en la práctica, porque $\ell < 0$ siempre.
+
+**Ejemplo de cálculo:**
+
+Con $\ell(\hat{\boldsymbol{\beta}}) = -11{,}478.3$ (NB completo) y $\ell(\hat{\beta}_0) = -13{,}890.1$ (solo constante):
+
+$$R^2_{McF} = 1 - \frac{-11{,}478.3}{-13{,}890.1} = 1 - 0.8263 = 0.1737$$
+
+**Interpretación:** El modelo explica aproximadamente un 17.4% de la variación en la log-verosimilitud. En modelos de recuento con datos microeconómicos, **valores entre 0.10 y 0.25 son habituales y aceptables**.
+
+> **Referencia:** En regresión lineal, un $R^2 = 0.17$ se consideraría bajo. Pero en modelos de recuento, la heterogeneidad individual no observada hace que las predicciones puntuales sean intrínsecamente más difíciles, por lo que estos valores son normales y no indican un modelo deficiente.
+
+##### $R^2$ de Cameron y Windmeijer (1993)
+
+Cameron y Windmeijer propusieron una medida basada en la desviación que está **acotada entre 0 y 1**:
+
+$$R^2_{Dev} = \frac{D_0 - D}{D_0^*}$$
+
+donde:
+
+- $D_0$: desviación del modelo nulo (solo constante).
+- $D$: desviación del modelo completo.
+- $D_0^*$: desviación máxima posible (mejora máxima sobre un ajuste perfecto).
+
+Esta medida es equivalente al pseudo-$R^2$ reportado por muchos paquetes estadísticos y puede reescribirse como:
+
+$$R^2_{Dev} = 1 - \frac{D}{D_0}$$
+
+**Ejemplo de cálculo:**
+
+Con $D_0 = 8{,}127.5$ y $D = 6{,}531.2$:
+
+$$R^2_{Dev} = 1 - \frac{6{,}531.2}{8{,}127.5} = 1 - 0.8035 = 0.1965$$
+
+El modelo reduce la desviación en un 19.7% respecto al modelo nulo.
+
+**Ventajas sobre McFadden:** Está acotada entre 0 y 1 y aumenta monótonamente al añadir variables relevantes, lo que la hace más interpretable.
+
+
+#### Criterio de Información de Akaike (AIC)
+
+##### Fundamento teórico
+
+El AIC fue propuesto por Akaike (1973) basándose en la **divergencia de Kullback-Leibler (K-L)**, que mide la "distancia" entre la distribución verdadera (desconocida) de los datos y la distribución estimada por nuestro modelo.
+
+Akaike demostró que un estimador asintóticamente insesgado de la divergencia K-L esperada es:
+
+$$\text{AIC} = 2k - 2\ell(\hat{\boldsymbol{\beta}})$$
+
+donde:
+
+- $k$ = número de parámetros estimados (incluida la constante).
+- $\ell(\hat{\boldsymbol{\beta}})$ = log-verosimilitud evaluada en los estimadores de máxima verosimilitud.
+
+##### Interpretación de los componentes
+
+El AIC equilibra dos objetivos contrapuestos:
+
+- **$-2\ell(\hat{\boldsymbol{\beta}})$: Bondad de ajuste.** Cuanto mayor la verosimilitud, menor este término. Mide lo bien que el modelo se ajusta a los datos observados.
+- **$2k$: Penalización por complejidad.** Cada parámetro adicional suma 2 al AIC. Previene el sobreajuste: un modelo con muchas variables puede ajustar bien los datos de entrenamiento pero predecir mal datos nuevos.
+
+> **Intuición:** El AIC busca el modelo que mejor **predecirá** datos futuros generados por el mismo proceso, no el que mejor ajuste los datos actuales.
+
+##### Ejemplo detallado de cálculo manual
+
+**Modelo Poisson** ($k = 5$, $\ell = -12{,}215.6$):
+
+$$\text{AIC}_{Poisson} = 2(5) - 2(-12{,}215.6) = 10 + 24{,}431.2 = 24{,}441.2$$
+
+Desglose: penalización = 10 (por 5 parámetros), ajuste = 24,431.2 (peor ajuste → mayor valor).
+
+**Modelo Binomial Negativo** ($k = 6$, $\ell = -11{,}478.3$):
+
+$$\text{AIC}_{NB} = 2(6) - 2(-11{,}478.3) = 12 + 22{,}956.6 = 22{,}968.6$$
+
+Desglose: penalización = 12 (un parámetro más, $\alpha$), ajuste = 22,956.6 (mejor ajuste).
+
+**Comparación:**
+
+$$\Delta \text{AIC} = 24{,}441.2 - 22{,}968.6 = 1{,}472.6$$
+
+> **Regla práctica de Burnham y Anderson (2002):**
+>
+> - $\Delta \text{AIC} < 2$: ambos modelos son igualmente plausibles.
+> - $2 < \Delta \text{AIC} < 7$: el modelo con menor AIC es moderadamente mejor.
+> - $\Delta \text{AIC} > 10$: el modelo con mayor AIC tiene **soporte prácticamente nulo**.
+>
+> En nuestro ejemplo, $\Delta = 1{,}472.6 \gg 10$: el NB es **abrumadoramente** superior.
+
+##### Limitaciones del AIC
+
+1. **No tiene interpretación absoluta**: solo sirve para comparar modelos ajustados a los **mismos datos**.
+2. **Tiende a seleccionar modelos complejos** en muestras grandes, porque la penalización $2k$ no crece con $n$.
+3. **No indica si el modelo es "bueno"**: un modelo con el menor AIC puede seguir siendo inadecuado.
+
+
+#### Criterio de Información Bayesiano (BIC)
+
+##### Fundamento teórico
+
+El BIC (también llamado criterio de Schwarz, 1978) surge de la **selección bayesiana de modelos**. Aproxima el logaritmo del factor de Bayes, que mide la evidencia relativa a favor de un modelo sobre otro.
+
+$$\text{BIC} = k \ln(n) - 2\ell(\hat{\boldsymbol{\beta}})$$
+
+##### Diferencia clave con el AIC
+
+La penalización del BIC es $k \ln(n)$ en lugar de $2k$. Puesto que $\ln(n) > 2$ cuando $n > 7$ (es decir, **casi siempre en la práctica**):
+
+$$\text{Penalización BIC} = k \ln(n) > 2k = \text{Penalización AIC} \quad \text{para } n > 7$$
+
+Esto significa que el BIC **penaliza más la complejidad** y tiende a seleccionar modelos más parsimoniosos (con menos variables) que el AIC.
+
+##### Ejemplo detallado de cálculo manual
+
+Con $n = 4{,}406$, $\ln(4{,}406) = 8.39$:
+
+**Modelo Poisson** ($k = 5$):
+$$\text{BIC}_{Poisson} = 5 \times 8.39 - 2(-12{,}215.6) = 41.95 + 24{,}431.2 = 24{,}473.2$$
+
+**Modelo NB** ($k = 6$):
+$$\text{BIC}_{NB} = 6 \times 8.39 - 2(-11{,}478.3) = 50.34 + 22{,}956.6 = 23{,}006.9$$
+
+**Comparación:** $\Delta \text{BIC} = 24{,}473.2 - 23{,}006.9 = 1{,}466.3$
+
+> **Escala de evidencia de Kass y Raftery (1995):**
+>
+> - $\Delta \text{BIC} < 2$: evidencia débil (apenas vale la pena mencionarlo).
+> - $2 < \Delta \text{BIC} < 6$: evidencia positiva.
+> - $6 < \Delta \text{BIC} < 10$: evidencia fuerte.
+> - $\Delta \text{BIC} > 10$: evidencia **muy fuerte**.
+>
+> En nuestro ejemplo, $\Delta \text{BIC} = 1{,}466.3 \gg 10$: evidencia **abrumadora** a favor del NB.
+
+##### ¿Cuándo usar AIC y cuándo BIC?
+
+- **AIC**: Cuando el objetivo es **predicción**. El AIC selecciona el modelo que minimiza el error de predicción esperado.
+- **BIC**: Cuando el objetivo es **identificar el modelo verdadero**. Si el verdadero modelo está entre los candidatos, el BIC lo selecciona con probabilidad $\to 1$ cuando $n \to \infty$ (propiedad de consistencia).
+- **En la práctica**: Si ambos criterios coinciden, la decisión es clara. Si discrepan, el AIC suele preferir un modelo más complejo y el BIC uno más parsimonioso. En microeconometría, se reportan ambos.
+
+
+#### Tabla resumen de medidas de bondad de ajuste
+
+```{r t04-tabla-resumen-gof, echo=FALSE}
+tabla_gof <- data.frame(
+  Medida = c("Desviación residual ($D$)",
+             "$\\chi^2$ de Pearson",
+             "$R^2$ residual",
+             "$R^2$ McFadden",
+             "$R^2$ Cameron-Windmeijer",
+             "AIC",
+             "BIC"),
+  Formula = c("$2\\sum[y_i \\cdot \\ln(y_i/\\hat{\\lambda}_i) - (y_i - \\hat{\\lambda}_i)]$",
+              "$\\sum(y_i - \\hat{\\lambda}_i)^2 / \\hat{\\lambda}_i$",
+              "$1 - [\\sum(y_i - \\hat{\\lambda}_i)^2/\\hat{\\lambda}_i] \\;/\\; [\\sum(y_i - \\bar{y})^2/\\bar{y}]$",
+              "$1 - \\ell(\\hat{\\beta})/\\ell(\\hat{\\beta}_0)$",
+              "$1 - D/D_0$",
+              "$2k - 2\\ell$",
+              "$k \\cdot \\ln(n) - 2\\ell$"),
+  Uso = c("Test GOF: $D \\sim \\chi^2(n-k)$",
+          "Test GOF: $X^2 \\sim \\chi^2(n-k)$",
+          "Ajuste relativo (puede ser < 0)",
+          "Proporción de $\\ell$ explicada",
+          "Ajuste relativo (0 a 1)",
+          "Comparar modelos (menor = mejor)",
+          "Comparar modelos (penaliza más)"),
+  Valor_Ejemplo = c("6.531,2 (ratio 1,48)",
+                     "6.582,7 (ratio 1,50)",
+                     "---",
+                     "0,174",
+                     "0,197",
+                     "22.968,6 (NB)",
+                     "23.006,9 (NB)")
+)
+knitr::kable(tabla_gof,
+             col.names = c("Medida", "Fórmula", "Uso principal", "Ejemplo"),
+             escape = FALSE,
+             caption = "Resumen de medidas de bondad de ajuste para modelos de recuento")
+```
+
+
+### Procedimiento completo de comparación Poisson vs Binomial Negativo
+
+En la práctica, la comparación de modelos sigue estos **cinco pasos**:
+
+1. **Estimar el modelo Poisson** y calcular el estadístico de dispersión de Pearson. Si $\approx 1$, Poisson puede ser suficiente; si $> 1.5$, hay indicios de sobredispersión.
+
+2. **Estimar el modelo Binomial Negativo** con las mismas variables explicativas.
+
+3. **Test LR formal**: Calcular $LR = 2(\ell_{NB} - \ell_{Poisson})$. Si $p < 0.05$, la sobredispersión es significativa.
+
+4. **Comparar AIC y BIC**: El modelo con valores menores es preferido. Si la diferencia es grande ($\Delta > 10$), la evidencia es clara.
+
+5. **Decisión**: Si los pasos 3 y 4 coinciden → la decisión es clara. Si discrepan (raro), priorizar el test LR para modelos anidados.
+
+
+### Tablas resumen
+
+Los contrastes y medidas de diagnóstico para modelos de recuento se organizan en tres grupos: tests de significación, tests de sobredispersión y medidas de bondad de ajuste.
+
+```{r t04-tabla-contrastes-signif, echo=FALSE}
+t1 <- data.frame(
+  Test = c("Wald", "LR (conjunto)"),
+  H0 = c("$\\beta_j = 0$", "$\\beta_1 = \\cdots = \\beta_q = 0$"),
+  Distribucion = c("$z \\sim N(0,1)$", "$\\chi^2(q)$"),
+  Criterio = c("Rechazar si $p < 0{,}05$", "Rechazar si $p < 0{,}05$")
+)
+knitr::kable(t1,
+             col.names = c("Test", "$H_0$", "Distribución", "Criterio"),
+             escape = FALSE,
+             caption = "Tests de significación de variables",
+             align = c("l", "l", "l", "l"))
+```
+
+```{r t04-tabla-contrastes-sobredisp, echo=FALSE}
+t2 <- data.frame(
+  Test = c("LR: NB vs Poisson", "Dispersión de Pearson", "Cameron-Trivedi"),
+  H0 = c("$\\alpha = 0$", "Dispersión $= 1$", "$\\alpha_1 = 0$"),
+  Criterio = c("$LR > 3{,}84 \\Rightarrow$ NB", "$> 1{,}5 \\Rightarrow$ sobredispersión", "$p < 0{,}05 \\Rightarrow$ sobredispersión")
+)
+knitr::kable(t2,
+             col.names = c("Test", "$H_0$", "Criterio de decisión"),
+             escape = FALSE,
+             caption = "Tests de sobredispersión (Poisson vs Binomial Negativo)",
+             align = c("l", "l", "l"))
+```
+
+```{r t04-tabla-contrastes-gof, echo=FALSE}
+t3 <- data.frame(
+  Medida = c("AIC", "BIC", "Pseudo $R^2$ McFadden"),
+  Formula = c("$2k - 2\\ell$", "$k \\cdot \\ln(n) - 2\\ell$", "$1 - \\ell(\\hat{\\beta})/\\ell(\\hat{\\beta}_0)$"),
+  Criterio = c("Menor es mejor", "Menor es mejor (penaliza más)", "Mayor es mejor (0,10--0,25 típico)")
+)
+knitr::kable(t3,
+             col.names = c("Medida", "Fórmula", "Interpretación"),
+             escape = FALSE,
+             caption = "Medidas de bondad de ajuste y comparación de modelos",
+             align = c("l", "l", "l"))
+```
+
+> **Consejo práctico:** En un informe o trabajo, reporta siempre: (1) el test de Wald para cada variable individual (sale directamente del `summary()`), (2) el test LR para comparar Poisson vs NB, (3) AIC y BIC de ambos modelos, y (4) el pseudo $R^2$. Con estos cuatro elementos, el lector puede evaluar completamente la especificación del modelo.
+
+\newpage
+
+## Extensiones y temas avanzados
+
+### Sobredispersión: detección y corrección
+
+#### Diagnósticos de sobredispersión
+
+**1. Estadístico de dispersión de Pearson:**
+$$\text{Disp} = \frac{\sum_i (y_i - \hat{\lambda}_i)^2 / \hat{\lambda}_i}{n - k}$$
+
+Si > 1 → sobredispersión. Si >> 1 → importante.
+
+**2. Deviance/grados de libertad:**
+$$\text{Deviance Ratio} = \frac{D}{n-k}$$
+
+Similares resultados (cercano a 1 → ajuste bueno).
+
+#### Correcciones de la sobredispersión
+
+Cuando se detecta sobredispersión, existen tres estrategias principales. La primera y más recomendada es estimar un **modelo Binomial Negativo**, que incorpora un parámetro de dispersión $\alpha$ que permite que la varianza exceda la media. Es el enfoque estándar en la literatura econométrica y se estima en R con `MASS::glm.nb()`.
+
+La segunda opción es el modelo **Quasi-Poisson**, que mantiene la estructura del modelo Poisson pero ajusta los errores estándar multiplicándolos por un factor de dispersión estimado a partir de los datos. No requiere especificar una nueva distribución, sino que utiliza un enfoque de cuasi-verosimilitud. En R se estima con `family = quasipoisson`.
+
+La tercera opción consiste en mantener el modelo Poisson pero calcular **errores estándar robustos** (tipo sandwich), que son válidos incluso cuando la varianza no coincide con la media. En R se obtienen combinando `coeftest()` del paquete `lmtest` con `vcovHC()` del paquete `sandwich`.
+
+### Datos con exceso de ceros
+
+En muchos contextos económicos, los datos de recuento presentan una proporción de observaciones con valor cero considerablemente mayor de la que predeciría un modelo Poisson o Binomial Negativo. Este fenómeno se denomina **exceso de ceros** (zero inflation) y aparece cuando existen dos procesos generadores de datos superpuestos: uno que determina si el evento puede ocurrir en absoluto, y otro que gobierna cuántas veces ocurre condicionado a que sea posible. Por ejemplo, en el gasto en ocio, algunas personas nunca gastan (cero estructural, por preferencias o restricciones), mientras que las que sí gastan presentan un recuento variable. De forma similar, en el número de hijos, hay parejas que han decidido no tener hijos (cero deliberado) frente a las que simplemente aún no los han tenido (cero circunstancial).
+
+Para modelar estos datos existen dos familias de modelos. Los modelos **Zero-Inflated** (ZIP para Poisson, ZINB para Binomial Negativo) asumen que los ceros provienen de dos fuentes: una masa puntual en cero (modelada con un Logit) y el proceso de recuento habitual. Los modelos **Hurdle** adoptan un enfoque secuencial: primero modelan si $y > 0$ o no (con un modelo binario), y luego, condicionado a $y > 0$, modelan el recuento con una distribución truncada en cero. Ambos enfoques se implementan en R con el paquete `pscl`.
+
+### Variables de offset
+
+Para modelar **tasas** en lugar de recuentos absolutos, usamos variables de offset.
+
+Ejemplo: Si $y_i$ son accidentes y queremos ajustar por horas trabajadas:
+
+$$\ln(\lambda_i / \text{horas}_i) = \mathbf{x}_i \boldsymbol{\beta}$$
+
+equivalentemente:
+
+$$\ln(\lambda_i) = \ln(\text{horas}_i) + \mathbf{x}_i \boldsymbol{\beta}$$
+
+En R: `glm(..., offset = log(horas), ...)`
+
+\newpage
+
+## Resumen: lo esencial en 10 puntos
+
+1. Los **datos de recuento** toman valores enteros no negativos ($y \in \{0, 1, 2, \ldots\}$). Ejemplos: visitas al médico, patentes, accidentes laborales.
+
+2. La **distribución de Poisson** es el punto de partida natural. Su propiedad fundamental es la **equidispersión**: $E[Y] = \text{Var}(Y) = \lambda$.
+
+3. El **modelo de regresión de Poisson** especifica $\ln(\lambda_i) = \mathbf{x}_i \boldsymbol{\beta}$. La función exponencial garantiza que $\lambda_i > 0$ siempre.
+
+4. Los coeficientes se interpretan como **semi-elasticidades**: un cambio de 1 unidad en $x_j$ multiplica la media esperada por $e^{\beta_j}$. Esto equivale a un cambio porcentual de $(e^{\beta_j} - 1) \times 100\%$.
+
+5. El **efecto marginal** no es constante: $\partial E[y] / \partial x_j = \beta_j \cdot \lambda_i$. Depende del nivel de $\lambda_i$.
+
+6. En datos reales, la varianza frecuentemente **excede la media** (sobredispersión). Si se ignora, los errores estándar del Poisson son demasiado pequeños y se generan falsos positivos.
+
+7. El **modelo Binomial Negativo** corrige la sobredispersión añadiendo un parámetro de dispersión $\alpha$: $\text{Var}(y_i) = \lambda_i + \alpha \lambda_i^2$. Cuando $\alpha = 0$, se recupera el Poisson.
+
+8. El **test LR de sobredispersión** compara Poisson con NB: $LR = 2(\ell_{NB} - \ell_{Poisson}) \sim \chi^2_1$. Si se rechaza $H_0$, el NB es preferible.
+
+9. La bondad de ajuste se evalúa con la **desviación** ($D/(n-k) \approx 1$ indica buen ajuste), el **pseudo-$R^2$ de McFadden** (0.10--0.25 típico en recuento) y los criterios **AIC** y **BIC** (menor es mejor).
+
+10. Para datos con **exceso de ceros**, se utilizan modelos Zero-Inflated (ZIP/ZINB) o modelos Hurdle, que distinguen entre ceros estructurales y ceros del proceso de recuento.
+
+
+\newpage
+
+## Funciones esenciales en R
+
+### Estimación de modelos
+
+- `glm(y ~ x1 + x2, family = poisson(link = "log"), data = datos)` — modelo de regresión Poisson.
+- `MASS::glm.nb(y ~ x1 + x2, data = datos)` — modelo Binomial Negativo (estima $\alpha$ automáticamente).
+- `glm(..., family = quasipoisson)` — modelo Quasi-Poisson (corrige errores estándar por sobredispersión).
+
+### Extracción de resultados
+
+- `summary(modelo)` — tabla de coeficientes, errores estándar, z-valores y p-valores.
+- `coef(modelo)` — vector de coeficientes $\hat{\boldsymbol{\beta}}$.
+- `exp(coef(modelo))` — coeficientes exponenciados (tasas de incidencia, IRR).
+- `confint(modelo)` — intervalos de confianza.
+- `vcov(modelo)` — matriz de varianzas-covarianzas.
+
+### Bondad de ajuste y comparación
+
+- `logLik(modelo)` — log-verosimilitud.
+- `AIC(modelo)`, `BIC(modelo)` — criterios de información.
+- `deviance(modelo)` — desviación residual.
+- `modelo$df.residual` — grados de libertad residuales.
+- `residuals(modelo, type = "pearson")` — residuos de Pearson (para el estadístico $\chi^2$).
+- `residuals(modelo, type = "deviance")` — residuos de la desviación.
+
+### Test de razón de verosimilitud (manual)
+
+- `lr <- 2 * (logLik(m_completo) - logLik(m_reducido))` — estadístico LR.
+- `pchisq(lr, df = diferencia_parametros, lower.tail = FALSE)` — p-valor.
+
+### Predicción
+
+- `predict(modelo, newdata = df, type = "response")` — predicción del valor esperado $\hat{\lambda}$.
+- `predict(modelo, newdata = df, type = "link")` — predicción del predictor lineal $\mathbf{x}\hat{\boldsymbol{\beta}}$.
+
+### Modelos con exceso de ceros
+
+- `pscl::zeroinfl(y ~ x1 + x2 | z1 + z2, dist = "poisson", data = datos)` — Zero-Inflated Poisson.
+- `pscl::zeroinfl(..., dist = "negbin")` — Zero-Inflated Binomial Negativo.
+- `pscl::hurdle(y ~ x1 + x2, dist = "poisson", data = datos)` — modelo Hurdle.
+
+### Offset (tasas)
+
+- `glm(y ~ x1 + x2, family = poisson, offset = log(exposicion), data = datos)` — modelo para tasas.
+
+\newpage
+
+
+### Código R del capítulo {-}
+
+El script completo de este capítulo (`T04_mECO_Script_Recuento.R`) está disponible en el repositorio de material complementario del manual:
+
+**[https://github.com/carlanta/MicroEconometrics](https://github.com/carlanta/MicroEconometrics)**
+
+El alumno puede descargar el script directamente desde la carpeta `scripts/` del repositorio y ejecutarlo en RStudio de forma interactiva.

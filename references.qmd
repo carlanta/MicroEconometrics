@@ -1,0 +1,63 @@
+# Bibliografía {-}
+
+**Referencias generales de microeconometría**
+
+- Cameron, A. C. y Trivedi, P. K. (2005). *Microeconometrics: Methods and Applications*. Cambridge University Press.
+
+- Greene, W. H. (2018). *Econometric Analysis* (8ª ed.). Pearson.
+
+- Wooldridge, J. M. (2010). *Econometric Analysis of Cross Section and Panel Data*. MIT Press.
+
+- Wooldridge, J. M. (2019). *Introductory Econometrics: A Modern Approach* (7ª ed.). Cengage.
+
+- Stock, J. H. y Watson, M. W. (2019). *Introduction to Econometrics* (4ª ed.). Pearson.
+
+- Long, J. S. y Freese, J. (2014). *Regression Models for Categorical Dependent Variables Using Stata* (3ª ed.). Stata Press.
+
+**Modelos de elección discreta (Capítulo 2)**
+
+- McFadden, D. (1974). "Conditional Logit Analysis of Qualitative Choice Behavior". En Zarembka, P. (ed.), *Frontiers in Econometrics*. Academic Press.
+
+**Modelos para datos censurados (Capítulo 3)**
+
+- Tobin, J. (1958). "Estimation of Relationships for Limited Dependent Variables". *Econometrica*, 26(1), 24-36.
+
+- Heckman, J. J. (1979). "Sample Selection Bias as a Specification Error". *Econometrica*, 47(1), 153-161.
+
+- Olsen, R. J. (1978). "Note on the Uniqueness of the Maximum Likelihood Estimator for the Tobit Model". *Econometrica*, 46(5), 1211-1215.
+
+- McDonald, J. F. y Moffitt, R. A. (1980). "The Uses of Tobit Analysis". *Review of Economics and Statistics*, 62(2), 318-321.
+
+**Modelos para datos de recuento (Capítulo 4)**
+
+- Cameron, A. C. y Trivedi, P. K. (2013). *Regression Analysis of Count Data* (2ª ed.). Cambridge University Press.
+
+- Hausman, J. A., Hall, B. H. y Griliches, Z. (1984). "Econometric Models for Count Data with an Application to the Patents-R&D Relationship". *Econometrica*, 52(4), 909-938.
+
+- Akaike, H. (1973). "Information Theory and an Extension of the Maximum Likelihood Principle". En Petrov, B. N. y Csáki, F. (eds.), *2nd International Symposium on Information Theory*. Akadémiai Kiadó.
+
+- Schwarz, G. (1978). "Estimating the Dimension of a Model". *Annals of Statistics*, 6(2), 461-464.
+
+- Burnham, K. P. y Anderson, D. R. (2002). *Model Selection and Multimodel Inference* (2ª ed.). Springer.
+
+**Datos de panel (Capítulo 5)**
+
+- Baltagi, B. H. (2021). *Econometric Analysis of Panel Data* (6ª ed.). Springer.
+
+- Arellano, M. (2003). *Panel Data Econometrics*. Oxford University Press.
+
+- Hausman, J. A. (1978). "Specification Tests in Econometrics". *Econometrica*, 46(6), 1251-1271.
+
+- Arellano, M. y Bond, S. (1991). "Some Tests of Specification for Panel Data: Monte Carlo Evidence and an Application to Employment Equations". *Review of Economic Studies*, 58(2), 277-297.
+
+- Grunfeld, Y. (1958). *The Determinants of Corporate Investment*. Tesis doctoral no publicada, Universidad de Chicago.
+
+**Tests y diagnóstico**
+
+- Shapiro, S. S. y Wilk, M. B. (1965). "An Analysis of Variance Test for Normality". *Biometrika*, 52(3-4), 591-611.
+
+- Jarque, C. M. y Bera, A. K. (1980). "Efficient Tests for Normality, Homoscedasticity and Serial Independence of Regression Residuals". *Economics Letters*, 6(3), 255-259.
+
+- Bartlett, M. S. (1937). "Properties of Sufficiency and Statistical Tests". *Proceedings of the Royal Society A*, 160(901), 268-282.
+
+- Kass, R. E. y Raftery, A. E. (1995). "Bayes Factors". *Journal of the American Statistical Association*, 90(430), 773-795.

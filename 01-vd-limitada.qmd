@@ -1,0 +1,1029 @@
+# Datos con Variable Dependiente Limitada
+
+## Introducción: ¿qué es una variable dependiente limitada?
+
+En el Tema 0 aprendimos a estimar modelos de regresión lineal por MCO. En aquellos modelos, la variable dependiente $y$ podía tomar **cualquier valor real**: el salario, las ventas, el PIB... Sin embargo, en muchas aplicaciones microeconómicas la variable que queremos explicar **no es libre de tomar cualquier valor**. Cuando el rango de valores de la variable dependiente está **restringido de alguna forma**, decimos que se trata de una **variable dependiente limitada**.
+
+Este tipo de datos aparece constantemente en economía aplicada. Cuando se analiza la participación laboral, la variable de interés es **binaria**: la persona trabaja o no trabaja, y la respuesta se codifica como 0 o 1. Cuando se estudia la elección de medio de transporte, la variable es **multinomial**: el viajero selecciona entre coche, autobús, tren o avión. Cuando se modela el gasto en seguros médicos, la variable es **continua pero censurada**: muchas familias no gastan nada (valor cero), mientras que las demás presentan un gasto estrictamente positivo.
+
+En los tres casos, el modelo de regresión lineal clásico (MCO) genera problemas graves. El **objetivo de este tema** es presentar los distintos tipos de variables dependientes limitadas, entender por qué MCO falla en cada caso y conocer las distribuciones estadísticas asociadas. En los temas siguientes estudiaremos los modelos adecuados para cada situación (Probit/Logit en el Tema 2, Tobit en el Tema 3).
+
+### ¿Por qué MCO no funciona?
+
+Recordemos que el modelo lineal clásico es:
+
+$$y_i = \mathbf{x}_i'\boldsymbol{\beta} + u_i$$
+
+y MCO estima los coeficientes minimizando $\sum \hat{u}_i^2$. El valor predicho $\hat{y}_i = \mathbf{x}_i'\hat{\boldsymbol{\beta}}$ puede tomar **cualquier valor** en $(-\infty, +\infty)$.
+
+Pero si $y_i$ solo puede ser 0 o 1, resulta que:
+
+1.  **Las predicciones pueden salir fuera del rango** $[0, 1]$: MCO puede predecir probabilidades negativas o superiores a 1. Esto no tiene sentido.
+2.  **Los errores no son normales ni homocedásticos**: cuando $y$ es binaria, el error $u_i = y_i - \mathbf{x}_i'\boldsymbol{\beta}$ solo puede tomar dos valores, así que no puede seguir una distribución normal. Además, su varianza depende de $\mathbf{x}_i$, violando la homocedasticidad.
+3.  **Los contrastes t y F dejan de ser válidos**: al fallar los supuestos distribucionales, la inferencia clásica no es fiable.
+
+Veamos esto con un ejemplo simulado:
+
+```{r t01-mlp-problemas, fig.height=4.5, fig.cap="Problemas del Modelo Lineal de Probabilidad: las predicciones de MCO salen fuera de [0, 1]."}
+set.seed(2026)
+n <- 200
+x <- runif(n, -3, 6)
+p_real <- pnorm(0.5 + 0.8 * x)  # probabilidad real (probit)
+y <- rbinom(n, 1, p_real)
+
+## Estimamos con MCO (Modelo Lineal de Probabilidad)
+mlp <- lm(y ~ x)
+
+## Gráfico
+par(mar = c(4.5, 4.5, 3, 1))
+plot(x, y, pch = 19, col = adjustcolor("gray40", alpha = 0.4),
+     xlab = "Variable explicativa (x)", ylab = "y  /  Probabilidad predicha",
+     main = "MCO aplicado a una variable binaria", ylim = c(-0.3, 1.3))
+abline(mlp, col = "#E74C3C", lwd = 3)
+abline(h = c(0, 1), lty = 2, col = "gray60")
+x_ord <- sort(x)
+lines(x_ord, pnorm(0.5 + 0.8 * x_ord), col = "#2ECC71", lwd = 3, lty = 1)
+rect(-4, -0.5, 8, 0, col = adjustcolor("#E74C3C", alpha = 0.08), border = NA)
+rect(-4, 1, 8, 1.5, col = adjustcolor("#E74C3C", alpha = 0.08), border = NA)
+text(5.5, -0.15, "Zona imposible\n(prob. < 0)", col = "#C0392B", cex = 0.75, font = 3)
+text(5.5, 1.15, "Zona imposible\n(prob. > 1)", col = "#C0392B", cex = 0.75, font = 3)
+legend("topleft",
+       legend = c("MCO (Modelo Lineal de Prob.)", "Modelo correcto (Probit)",
+                  "Límites 0 y 1"),
+       col    = c("#E74C3C", "#2ECC71", "gray60"),
+       lwd    = c(3, 3, 1), lty = c(1, 1, 2), bty = "n", cex = 0.8)
+```
+
+Como vemos en la figura, la recta de MCO (en rojo) cruza los límites 0 y 1. El modelo correcto (curva verde, un Probit) mantiene las predicciones siempre dentro de $[0, 1]$.
+
+> **Conclusión:** Cuando la variable dependiente está limitada, necesitamos modelos que **respeten esas restricciones**. Este es el punto de partida de toda la microeconometría.
+
+### Clasificación de las variables dependientes limitadas
+
+Las variables dependientes limitadas se clasifican en tres grandes familias, según la naturaleza de la restricción:
+
+```{r t01-clasificacion, echo=FALSE, fig.height=4.5, fig.cap="Clasificación de las variables dependientes limitadas."}
+par(mar = c(0.5, 0.5, 2, 0.5))
+plot(NULL, xlim = c(0, 10), ylim = c(0, 7), xlab = "", ylab = "",
+     xaxt = "n", yaxt = "n", bty = "n",
+     main = "Tipos de variables dependientes limitadas")
+
+## Raíz
+rect(2.5, 5.8, 7.5, 6.8, col = "#2C3E50", border = "#2C3E50", lwd = 2)
+text(5, 6.3, "Variable dependiente\nlimitada", col = "white", font = 2, cex = 0.9)
+
+## Ramas
+rect(0.1, 3.5, 3.2, 4.8, col = "#3498DB", border = "#2980B9", lwd = 2)
+text(1.65, 4.35, "Binaria\n(dicotómica)", col = "white", font = 2, cex = 0.85)
+text(1.65, 3.7, "y in {0, 1}", col = "#D6EAF8", cex = 0.75)
+
+rect(3.6, 3.5, 6.5, 4.8, col = "#27AE60", border = "#1E8449", lwd = 2)
+text(5.05, 4.35, "Multinomial\n(discreta)", col = "white", font = 2, cex = 0.85)
+text(5.05, 3.7, "y in {0, 1, ..., J}", col = "#D5F5E3", cex = 0.75)
+
+rect(6.9, 3.5, 9.9, 4.8, col = "#E67E22", border = "#CA6F1E", lwd = 2)
+text(8.4, 4.35, "Continua\nlimitada", col = "white", font = 2, cex = 0.85)
+text(8.4, 3.7, "y >= 0 (censurada)", col = "#FDEBD0", cex = 0.75)
+
+## Flechas
+segments(5, 5.8, 5, 5.3, lwd = 2)
+segments(1.65, 5.3, 8.4, 5.3, lwd = 2)
+segments(c(1.65, 5.05, 8.4), rep(5.3, 3), c(1.65, 5.05, 8.4), rep(4.8, 3), lwd = 2)
+
+## Ejemplos
+text(1.65, 2.9, "Ejemplos:", font = 2, cex = 0.7)
+text(1.65, 2.4, "• Trabaja / no trabaja\n• Compra / no compra\n• Aprueba / suspende",
+     cex = 0.65)
+text(5.05, 2.9, "Ejemplos:", font = 2, cex = 0.7)
+text(5.05, 2.4, "• Medio de transporte\n• Nivel de satisfacción\n• Sector de empleo",
+     cex = 0.65)
+text(8.4, 2.9, "Ejemplos:", font = 2, cex = 0.7)
+text(8.4, 2.4, "• Gasto en seguros\n• Horas trabajadas\n• Demanda de un bien",
+     cex = 0.65)
+
+## Modelos
+rect(0.1, 0.3, 3.2, 1.3, col = "#EBF5FB", border = "#3498DB", lwd = 1.5)
+text(1.65, 0.8, "Modelos: Probit, Logit\n(Tema 2)", col = "#2471A3", font = 2, cex = 0.7)
+
+rect(3.6, 0.3, 6.5, 1.3, col = "#EAFAF1", border = "#27AE60", lwd = 1.5)
+text(5.05, 0.8, "Modelos: Logit / Probit\nmultinomial, ordenado\n(Temas avanzados)", col = "#1E8449", font = 2, cex = 0.65)
+
+rect(6.9, 0.3, 9.9, 1.3, col = "#FEF5E7", border = "#E67E22", lwd = 1.5)
+text(8.4, 0.8, "Modelos: Tobit\n(Tema 3)", col = "#CA6F1E", font = 2, cex = 0.7)
+
+segments(c(1.65, 5.05, 8.4), rep(1.65, 3), c(1.65, 5.05, 8.4), rep(1.3, 3),
+         lwd = 1.5, lty = 2, col = "gray50")
+```
+
+En las secciones siguientes estudiaremos cada tipo en detalle.
+
+\newpage
+
+## Variables dependientes limitadas binarias
+
+### Concepto
+
+Una variable dependiente **binaria** (o **dicotómica**) es aquella que solo puede tomar dos valores: 0 o 1. Típicamente codificamos:
+
+$$y_i = \begin{cases} 1 & \text{si ocurre el evento de interés} \\ 0 & \text{en caso contrario} \end{cases}$$
+
+Estos datos son extremadamente frecuentes en economía:
+
+```{r t01-tabla-binarias, echo=FALSE}
+ejemplos_bin <- data.frame(
+  Contexto = c("Mercado laboral", "Banca", "Salud",
+               "Marketing", "Educación", "Comercio"),
+  Variable = c("Participación laboral", "Concesión de crédito",
+                "Tiene seguro médico", "Compra un producto",
+                "Aprueba el examen", "Compra online"),
+  `y = 1` = c("Trabaja", "Se concede", "Sí tiene",
+               "Compra", "Aprueba", "Compra online"),
+  `y = 0` = c("No trabaja", "Se deniega", "No tiene",
+               "No compra", "Suspende", "No compra online"),
+  check.names = FALSE
+)
+knitr::kable(ejemplos_bin,
+             caption = "Ejemplos de variables dependientes binarias en economía")
+```
+
+En todos estos casos, lo que queremos modelar es la **probabilidad** de que $y = 1$ en función de las características observables del individuo $\mathbf{x}_i$:
+
+$$P(y_i = 1 \mid \mathbf{x}_i) = F(\mathbf{x}_i'\boldsymbol{\beta})$$
+
+donde $F(\cdot)$ es una función que **siempre devuelve valores entre 0 y 1**. La elección de $F$ determinará el modelo: si $F = \Phi$ (CDF de la Normal estándar), tenemos el **Probit**; si $F = \Lambda$ (CDF de la logística), tenemos el **Logit**.
+
+### La distribución de Bernoulli
+
+#### Intuición: la moneda y el dado
+
+Antes de escribir fórmulas, pensemos en los ejemplos más sencillos de fenómenos aleatorios:
+
+```{r t01-moneda-dado, echo=FALSE, fig.height=3.5, fig.cap="Los fenómenos aleatorios más simples: lanzar una moneda (dos resultados) o un dado (seis resultados)."}
+par(mfrow = c(1, 2), mar = c(1, 1, 3, 1))
+
+## --- Moneda ---
+plot(NULL, xlim = c(-1.5, 1.5), ylim = c(-1.5, 1.5),
+     xlab = "", ylab = "", xaxt = "n", yaxt = "n", bty = "n",
+     main = "Lanzar una moneda", asp = 1)
+## Cara
+theta <- seq(0, 2*pi, length.out = 100)
+polygon(0.9*cos(theta) - 0, 0.9*sin(theta), col = "#F1C40F",
+        border = "#D4AC0D", lwd = 3)
+text(0, 0.15, "CARA", font = 2, cex = 1.3, col = "#7D6608")
+text(0, -0.2, "(y = 1)", cex = 0.9, col = "#7D6608")
+text(0, -1.3, "P(cara) = p = 0.5", cex = 1, font = 2)
+
+## --- Dado ---
+plot(NULL, xlim = c(-2, 2), ylim = c(-1.5, 1.5),
+     xlab = "", ylab = "", xaxt = "n", yaxt = "n", bty = "n",
+     main = "Lanzar un dado", asp = 1)
+rect(-0.8, -0.8, 0.8, 0.8, col = "white", border = "#2C3E50", lwd = 3)
+## Puntos del 5
+puntos_x <- c(-0.4, 0.4, 0, -0.4, 0.4)
+puntos_y <- c(0.4, 0.4, 0, -0.4, -0.4)
+points(puntos_x, puntos_y, pch = 19, cex = 1.8, col = "#2C3E50")
+text(0, -1.3, "P(cada cara) = 1/6", cex = 1, font = 2)
+
+par(mfrow = c(1, 1))
+```
+
+-   **Moneda justa:** Al lanzar una moneda, hay dos resultados posibles: cara ($y = 1$) o cruz ($y = 0$). Si la moneda es justa, $p = P(\text{cara}) = 0.5$. Pero una moneda trucada podría tener $p = 0.7$: saldría cara el 70% de las veces.
+-   **Dado:** Al lanzar un dado hay 6 resultados posibles. Si nos preguntamos "¿ha salido un 6?", la respuesta es sí ($y = 1$) con probabilidad $p = 1/6$, o no ($y = 0$) con probabilidad $1 - p = 5/6$. También es una Bernoulli.
+
+La **Bernoulli** captura exactamente esta idea: un experimento con solo **dos resultados posibles**.
+
+#### ¿Qué significa $p$? El parámetro de la Bernoulli
+
+El parámetro $p$ es la **probabilidad de éxito** (de que ocurra el evento de interés, $y = 1$). Es un número entre 0 y 1 que resume toda la incertidumbre del fenómeno:
+
+$$P(y = 1) = p \qquad\qquad P(y = 0) = 1 - p$$
+
+En forma compacta, la **función de masa de probabilidad** de la Bernoulli es:
+
+$$\boxed{f(y; p) = p^{\,y} \cdot (1 - p)^{1-y}, \qquad y \in \{0, 1\}}$$
+
+Comprobación rápida:
+
+-   Si $y = 1$: $f(1; p) = p^1 \cdot (1-p)^0 = p$ ✓
+-   Si $y = 0$: $f(0; p) = p^0 \cdot (1-p)^1 = 1 - p$ ✓
+
+Sus momentos son:
+
+-   **Esperanza:** $E(y) = p$ (la media de muchas realizaciones tiende a $p$)
+-   **Varianza:** $Var(y) = p(1-p)$ (la dispersión depende de $p$)
+
+> **Observación importante:** La varianza **depende de** $p$, que a su vez depende de $\mathbf{x}_i$ en un modelo econométrico. Esto confirma que la homocedasticidad se viola de forma inherente cuando la variable dependiente es binaria.
+
+#### Ejemplo concreto: una realización muestral
+
+Imaginemos que encuestamos a 20 personas y les preguntamos si compraron por Internet en el último mes ($y = 1$) o no ($y = 0$). Los datos que obtenemos son una **realización muestral** de 20 variables Bernoulli:
+
+```{r t01-muestra-bernoulli, echo=FALSE, results='hide'}
+## Simulamos una muestra de 20 personas (p = 0.6: 60% compra online)
+set.seed(2026)
+p_real <- 0.60
+muestra <- rbinom(20, size = 1, prob = p_real)
+cat("Datos observados (0 = no compra, 1 = compra):\n")
+print(muestra)
+```
+
+```{r t01-tabla-muestra, echo=FALSE}
+## Mostramos la muestra en formato tabla
+df_muestra <- data.frame(
+  Persona = 1:20,
+  Compra_online = ifelse(muestra == 1, "Sí (y=1)", "No (y=0)")
+)
+knitr::kable(t(data.frame(Persona = 1:20, y = muestra)),
+             caption = "Realización muestral: 20 observaciones de una Bernoulli")
+```
+
+#### ¿Cómo obtenemos $p$ a partir de una muestra?
+
+En la práctica, **no conocemos** el valor verdadero de $p$. Lo que hacemos es **estimarlo** a partir de los datos observados. El estimador más natural es la **proporción muestral**:
+
+$$\boxed{\hat{p} = \frac{\text{número de éxitos}}{n} = \frac{\sum_{i=1}^{n} y_i}{n} = \bar{y}}$$
+
+Es decir, $\hat{p}$ es simplemente la **media muestral** de los unos y ceros.
+
+```{r t01-estimar-p, results='hide'}
+## Estimamos p a partir de nuestra muestra
+n <- length(muestra)
+exitos <- sum(muestra)
+p_hat <- mean(muestra)
+
+cat("Tamaño de la muestra (n):", n, "\n")
+cat("Número de éxitos (Σy_i):", exitos, "\n")
+cat("Estimación de p (p̂ = Σy_i / n):", p_hat, "\n")
+cat("Valor real de p:", p_real, "\n")
+cat("\nDiferencia |p̂ - p| =", abs(p_hat - p_real),
+    "(normal con muestras pequeñas)\n")
+```
+
+> **¿Por qué** $\hat{p}$ no coincide exactamente con $p$? Porque estamos trabajando con una muestra finita. Con $n = 20$, hay variabilidad muestral. Si aumentamos el tamaño de la muestra, $\hat{p}$ se acerca cada vez más al verdadero $p$ (esto es la **Ley de los Grandes Números**):
+
+```{r t01-convergencia-p, fig.height=3.5, fig.cap="Ley de los Grandes Números: a medida que n crece, la proporción muestral converge al verdadero p = 0.60."}
+set.seed(2026)
+n_max <- 1000
+y_sim <- rbinom(n_max, 1, p_real)
+p_acumulada <- cumsum(y_sim) / (1:n_max)
+
+par(mar = c(4.5, 4.5, 3, 1))
+plot(1:n_max, p_acumulada, type = "l", col = "#3498DB", lwd = 2,
+     xlab = "Tamaño de la muestra (n)", ylab = expression(hat(p) == bar(y)),
+     main = "Convergencia de la proporción muestral al verdadero p")
+abline(h = p_real, col = "#E74C3C", lwd = 2, lty = 2)
+text(800, p_real + 0.03, sprintf("p real = %.2f", p_real),
+     col = "#C0392B", font = 2)
+text(200, 0.50, expression(hat(p) %->% p ~ "cuando" ~ n %->% infinity),
+     col = "#2471A3", font = 3, cex = 0.9)
+```
+
+#### Gráficos de la distribución Bernoulli
+
+Veamos cómo cambia la forma de la distribución según el valor de $p$:
+
+```{r t01-bernoulli, fig.height=3.5, fig.cap="Distribución Bernoulli para distintos valores de p."}
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+for (p in c(0.2, 0.5, 0.8)) {
+  bp <- barplot(c(1 - p, p), names.arg = c("y = 0", "y = 1"),
+          col = c("#E74C3C", "#2ECC71"), ylim = c(0, 1),
+          ylab = "Probabilidad",
+          main = bquote(Bernoulli(p == .(p))),
+          border = "white", cex.main = 1.1)
+  abline(h = 0)
+  text(bp[1], 1 - p + 0.05, sprintf("%.1f", 1 - p), font = 2, cex = 0.9)
+  text(bp[2], p + 0.05, sprintf("%.1f", p), font = 2, cex = 0.9)
+}
+par(mfrow = c(1, 1))
+```
+
+Con $p = 0.5$ la distribución es **simétrica** (como una moneda justa). Cuando $p$ se aleja de 0.5, la distribución se **asimetra**: con $p = 0.2$ predominan los ceros; con $p = 0.8$, los unos.
+
+### La distribución Binomial
+
+#### De una moneda a muchas monedas
+
+Si en lugar de lanzar una moneda **una vez**, la lanzamos $n$ veces (o equivalentemente, observamos a $n$ individuos independientes con la misma probabilidad $p$ de éxito), nos interesa saber: **¿cuántos éxitos obtendremos en total?**
+
+El número total de éxitos $k$ sigue una distribución **Binomial**:
+
+$$\boxed{P(k; n, p) = \binom{n}{k} p^k (1-p)^{n-k}, \qquad k = 0, 1, \ldots, n}$$
+
+donde $\binom{n}{k} = \frac{n!}{k!(n-k)!}$ es el **coeficiente binomial** (número de formas de elegir $k$ éxitos entre $n$ ensayos).
+
+La Bernoulli es un caso particular de la Binomial con $n = 1$:
+
+$$P(k; 1, p) = \binom{1}{k} p^k (1-p)^{1-k} = p^k(1-p)^{1-k} \quad \Rightarrow \quad \text{¡es exactamente la Bernoulli!}$$
+
+#### Ejemplo concreto: lanzar 10 monedas
+
+Supongamos que lanzamos 10 monedas justas ($p = 0.5$). ¿Cuál es la probabilidad de obtener exactamente $k$ caras?
+
+```{r t01-binom-ejemplo}
+n_monedas <- 10; p_moneda <- 0.5
+
+## Calculamos P(k) para k = 0, 1, ..., 10
+tabla_binom <- data.frame(
+  k = 0:n_monedas,
+  Combinaciones = choose(n_monedas, 0:n_monedas),
+  `P(k)` = round(dbinom(0:n_monedas, n_monedas, p_moneda), 4),
+  `P(k) en porcentaje` = sprintf("%.2f%%",
+                          dbinom(0:n_monedas, n_monedas, p_moneda) * 100),
+  check.names = FALSE
+)
+knitr::kable(tabla_binom,
+             caption = "Distribución Binomial: P(k caras) al lanzar 10 monedas justas")
+```
+
+Lo más probable es obtener 5 caras (24.6%), pero no es raro obtener 4 o 6. Obtener 0 o 10 caras es extremadamente improbable (\< 0.1%).
+
+#### Gráficos de la distribución Binomial
+
+```{r t01-binomial, fig.height=3.5, fig.cap="Distribución Binomial: número de éxitos en n ensayos independientes."}
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+params <- list(c(10, 0.3), c(20, 0.5), c(50, 0.7))
+cols <- c("#3498DB", "#9B59B6", "#E67E22")
+for (i in seq_along(params)) {
+  n_b <- params[[i]][1]; p_b <- params[[i]][2]
+  k <- 0:n_b
+  barplot(dbinom(k, n_b, p_b), names.arg = k, col = cols[i],
+          border = "white", ylab = "P(k)",
+          main = bquote(Bin(n == .(n_b) ~ ", " ~ p == .(p_b))),
+          cex.names = ifelse(n_b > 20, 0.5, 0.7), las = 1)
+}
+par(mfrow = c(1, 1))
+```
+
+Observamos que a medida que $n$ crece, la distribución Binomial se parece cada vez más a una **campana** (Normal). Este resultado se conoce como el **Teorema Central del Límite**.
+
+#### Simulación: verificar la Binomial con datos
+
+Vamos a simular el lanzamiento de 10 monedas y repetir el experimento 10.000 veces, para comprobar que las frecuencias observadas coinciden con las probabilidades teóricas:
+
+```{r t01-binom-simulacion, fig.height=4, fig.cap="Simulación vs. teoría: la frecuencia relativa converge a la probabilidad teórica."}
+set.seed(2026)
+n_sim <- 10000
+resultados <- rbinom(n_sim, size = 10, prob = 0.5)
+
+par(mar = c(4.5, 4.5, 3, 1))
+## Frecuencias observadas
+freq_obs <- table(factor(resultados, levels = 0:10)) / n_sim
+bp <- barplot(freq_obs, col = adjustcolor("#3498DB", 0.5), border = "white",
+        ylim = c(0, 0.28), ylab = "Proporción",
+        main = "10.000 repeticiones de lanzar 10 monedas",
+        xlab = "Número de caras (k)")
+## Probabilidades teóricas
+points(bp, dbinom(0:10, 10, 0.5), pch = 19, col = "#E74C3C", cex = 1.5)
+lines(bp, dbinom(0:10, 10, 0.5), col = "#E74C3C", lwd = 2)
+legend("topright",
+       legend = c("Simulación (frecuencia)", "Teoría Bin(10, 0.5)"),
+       col = c("#3498DB", "#E74C3C"),
+       pch = c(15, 19), bty = "n")
+```
+
+La simulación (barras azules) coincide casi perfectamente con la teoría (puntos rojos). Esto confirma que la distribución Binomial describe correctamente el número de éxitos en ensayos independientes.
+
+**¿Por qué nos importa la Binomial en microeconometría?** Porque la función de verosimilitud de un modelo Probit o Logit se construye a partir del producto de distribuciones Bernoulli independientes, que tiene la estructura de una Binomial. Este es el punto de partida de la **estimación por Máxima Verosimilitud (MV)**, que estudiaremos en el Tema 2.
+
+### El concepto de variable latente
+
+En muchos problemas económicos, la variable que realmente determina el comportamiento del individuo **no es directamente observable**. Por ejemplo, cuando una persona decide si trabajar o no, lo que determina esa decisión es su **utilidad neta** de trabajar:
+
+$$y_i^* = \mathbf{x}_i'\boldsymbol{\beta} + u_i$$
+
+donde $y_i^*$ es la **variable latente** (no observable). Lo que sí observamos es la **decisión final**:
+
+$$y_i = \begin{cases} 1 & \text{si } y_i^* > 0 \quad (\text{la utilidad de trabajar supera la de no trabajar}) \\ 0 & \text{si } y_i^* \leq 0 \end{cases}$$
+
+Este enfoque de **variable latente** es el fundamento teórico de los modelos Probit y Logit. La intuición es clara: no observamos la utilidad, pero sí observamos la decisión que se deriva de ella.
+
+```{r t01-latente, echo=FALSE, fig.height=4, fig.cap="La variable latente y* determina la decisión observada y."}
+set.seed(42)
+n <- 150
+x_lat <- seq(-3, 3, length.out = n)
+y_star <- 0.5 + 1.2 * x_lat + rnorm(n, 0, 1.5)
+y_obs <- ifelse(y_star > 0, 1, 0)
+
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3, 1))
+
+## Panel izquierdo: variable latente
+plot(x_lat, y_star, pch = 19,
+     col = ifelse(y_star > 0, adjustcolor("#2ECC71", 0.6),
+                                adjustcolor("#E74C3C", 0.6)),
+     xlab = "x", ylab = expression(y^"*" ~ "(variable latente)"),
+     main = expression("Variable latente " * y^"*"))
+abline(h = 0, lty = 2, lwd = 2, col = "gray30")
+abline(a = 0.5, b = 1.2, col = "#3498DB", lwd = 2)
+text(2, -3, expression(y^{"*"} <= 0 ~ "2192" ~ y == 0), col = "#C0392B", font = 2)
+text(-2, 4, expression(y^{"*"} > 0 ~ "2192" ~ y == 1), col = "#1E8449", font = 2)
+
+## Panel derecho: variable observada
+plot(x_lat, y_obs, pch = 19,
+     col = ifelse(y_obs == 1, adjustcolor("#2ECC71", 0.5),
+                                adjustcolor("#E74C3C", 0.5)),
+     xlab = "x", ylab = "y (variable observada)",
+     main = "Variable observada y", yaxt = "n", ylim = c(-0.1, 1.1))
+axis(2, at = c(0, 1), labels = c("0", "1"))
+lines(sort(x_lat), pnorm(0.5 + 1.2 * sort(x_lat), 0, 1.5),
+      col = "#3498DB", lwd = 3)
+text(1.5, 0.35, expression(P(y == 1 ~ "|" ~ x)), col = "#2471A3", font = 2)
+
+par(mfrow = c(1, 1))
+```
+
+En el panel izquierdo vemos la variable latente $y^*$: algunos valores son positivos (verde, $y = 1$) y otros negativos (rojo, $y = 0$). En el panel derecho vemos lo que realmente observamos: solo los unos y los ceros. La curva azul es la probabilidad estimada de $y = 1$ dado $x$.
+
+### Modelo Lineal de Probabilidad (MLP): una primera aproximación
+
+La forma más sencilla (pero incorrecta) de modelar una variable binaria es aplicar MCO directamente:
+
+$$P(y_i = 1 \mid \mathbf{x}_i) = \mathbf{x}_i'\boldsymbol{\beta}$$
+
+Esto se conoce como **Modelo Lineal de Probabilidad (MLP)**. Aunque es fácil de estimar e interpretar, tiene tres problemas fundamentales:
+
+**Problema 1: Predicciones fuera de** $[0, 1]$. Las predicciones lineales $\hat{y}_i = \mathbf{x}_i'\hat{\boldsymbol{\beta}}$ pueden ser negativas o superiores a 1. Esto carece de sentido como probabilidad. **Consecuencia:** predicciones sin interpretación económica.
+
+**Problema 2: Heterocedasticidad inherente.** Como $Var(u_i) = p_i(1-p_i)$ y $p_i$ depende de $\mathbf{x}_i$, la varianza del error cambia con cada observación. **Consecuencia:** los errores estándar de MCO son incorrectos, por lo que los contrastes $t$ y $F$ no son válidos.
+
+**Problema 3: No normalidad de los errores.** El error $u_i = y_i - p_i$ solo puede tomar dos valores, por lo que no puede seguir una distribución normal. **Consecuencia:** los intervalos de confianza y los contrastes pierden validez en muestras pequeñas.
+
+A pesar de estos problemas, el MLP se utiliza en ocasiones como **primera aproximación rápida**, especialmente cuando las probabilidades predichas no caen lejos de $[0, 1]$. No obstante, los modelos Probit y Logit (Tema 2) son la solución estándar.
+
+\newpage
+
+## Variables dependientes limitadas multinomiales
+
+### Concepto
+
+En muchos problemas económicos, la variable dependiente no es simplemente 0 o 1, sino que puede tomar **múltiples categorías**. Cuando hay más de dos alternativas posibles, hablamos de variables dependientes **multinomiales**:
+
+$$y_i \in \{0, 1, 2, \ldots, J\}$$
+
+donde $J + 1$ es el número total de categorías.
+
+```{r t01-tabla-multinomiales, echo=FALSE}
+ejemplos_multi <- data.frame(
+  Contexto = c("Transporte", "Mercado laboral",
+               "Satisfacción", "Salud",
+               "Consumo"),
+  Variable = c("Medio de transporte elegido",
+                "Sector de empleo",
+                "Grado de satisfacción con un servicio",
+                "Decisión de tratamiento médico",
+                "Tipo de vivienda"),
+  Categorias = c("Coche, autobús, tren, avión",
+                  "Público, privado, autónomo",
+                  "Muy insatisfecho, insatisfecho, neutro, satisfecho, muy satisfecho",
+                  "Sin tratamiento, tratamiento A, tratamiento B",
+                  "Alquiler, compra, compartida"),
+  Tipo = c("No ordenada", "No ordenada", "Ordenada", "Secuencial", "No ordenada")
+)
+knitr::kable(ejemplos_multi,
+             caption = "Ejemplos de variables dependientes multinomiales")
+```
+
+Igual que en el caso binario, se supone que cada individuo elige la alternativa que le proporciona **mayor utilidad**:
+
+$$y_i = j \quad \text{si} \quad U_{ij} > U_{ik} \quad \forall\, k \neq j$$
+
+Las probabilidades de elección dependerán de la forma que tome la variable dependiente.
+
+### Variables multinomiales ordenadas
+
+Cuando las categorías tienen un **orden natural**, hablamos de variables **ordenadas**. Un ejemplo clásico es el nivel de satisfacción:
+
+$$y_i = \begin{cases} 0 & \text{Muy insatisfecho} \\ 1 & \text{Insatisfecho} \\ 2 & \text{Neutro} \\ 3 & \text{Satisfecho} \\ 4 & \text{Muy satisfecho} \end{cases}$$
+
+Aquí la codificación numérica refleja un **orden** (4 \> 3 \> 2 \> 1 \> 0), pero la distancia entre categorías no tiene por qué ser igual. Es decir, la diferencia entre "muy insatisfecho" e "insatisfecho" no es necesariamente la misma que entre "satisfecho" y "muy satisfecho".
+
+Otro ejemplo relevante: el nivel de ingresos ordenado en cuartiles:
+
+$$y_i = \begin{cases} 1 & \text{si } x_i'\beta < \mu_1 \\ 2 & \text{si } \mu_1 \leq x_i'\beta < \mu_2 \\ 3 & \text{si } \mu_2 \leq x_i'\beta < \mu_3 \\ 4 & \text{si } x_i'\beta \geq \mu_3 \end{cases}$$
+
+donde $\mu_1 < \mu_2 < \mu_3$ son los **umbrales** (thresholds) que separan las categorías.
+
+Dentro de las variables ordenadas también encontramos las **secuenciales**: para elegir una categoría, es necesario haber pasado por un proceso de decisión previo. Por ejemplo, en el ámbito laboral:
+
+```{r t01-arbol-secuencial, echo=FALSE, fig.height=3.5, fig.cap="Ejemplo de decisión secuencial en el mercado laboral."}
+par(mar = c(0.5, 0.5, 2, 0.5))
+plot(NULL, xlim = c(0, 10), ylim = c(0, 5), xlab = "", ylab = "",
+     xaxt = "n", yaxt = "n", bty = "n",
+     main = "Decisión secuencial: oferta de trabajo")
+
+## Nivel 1
+rect(3.5, 3.8, 6.5, 4.6, col = "#2C3E50", border = NA)
+text(5, 4.2, "¿Busca empleo?", col = "white", font = 2, cex = 0.85)
+
+## Nivel 2 - izquierda
+rect(0.5, 2, 3, 2.8, col = "#E74C3C", border = NA)
+text(1.75, 2.4, "No busca\n(inactivo)", col = "white", font = 2, cex = 0.75)
+
+## Nivel 2 - derecha
+rect(7, 2, 9.5, 2.8, col = "#27AE60", border = NA)
+text(8.25, 2.4, "Sí busca", col = "white", font = 2, cex = 0.85)
+
+## Nivel 3
+rect(5.5, 0.2, 7.5, 1, col = "#E67E22", border = NA)
+text(6.5, 0.6, "Parcial", col = "white", font = 2, cex = 0.75)
+
+rect(8.5, 0.2, 10, 1, col = "#3498DB", border = NA)
+text(9.25, 0.6, "Completo", col = "white", font = 2, cex = 0.75)
+
+## Flechas
+arrows(3.5, 4.0, 3, 2.8, length = 0.1, lwd = 2)
+arrows(6.5, 4.0, 7, 2.8, length = 0.1, lwd = 2)
+arrows(7.5, 2, 6.8, 1, length = 0.1, lwd = 2)
+arrows(9, 2, 9.25, 1, length = 0.1, lwd = 2)
+
+text(2.5, 3.4, "No", font = 3, col = "#C0392B")
+text(7.5, 3.4, "Sí", font = 3, col = "#1E8449")
+text(6.5, 1.4, "Parcial", font = 3, col = "#CA6F1E", cex = 0.8)
+text(9.5, 1.4, "Completo", font = 3, col = "#2471A3", cex = 0.8)
+```
+
+### Variables multinomiales no ordenadas
+
+Cuando las categorías **no tienen un orden natural**, hablamos de variables **no ordenadas**. El ejemplo más clásico es la elección del medio de transporte:
+
+$$y_i \in \{\text{coche},\; \text{autobús},\; \text{tren},\; \text{avión}\}$$
+
+No tiene sentido decir que "avión \> tren" o que "autobús \< coche" en un sentido ordinal. Cada alternativa es simplemente una opción distinta, y el individuo elige aquella que le reporta **mayor utilidad**:
+
+$$y_i = j \quad \Longleftrightarrow \quad U_{ij} = \max(U_{i0}, U_{i1}, \ldots, U_{iJ})$$
+
+Los modelos para este tipo de variables (Logit multinomial, Probit multinomial) se estudian en temas avanzados de microeconometría.
+
+### La distribución Multinomial
+
+Las variables multinomiales siguen una distribución **Multinomial**, que es la generalización de la Binomial a más de dos categorías.
+
+Si realizamos $n$ experimentos independientes, cada uno con $J + 1$ resultados posibles con probabilidades $p_0, p_1, \ldots, p_J$ (donde $\sum p_j = 1$), la probabilidad de observar $k_0, k_1, \ldots, k_J$ éxitos de cada tipo es:
+
+$$\boxed{P(k_0, k_1, \ldots, k_J) = \frac{n!}{k_0! \, k_1! \cdots k_J!} \, p_0^{k_0} \, p_1^{k_1} \cdots p_J^{k_J}}$$
+
+donde $\sum k_j = n$.
+
+```{r t01-multinomial, fig.height=4, fig.cap="Ejemplo de distribución Multinomial: 1000 individuos eligen entre 4 medios de transporte."}
+set.seed(2026)
+## Simulamos elecciones de transporte
+probs <- c(Coche = 0.45, Autobus = 0.25, Tren = 0.20, Avion = 0.10)
+elecciones <- sample(names(probs), 1000, replace = TRUE, prob = probs)
+
+## Tabla de frecuencias
+freq <- table(factor(elecciones, levels = names(probs)))
+prop <- prop.table(freq)
+
+par(mar = c(4.5, 4.5, 3, 1))
+bp <- barplot(prop, col = c("#3498DB", "#2ECC71", "#E67E22", "#9B59B6"),
+        border = "white", ylim = c(0, 0.55),
+        ylab = "Proporción", main = "Elección de medio de transporte (n = 1000)",
+        cex.names = 0.9)
+text(bp, as.numeric(prop) + 0.02,
+     sprintf("%.1f%%", as.numeric(prop) * 100), font = 2, cex = 0.9)
+abline(h = 0)
+```
+
+#### Demostración: Bernoulli y Binomial como casos particulares
+
+Es importante entender que las tres distribuciones que hemos visto (Bernoulli, Binomial, Multinomial) están **conectadas jerárquicamente**. Vamos a demostrarlo paso a paso.
+
+**1. La Bernoulli es un caso particular de la Multinomial con** $J = 1$.
+
+La distribución Multinomial para $n = 1$ ensayo con $J + 1 = 2$ categorías (éxito/fracaso) es:
+
+$$P(k_0, k_1) = \frac{1!}{k_0! \, k_1!} \, p_0^{k_0} \, p_1^{k_1}$$
+
+donde $k_0 + k_1 = 1$ (solo hay un ensayo), $p_0 = 1 - p$ y $p_1 = p$.
+
+Si $k_1 = 1$ (éxito): $P(0, 1) = \frac{1!}{0! \cdot 1!} (1-p)^0 \cdot p^1 = p$
+
+Si $k_1 = 0$ (fracaso): $P(1, 0) = \frac{1!}{1! \cdot 0!} (1-p)^1 \cdot p^0 = 1 - p$
+
+Esto es **exactamente la distribución Bernoulli**: $f(y; p) = p^y(1-p)^{1-y}$.
+
+**2. La Binomial es la Multinomial con** $J = 1$ y $n$ ensayos.
+
+La distribución Multinomial para $n$ ensayos con $J + 1 = 2$ categorías es:
+
+$$P(k_0, k_1) = \frac{n!}{k_0! \, k_1!} \, p_0^{k_0} \, p_1^{k_1}$$
+
+donde $k_0 + k_1 = n$, $p_0 = 1-p$, $p_1 = p$. Sustituyendo $k_0 = n - k_1$:
+
+$$P(k_1) = \frac{n!}{(n - k_1)! \, k_1!} \, (1-p)^{n-k_1} \, p^{k_1} = \binom{n}{k_1} p^{k_1} (1-p)^{n-k_1}$$
+
+Esto es **exactamente la distribución Binomial**: $P(k; n, p) = \binom{n}{k} p^k (1-p)^{n-k}$. $\square$
+
+```{r t01-jerarquia, echo=FALSE, fig.height=3.5, fig.cap="Jerarquía de distribuciones: la Bernoulli y la Binomial son casos particulares de la Multinomial."}
+par(mar = c(0.5, 0.5, 2, 0.5))
+plot(NULL, xlim = c(0, 10), ylim = c(0, 5),
+     xlab = "", ylab = "", xaxt = "n", yaxt = "n", bty = "n",
+     main = "Jerarquía de distribuciones discretas")
+
+## Multinomial (arriba)
+rect(2.5, 3.5, 7.5, 4.5, col = "#9B59B6", border = "#7D3C98", lwd = 2)
+text(5, 4.2, "MULTINOMIAL", col = "white", font = 2, cex = 1)
+text(5, 3.8, "n ensayos, J+1 categorías", col = "#E8DAEF", cex = 0.8)
+
+## Binomial (medio)
+rect(3, 1.8, 7, 2.8, col = "#2980B9", border = "#1F618D", lwd = 2)
+text(5, 2.5, "BINOMIAL", col = "white", font = 2, cex = 1)
+text(5, 2.1, "n ensayos, 2 categorías (J=1)", col = "#D6EAF8", cex = 0.8)
+
+## Bernoulli (abajo)
+rect(3.5, 0.2, 6.5, 1.2, col = "#27AE60", border = "#1E8449", lwd = 2)
+text(5, 0.9, "BERNOULLI", col = "white", font = 2, cex = 1)
+text(5, 0.5, "1 ensayo, 2 categorías (J=1, n=1)", col = "#D5F5E3", cex = 0.8)
+
+## Flechas
+arrows(5, 3.5, 5, 2.8, length = 0.12, lwd = 2.5, col = "#2C3E50")
+arrows(5, 1.8, 5, 1.2, length = 0.12, lwd = 2.5, col = "#2C3E50")
+
+text(6.5, 3.15, "J = 1", font = 2, col = "#2C3E50", cex = 0.9)
+text(6.2, 1.5, "n = 1", font = 2, col = "#2C3E50", cex = 0.9)
+```
+
+> **Resumen:** La Multinomial es la distribución más general. Si restringimos a dos categorías ($J = 1$), obtenemos la Binomial. Si además hacemos un solo ensayo ($n = 1$), obtenemos la Bernoulli. Cada distribución es un **caso particular** de la anterior.
+
+\newpage
+
+## Variables dependientes limitadas continuas
+
+### Concepto
+
+Hasta ahora hemos visto variables que toman **valores discretos** (0/1, o categorías). Pero también existen variables dependientes que son **continuas** pero cuyo rango está **limitado o restringido**. Esto sucede por dos razones:
+
+-   **Censura:** La variable existe para todos los individuos, pero solo observamos su valor en un subconjunto del rango. El resto se asigna a un valor fijo (típicamente 0).
+-   **Truncamiento (selección):** Solo observamos los datos de los individuos cuya variable dependiente supera (o no alcanza) un determinado umbral. Los demás **desaparecen** de la muestra.
+
+> **Clave:** La diferencia fundamental es que en la **censura** observamos las variables explicativas $\mathbf{x}$ de **todos** los individuos, mientras que en el **truncamiento** perdemos toda la información de los individuos fuera del rango observable.
+
+### Variables censuradas
+
+#### Concepto y ejemplos
+
+En los datos **censurados**, todos los valores de la variable dependiente en un cierto rango se transforman o reportan como un solo valor, pero las variables explicativas $\mathbf{x}_i$ se observan para todos:
+
+$$y_i = \begin{cases} y_i^* & \text{si } y_i^* > 0 \\ 0 & \text{si } y_i^* \leq 0 \end{cases}$$
+
+donde $y_i^* = \mathbf{x}_i'\boldsymbol{\beta} + u_i$ es la variable latente.
+
+Ejemplos económicos de censura:
+
+-   **Gasto en seguros médicos:** Es positivo para quienes contratan un seguro y cero para los demás. Pero la renta, la edad y la situación familiar se observan para todos.
+-   **Horas de trabajo:** Pueden ser 0 (para personas que no trabajan) o positivas. La educación, la experiencia y el número de hijos se observan para todos.
+-   **Demanda de un bien con restricción de capacidad:** Un coche cuesta al menos 13.000 €. Si la disposición a pagar del individuo es menor, observamos 0 como gasto, pero sí registramos sus datos socioeconómicos.
+
+```{r t01-censura, fig.height=4.5, fig.cap="Ejemplo de datos censurados: gasto en seguros (censurado en 0)."}
+set.seed(2026)
+n <- 300
+renta <- runif(n, 15, 80)  # renta en miles de euros
+gasto_latente <- -20 + 0.6 * renta + rnorm(n, 0, 8)
+gasto_observado <- pmax(gasto_latente, 0)  # censura en 0
+
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3, 1))
+
+## Panel 1: Variable latente
+plot(renta, gasto_latente, pch = 19,
+     col = ifelse(gasto_latente > 0,
+                  adjustcolor("#2ECC71", 0.5),
+                  adjustcolor("#E74C3C", 0.5)),
+     xlab = "Renta (miles €)", ylab = "Gasto latente (miles €)",
+     main = expression("Variable latente " * y^"*"))
+abline(h = 0, lty = 2, lwd = 2)
+abline(lm(gasto_latente ~ renta), col = "#3498DB", lwd = 2)
+text(20, -25, expression(y^"*" <= 0), col = "#C0392B", font = 2)
+
+## Panel 2: Variable observada (censurada)
+plot(renta, gasto_observado, pch = 19,
+     col = ifelse(gasto_observado > 0,
+                  adjustcolor("#2ECC71", 0.5),
+                  adjustcolor("#E74C3C", 0.5)),
+     xlab = "Renta (miles €)", ylab = "Gasto observado (miles €)",
+     main = "Variable observada y (censurada)")
+abline(h = 0, lty = 2, lwd = 2)
+## MCO con datos censurados (sesgado)
+abline(lm(gasto_observado ~ renta), col = "#E74C3C", lwd = 2)
+## Recta verdadera
+abline(a = -20, b = 0.6, col = "#2ECC71", lwd = 2, lty = 2)
+legend("topleft",
+       legend = c("MCO (sesgado)", "Relación verdadera"),
+       col = c("#E74C3C", "#2ECC71"), lwd = 2, lty = c(1, 2),
+       bty = "n", cex = 0.8)
+
+par(mfrow = c(1, 1))
+```
+
+En el panel derecho observamos que MCO aplicado a los datos censurados produce una estimación **sesgada** (línea roja): subestima la pendiente y sobreestima la constante, porque trata los ceros como si fueran valores reales. El modelo **Tobit** (Tema 3) corrige este sesgo.
+
+```{r t01-histograma-censura, fig.height=3.5, fig.cap="Histograma de una variable censurada: masa de probabilidad en 0 + distribución continua."}
+par(mar = c(4.5, 4.5, 3, 1))
+hist(gasto_observado, breaks = 30, col = adjustcolor("#3498DB", 0.6),
+     border = "white", main = "Distribución de la variable censurada",
+     xlab = "Gasto observado (miles €)", ylab = "Frecuencia", xlim = c(-5, 40))
+## Resaltar la masa en 0
+n_ceros <- sum(gasto_observado == 0)
+text(1, n_ceros * 0.7,
+     sprintf("%d obs.\ncensuradas\nen 0", n_ceros),
+     col = "#C0392B", font = 2, cex = 0.8, pos = 4)
+arrows(1, n_ceros * 0.55, 0.5, n_ceros * 0.35, length = 0.1,
+       col = "#C0392B", lwd = 2)
+```
+
+La distribución de la variable censurada tiene **dos componentes**: un componente **discreto** (la masa de probabilidad en 0) y un componente **continuo** (para los valores positivos). Esta mezcla es la razón por la que MCO no funciona correctamente.
+
+#### Tipos de censura
+
+La censura puede ser por la izquierda o por la derecha:
+
+-   **Censura por la izquierda** (desde abajo): $y_i = \max(y_i^*, c)$ — no observamos valores por debajo de $c$.
+-   **Censura por la derecha** (desde arriba): $y_i = \min(y_i^*, c)$ — no observamos valores por encima de $c$.
+
+```{r t01-tipos-censura, echo=FALSE, fig.height=4, fig.cap="Censura por la izquierda vs. censura por la derecha."}
+set.seed(123)
+y_star <- rnorm(500, 5, 3)
+
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3, 1))
+
+## Censura izquierda en 0
+y_cens_izq <- pmax(y_star, 0)
+hist(y_cens_izq, breaks = 30, col = adjustcolor("#3498DB", 0.6),
+     border = "white", main = "Censura por la izquierda (c = 0)",
+     xlab = "y", ylab = "Frecuencia")
+abline(v = 0, col = "#E74C3C", lwd = 2, lty = 2)
+
+## Censura derecha en 10
+y_cens_der <- pmin(y_star, 10)
+hist(y_cens_der, breaks = 30, col = adjustcolor("#E67E22", 0.6),
+     border = "white", main = "Censura por la derecha (c = 10)",
+     xlab = "y", ylab = "Frecuencia")
+abline(v = 10, col = "#E74C3C", lwd = 2, lty = 2)
+
+par(mfrow = c(1, 1))
+```
+
+Un ejemplo clásico de censura por la derecha: las calificaciones en un examen están censuradas en la nota máxima (10 sobre 10). Todos los estudiantes que habrían obtenido más de 10 (si fuera posible) quedan registrados con un 10.
+
+### Variables truncadas
+
+#### Concepto y ejemplos
+
+En el **truncamiento** (o **selección**), solo observamos los datos cuando $y_i$ supera (o no alcanza) un umbral. Los individuos fuera del rango observable **desaparecen completamente** de la muestra: no observamos ni su $y_i$ ni sus variables explicativas $\mathbf{x}_i$.
+
+$$\text{Solo observamos } (y_i, \mathbf{x}_i) \text{ si } y_i > c$$
+
+Ejemplos:
+
+-   **Mercado inmobiliario:** Si la vivienda más barata cuesta 300.000 €, solo observamos a los compradores con disposición a pagar $\geq$ 300.000 €. Los que no compran no aparecen en la muestra.
+-   **Encuestas de renta:** Si una encuesta solo incluye a hogares con renta superior a un umbral, los hogares con renta inferior no aparecen en los datos.
+-   **Admisión universitaria:** Si solo analizamos datos de estudiantes admitidos (nota \> corte), los no admitidos están ausentes de la muestra.
+
+```{r t01-truncamiento, fig.height=4.5, fig.cap="Censura vs. truncamiento: en la censura observamos las X de todos; en el truncamiento perdemos toda la información."}
+set.seed(2026)
+n <- 300
+x_tr <- runif(n, 0, 10)
+y_star_tr <- -2 + 1.5 * x_tr + rnorm(n, 0, 2)
+
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3, 1))
+
+## Panel 1: Censura (observamos todos los x)
+y_cens <- pmax(y_star_tr, 0)
+plot(x_tr, y_cens, pch = 19,
+     col = ifelse(y_star_tr > 0,
+                  adjustcolor("#2ECC71", 0.5),
+                  adjustcolor("#E74C3C", 0.5)),
+     xlab = "x", ylab = "y",
+     main = "Censura en 0")
+abline(h = 0, lty = 2, lwd = 2)
+legend("topleft", legend = c("Observados (y > 0)", "Censurados (y = 0)"),
+       col = c("#2ECC71", "#E74C3C"), pch = 19, bty = "n", cex = 0.8)
+
+## Panel 2: Truncamiento (desaparecen completamente)
+sel <- y_star_tr > 0
+plot(x_tr[sel], y_star_tr[sel], pch = 19,
+     col = adjustcolor("#2ECC71", 0.5),
+     xlab = "x", ylab = "y",
+     main = "Truncamiento en 0",
+     xlim = range(x_tr), ylim = range(y_star_tr))
+abline(h = 0, lty = 2, lwd = 2)
+## Mostrar zona perdida
+points(x_tr[!sel], rep(NA, sum(!sel)))
+rect(par("usr")[1], par("usr")[3], par("usr")[2], 0,
+     col = adjustcolor("#E74C3C", 0.08), border = NA)
+text(8, -3, "Datos perdidos\n(no observados)", col = "#C0392B",
+     font = 3, cex = 0.85)
+
+par(mfrow = c(1, 1))
+```
+
+> **¿Por qué es peor el truncamiento que la censura?** Porque en la censura al menos conservamos las variables explicativas de todos los individuos (sabemos *quiénes* son los censurados). En el truncamiento, esos individuos simplemente no existen en nuestros datos, lo que genera un **sesgo de selección** más difícil de corregir.
+
+#### Tipos de truncamiento
+
+Al igual que en la censura:
+
+-   **Truncamiento por la izquierda:** Solo observamos $y_i > c$. Ejemplo: solo vemos compras por encima de un precio mínimo.
+-   **Truncamiento por la derecha:** Solo observamos $y_i < c$. Ejemplo: encuesta que excluye a los hogares con renta superior a un umbral.
+
+### Distribuciones para datos censurados y truncados
+
+#### Distribución normal censurada
+
+Si la variable latente $y^* \sim N(\mu, \sigma^2)$ y censuramos en 0, la distribución de la variable observada $y = \max(y^*, 0)$ tiene dos componentes:
+
+$$f(y) = \begin{cases} \Phi\!\left(-\frac{\mu}{\sigma}\right) & \text{si } y = 0 \\ \frac{1}{\sigma}\phi\!\left(\frac{y - \mu}{\sigma}\right) & \text{si } y > 0 \end{cases}$$
+
+donde $\phi(\cdot)$ es la densidad de la Normal estándar y $\Phi(\cdot)$ su distribución acumulada.
+
+```{r t01-dist-censurada, fig.height=4, fig.cap="Distribución normal censurada: masa en 0 + densidad continua."}
+mu <- 2; sigma <- 3
+y_seq <- seq(-8, 12, length.out = 500)
+dens <- dnorm(y_seq, mu, sigma)
+
+par(mar = c(4.5, 4.5, 3, 1))
+plot(y_seq[y_seq >= 0], dens[y_seq >= 0], type = "l", lwd = 3, col = "#3498DB",
+     xlab = "y", ylab = "Densidad / Probabilidad",
+     main = bquote("Normal censurada:" ~ mu == .(mu) ~ "," ~ sigma == .(sigma)),
+     xlim = c(-2, 12), ylim = c(0, max(dens) * 1.3))
+polygon(c(0, y_seq[y_seq >= 0], max(y_seq)),
+        c(0, dens[y_seq >= 0], 0),
+        col = adjustcolor("#3498DB", 0.2), border = NA)
+
+## Masa en 0
+p0 <- pnorm(0, mu, sigma)
+segments(0, 0, 0, p0, col = "#E74C3C", lwd = 4)
+points(0, p0, pch = 19, col = "#E74C3C", cex = 2)
+text(0.5, p0 + 0.01,
+     sprintf("P(y=0) = Phi(-mu/sigma) = %.3f", p0),
+     col = "#C0392B", font = 2, cex = 0.8, pos = 4)
+
+## Zona censurada
+lines(y_seq[y_seq < 0], dens[y_seq < 0], lwd = 2, lty = 3, col = "gray60")
+text(-5, 0.05, expression("Zona censurada" ~ (y^"*" < 0)),
+     col = "gray40", font = 3, cex = 0.8)
+```
+
+#### Distribución normal truncada
+
+Si solo observamos los valores $y > 0$ de una variable $y^* \sim N(\mu, \sigma^2)$, la densidad se **reescala** para que integre a 1 en el rango observable:
+
+$$f(y \mid y > 0) = \frac{\frac{1}{\sigma}\phi\!\left(\frac{y - \mu}{\sigma}\right)}{1 - \Phi\!\left(-\frac{\mu}{\sigma}\right)}, \qquad y > 0$$
+
+```{r t01-dist-truncada, fig.height=4, fig.cap="Distribución normal truncada vs. normal completa."}
+par(mar = c(4.5, 4.5, 3, 1))
+y_pos <- seq(0.001, 12, length.out = 500)
+dens_normal <- dnorm(y_pos, mu, sigma)
+dens_truncada <- dens_normal / (1 - pnorm(0, mu, sigma))
+
+plot(y_pos, dens_truncada, type = "l", lwd = 3, col = "#E67E22",
+     xlab = "y", ylab = "Densidad",
+     main = bquote("Normal truncada en 0:" ~ mu == .(mu) ~ "," ~ sigma == .(sigma)),
+     ylim = c(0, max(dens_truncada) * 1.1))
+lines(y_pos, dens_normal, lwd = 2, lty = 2, col = "#3498DB")
+polygon(c(y_pos, rev(y_pos)),
+        c(dens_truncada, rep(0, length(y_pos))),
+        col = adjustcolor("#E67E22", 0.15), border = NA)
+legend("topright",
+       legend = c("Normal truncada", "Normal original"),
+       col = c("#E67E22", "#3498DB"), lwd = c(3, 2), lty = c(1, 2),
+       bty = "n")
+abline(v = 0, lty = 3, col = "gray50")
+```
+
+La distribución truncada es siempre más alta que la normal original en la zona observable, porque debe compensar la probabilidad perdida en la zona no observable.
+
+### Resumen: censura vs. truncamiento
+
+```{r t01-tabla-censura-truncamiento, echo=FALSE}
+resumen_ct <- data.frame(
+  Caracteristica = c(
+    "¿Se observan las X de todos?",
+    "¿Hay masa de probabilidad en un punto?",
+    "Información perdida",
+    "Modelo adecuado",
+    "Sesgo si usamos MCO"
+  ),
+  Censura = c(
+    "Sí — las X se observan para todos los individuos",
+    "Sí — hay una masa en el punto de censura (ej. y = 0)",
+    "Se pierden los valores exactos de y* para los censurados",
+    "Tobit (Tema 3)",
+    "Moderado — subestima pendientes"
+  ),
+  Truncamiento = c(
+    "No — las X de los truncados se pierden",
+    "No — la distribución es continua pero reescalada",
+    "Se pierde toda la información de los individuos truncados",
+    "Modelos de selección (Heckman)",
+    "Grave — sesgo de selección"
+  )
+)
+knitr::kable(resumen_ct,
+             caption = "Comparación entre censura y truncamiento")
+```
+
+\newpage
+
+## Funciones esenciales en R
+
+A continuacion se recogen las funciones de R mas relevantes para este tema introductorio. Su uso detallado se desarrolla en la practica y el script.
+
+**Exploración de datos:**
+
+-   `str()` — Estructura del dataset (tipos de variables, dimensiones).
+-   `summary()` — Estadísticos descriptivos.
+-   `table()` — Tabla de frecuencias para variables categoricas.
+-   `prop.table()` — Proporciones a partir de una tabla de frecuencias.
+
+**Distribuciones:**
+
+-   `dbinom(k, n, p)` — Funcion de masa de la Binomial: $P(X = k)$.
+-   `pbinom(q, n, p)` — Funcion de distribucion acumulada de la Binomial.
+-   `rbinom(n, size, p)` — Generar datos aleatorios Binomial.
+-   `dnorm()`, `pnorm()`, `rnorm()` — Funciones de la Normal.
+-   `plogis()`, `qlogis()` — Funcion logistica y su inversa.
+
+**Modelo Lineal de Probabilidad (MLP):**
+
+-   `lm(y ~ x1 + x2, data)` — Estimacion por MCO.
+-   `predict(modelo)` — Predicciones (pueden salir fuera de \[0, 1\]).
+-   `coeftest(modelo, vcov = vcovHC(...))` — Inferencia con errores robustos.
+
+**Visualizacion:**
+
+-   `barplot()` — Diagrama de barras para variables categoricas.
+-   `hist()` — Histograma para variables continuas.
+-   `plot()` — Grafico de dispersion.
+-   `abline()` — Añadir lineas de referencia.
+
+**Tablas:**
+
+-   `knitr::kable()` — Tabla formateada para documentos RMD.
+-   `DT::datatable()` — Tabla interactiva con exportacion a Excel/CSV.
+
+\newpage
+
+## Resumen y hoja de ruta
+
+### Lo que hemos aprendido
+
+En este tema hemos establecido las bases conceptuales de la microeconometría:
+
+1.  **Variable dependiente limitada**: su rango está restringido de alguna forma (binaria, multinomial o continua limitada).
+2.  **MCO no funciona** correctamente con estos datos: genera predicciones fuera de rango, viola la homocedasticidad y la normalidad.
+3.  Las **variables binarias** ($y \in \{0, 1\}$) siguen una distribución **Bernoulli** y se modelan mediante el concepto de **variable latente**.
+4.  Las **variables multinomiales** ($y \in \{0, 1, \ldots, J\}$) pueden ser ordenadas o no ordenadas, y siguen una distribución **Multinomial**.
+5.  Las **variables continuas limitadas** pueden ser **censuradas** (observamos las X de todos, pero no el valor exacto de y para algunos) o **truncadas** (perdemos toda la información de los individuos fuera del rango).
+
+### Conexión con los temas siguientes
+
+```{r t01-tabla-hoja-ruta, echo=FALSE}
+hoja_ruta <- data.frame(
+  Tema = c("Tema 1 (este)", "Tema 2", "Tema 3"),
+  Contenido = c(
+    "Tipos de variables dependientes limitadas, distribuciones, por qué MCO falla",
+    "Modelos de elección discreta: Probit y Logit (variable binaria)",
+    "Modelos para datos censurados: Tobit (variable continua limitada)"
+  ),
+  `Tipo de variable` = c(
+    "Todas (introducción general)",
+    "Binaria: y in {0, 1}",
+    "Censurada: y >= 0"
+  ),
+  check.names = FALSE
+)
+knitr::kable(hoja_ruta,
+             caption = "Hoja de ruta de la asignatura de Microeconometría")
+```
+
+### Tabla-resumen de distribuciones
+
+```{r t01-tabla-distribuciones, echo=FALSE}
+distribuciones <- data.frame(
+  Distribucion = c("Bernoulli($p$)", "Binomial($n, p$)",
+                    "Multinomial($n, p_1 \\ldots p_J$)",
+                    "Normal censurada", "Normal truncada"),
+  Tipo = c("Discreta", "Discreta", "Discreta", "Mixta", "Continua"),
+  Soporte = c("$\\{0, 1\\}$", "$\\{0, 1, \\ldots, n\\}$",
+               "$k_0 + k_1 + \\cdots + k_J = n$",
+               "$[0, +\\infty)$", "$(c, +\\infty)$"),
+  Uso = c("Probit / Logit (Tema 2)",
+          "Verosimilitud en modelos binarios",
+          "Modelos multinomiales (avanzado)",
+          "Modelo Tobit (Tema 3)",
+          "Modelos de selección (Heckman)")
+)
+knitr::kable(distribuciones,
+             col.names = c("Distribución", "Tipo", "Soporte", "Uso en microeconometría"),
+             escape = FALSE,
+             caption = "Distribuciones asociadas a cada tipo de variable dependiente limitada")
+```
+
+En el **Tema 2** veremos cómo los modelos Probit y Logit resuelven los problemas del MLP utilizando las distribuciones Normal y Logística como funciones de enlace. ¡Ya tenemos las bases para entenderlos!
+
+### Código R del capítulo {.unnumbered}
+
+El script completo de este capítulo (`T01_mECO_Script_VD_Limitada.R`) está disponible en el repositorio de material complementario del manual:
+
+[**https://github.com/carlanta/MicroEconometrics**](https://github.com/carlanta/MicroEconometrics)
+
+El alumno puede descargar el script directamente desde la carpeta `scripts/` del repositorio y ejecutarlo en RStudio de forma interactiva.
