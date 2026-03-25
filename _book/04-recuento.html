@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Modelos para Datos de Recuento – Manual de Microeconometría</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-panel.html" rel="next">
+<link href="./03-tobit.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-recuento.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Modelos para Datos de Recuento</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Manual de Microeconometría</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prólogo</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00-fundamentos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Fundamentos de Probabilidad, Inferencia y Econometría</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-vd-limitada.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Datos con Variable Dependiente Limitada</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-eleccion-discreta.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Modelos de Elección Discreta</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-tobit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Modelos para Datos Censurados (Tobit)</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-recuento.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Modelos para Datos de Recuento</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-panel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Datos de Panel</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bibliografía</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content column-page-right" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Modelos para Datos de Recuento</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-right">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introducción-por-qué-modelos-para-datos-de-recuento" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="introducción-por-qué-modelos-para-datos-de-recuento"><span class="header-section-number">5.1</span> Introducción: ¿Por qué modelos para datos de recuento?</h2>
+<p>En los temas anteriores hemos estudiado modelos para distintos tipos de variables dependientes: variables continuas sin restricciones (Tema 1), variables binarias (Tema 2) y variables continuas limitadas por censura (Tema 3). Ahora abordamos un nuevo y muy relevante tipo de variables dependientes: aquellas que toman valores <strong>enteros no negativos</strong> (0, 1, 2, 3, …), es decir, <strong>datos de recuento</strong> o <strong>count data</strong>.</p>
+<p>Este tipo de datos es extremadamente frecuente en aplicaciones económicas, empresariales y de política pública:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Ejemplos de variables de recuento en economía</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Contexto</th>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Rango</th>
+<th style="text-align: left;">Características</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Salud</td>
+<td style="text-align: left;">Visitas al médico/año</td>
+<td style="text-align: left;">0-50+</td>
+<td style="text-align: left;">Muchos ceros</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Innovación</td>
+<td style="text-align: left;">Patentes solicitadas</td>
+<td style="text-align: left;">0-100+</td>
+<td style="text-align: left;">Sobredispersión</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Laboral</td>
+<td style="text-align: left;">Accidentes laborales</td>
+<td style="text-align: left;">0-10+</td>
+<td style="text-align: left;">Datos raros</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Financiero</td>
+<td style="text-align: left;">Quejas de clientes</td>
+<td style="text-align: left;">0-1000+</td>
+<td style="text-align: left;">Exceso ceros</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Educativo</td>
+<td style="text-align: left;">Faltas de asistencia</td>
+<td style="text-align: left;">0-180</td>
+<td style="text-align: left;">Límite superior</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Demográfico</td>
+<td style="text-align: left;">Número de hijos</td>
+<td style="text-align: left;">0-15+</td>
+<td style="text-align: left;">Distribución asimétrica</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Este tipo de datos presenta características que hacen inadecuado el uso de la regresión lineal clásica. En primer lugar, la variable dependiente solo toma valores <strong>enteros no negativos</strong>: no tiene sentido predecir 2.7 visitas al médico o <span class="math inline">\(-1\)</span> accidentes laborales. Sin embargo, MCO puede generar predicciones fraccionarias e incluso negativas, lo que viola la naturaleza del fenómeno. En segundo lugar, la <strong>distribución</strong> de los datos de recuento es típicamente asimétrica, con una acumulación de observaciones en valores bajos (muchos ceros y unos) y una cola derecha que se extiende hacia valores altos. La distribución normal, que MCO asume implícitamente, no captura esta forma. En tercer lugar, existe una <strong>relación intrínseca entre la media y la varianza</strong>: en datos de recuento, los individuos con media alta tienden a mostrar también mayor variabilidad. Esta heterocedasticidad es estructural, no un defecto del modelo, y MCO la ignora.</p>
+<p>Si aplicamos MCO directamente a datos de recuento, obtendremos estimaciones <strong>sesgadas e inconsistentes</strong>, intervalos de confianza incorrectos, y predicciones que pueden violar las restricciones naturales del problema.</p>
+<section id="el-modelo-poisson-concepto-fundamental" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="el-modelo-poisson-concepto-fundamental"><span class="header-section-number">5.1.1</span> El modelo Poisson: concepto fundamental</h3>
+<p>El <strong>modelo de Poisson</strong> y la <strong>regresión Binomial Negativa</strong> son herramientas diseñadas específicamente para modelar datos de recuento. El Poisson fue propuesto inicialmente para estos problemas porque proporciona un marco probabilístico natural basado en la distribución de Poisson.</p>
+<p>En estos apuntes se presenta en primer lugar la distribución de Poisson y sus propiedades, con especial énfasis en el concepto de equidispersión. A continuación se desarrolla el modelo de regresión de Poisson, su especificación, estimación por máxima verosimilitud e interpretación de los coeficientes. El tema aborda después el problema de la sobredispersión, frecuente en datos reales, y presenta el modelo Binomial Negativo como extensión flexible del Poisson. La sección de inferencia estadística incluye los tests de hipótesis, la comparación de modelos y las medidas de bondad de ajuste, todos ilustrados con ejemplos numéricos resueltos paso a paso.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="conceptos-fundamentales-de-datos-de-recuento" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="conceptos-fundamentales-de-datos-de-recuento"><span class="header-section-number">5.2</span> Conceptos fundamentales de datos de recuento</h2>
+<section id="qué-es-un-dato-de-recuento" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="qué-es-un-dato-de-recuento"><span class="header-section-number">5.2.1</span> ¿Qué es un dato de recuento?</h3>
+<p>Una variable de <strong>recuento</strong> (count data) mide el número de ocurrencias de un evento en un período o contexto determinado. Formalmente:</p>
+<p><span class="math display">\[Y_i \in \{0, 1, 2, 3, \ldots\}\]</span></p>
+<p>El espacio de la variable es el conjunto de números enteros no negativos. No hay límite superior teórico, aunque en la práctica los datos pueden estar acotados.</p>
+<p><strong>Ejemplos intuitivos:</strong></p>
+<ul>
+<li><strong>Número de visitas al médico en un año</strong>: Un paciente puede no visitar al médico (0 visitas), o tener múltiples visitas según su estado de salud.</li>
+<li><strong>Número de patentes solicitadas por una empresa</strong>: Mide la innovación. Muchas empresas no solicitan patentes, pero las que innovan lo hacen múltiples veces.</li>
+<li><strong>Número de accidentes laborales</strong>: En una empresa pequeña puede haber 0 accidentes; en una fábrica grande pueden ocurrir varios.</li>
+<li><strong>Número de empresas competidoras en un mercado local</strong>: Define la estructura de mercado.</li>
+</ul>
+</section>
+<section id="propiedades-estadísticas-clave" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="propiedades-estadísticas-clave"><span class="header-section-number">5.2.2</span> Propiedades estadísticas clave</h3>
+<p>Para una variable de recuento <span class="math inline">\(Y_i\)</span>, necesitamos entender cuatro propiedades fundamentales:</p>
+<section id="media-y-varianza" class="level4" data-number="5.2.2.1">
+<h4 data-number="5.2.2.1" class="anchored" data-anchor-id="media-y-varianza"><span class="header-section-number">5.2.2.1</span> 1. Media y Varianza</h4>
+<ul>
+<li><strong>Media</strong>: <span class="math inline">\(E[Y_i]\)</span> = promedio del número de ocurrencias. Si modelamos visitas al médico, <span class="math inline">\(E[Y_i] = 3\)</span> significa que en promedio un paciente visita 3 veces.</li>
+<li><strong>Varianza</strong>: <span class="math inline">\(\text{Var}(Y_i)\)</span> = dispersión alrededor de la media. Mide cómo varían los recuentos entre individuos.</li>
+</ul>
+</section>
+<section id="equidispersión" class="level4" data-number="5.2.2.2">
+<h4 data-number="5.2.2.2" class="anchored" data-anchor-id="equidispersión"><span class="header-section-number">5.2.2.2</span> 2. Equidispersión</h4>
+<p>En la distribución de Poisson existe una propiedad especial: <strong>media igual a varianza</strong>.</p>
+<p><span class="math display">\[E[Y_i] = \text{Var}(Y_i) = \lambda\]</span></p>
+<p>Esto significa que, en Poisson, si el promedio de eventos es 3, la varianza también debe ser 3. Esta es la <strong>equidispersión</strong>.</p>
+</section>
+<section id="sobredispersión" class="level4" data-number="5.2.2.3">
+<h4 data-number="5.2.2.3" class="anchored" data-anchor-id="sobredispersión"><span class="header-section-number">5.2.2.3</span> 3. Sobredispersión</h4>
+<p>En datos reales, <strong>frecuentemente la varianza excede la media</strong>:</p>
+<p><span class="math display">\[\text{Var}(Y_i) &gt; E[Y_i]\]</span></p>
+<p>Esto ocurre cuando hay heterogeneidad no observada entre individuos, variables omitidas, o errores de especificación.</p>
+<blockquote class="blockquote">
+<p><strong>Ejemplo intuitivo</strong>: Si algunas personas tienen predisposición genética a ciertas enfermedades (no observada), tendrán visitas al médico más variables que lo predicho por Poisson puro. Dos personas con <span class="math inline">\(E[Y_i] = 3\)</span> pueden tener realidades muy diferentes: una visita casi siempre (poco variable), otra va cuando está enferma (muy variable).</p>
+</blockquote>
+</section>
+<section id="subdispersión" class="level4" data-number="5.2.2.4">
+<h4 data-number="5.2.2.4" class="anchored" data-anchor-id="subdispersión"><span class="header-section-number">5.2.2.4</span> 4. Subdispersión</h4>
+<p>Menos común, pero posible: <span class="math inline">\(\text{Var}(Y_i) &lt; E[Y_i]\)</span>. Ocurre cuando los datos están fuertemente acotados o cuando hay mecanismos reguladores.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+</section>
+<section id="la-distribución-de-poisson" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="la-distribución-de-poisson"><span class="header-section-number">5.3</span> La distribución de Poisson</h2>
+<section id="concepto-y-propiedades-matemáticas" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="concepto-y-propiedades-matemáticas"><span class="header-section-number">5.3.1</span> Concepto y propiedades matemáticas</h3>
+<p>La <strong>distribución de Poisson</strong> es el modelo probabilístico natural para datos de recuento. Describe el número de eventos que ocurren en un intervalo fijo de tiempo o espacio, bajo condiciones específicas.</p>
+<section id="condiciones-para-una-distribución-poisson" class="level4" data-number="5.3.1.1">
+<h4 data-number="5.3.1.1" class="anchored" data-anchor-id="condiciones-para-una-distribución-poisson"><span class="header-section-number">5.3.1.1</span> Condiciones para una distribución Poisson</h4>
+<p>Para que un proceso genere datos Poisson deben cumplirse:</p>
+<ol type="1">
+<li><strong>Independencia</strong>: Los eventos ocurren <strong>independientemente</strong>. El que ocurra un evento no afecta la probabilidad de otro.</li>
+<li><strong>Tasa constante</strong>: Existe una <strong>tasa promedio constante</strong> de ocurrencia, denotada <span class="math inline">\(\lambda\)</span> (lambda).</li>
+<li><strong>No simultaneidad</strong>: Es <strong>prácticamente imposible</strong> que dos eventos ocurran exactamente al mismo tiempo.</li>
+<li><strong>Estacionariedad</strong>: La tasa <span class="math inline">\(\lambda\)</span> no cambia durante el período observado.</li>
+</ol>
+<p>En la práctica, estas condiciones son idealizaciones, pero muchos procesos reales se aproximan a ellas.</p>
+</section>
+<section id="definición-matemática" class="level4" data-number="5.3.1.2">
+<h4 data-number="5.3.1.2" class="anchored" data-anchor-id="definición-matemática"><span class="header-section-number">5.3.1.2</span> Definición matemática</h4>
+<p>Una variable <span class="math inline">\(Y\)</span> sigue una <strong>distribución de Poisson</strong> con parámetro <span class="math inline">\(\lambda &gt; 0\)</span> si su función de probabilidad es:</p>
+<p><span class="math display">\[P(Y = y) = \frac{e^{-\lambda} \lambda^y}{y!}, \quad y = 0, 1, 2, \ldots\]</span></p>
+<p>donde <span class="math inline">\(e \approx 2.71828\)</span> es la base del logaritmo natural, y <span class="math inline">\(y!\)</span> es el factorial.</p>
+</section>
+<section id="propiedades-fundamentales" class="level4" data-number="5.3.1.3">
+<h4 data-number="5.3.1.3" class="anchored" data-anchor-id="propiedades-fundamentales"><span class="header-section-number">5.3.1.3</span> Propiedades fundamentales</h4>
+<p><strong>Media:</strong> <span class="math display">\[E[Y] = \lambda\]</span></p>
+<p><strong>Varianza:</strong> <span class="math display">\[\text{Var}(Y) = \lambda\]</span></p>
+<p><strong>Función característica recursiva:</strong> <span class="math display">\[P(Y = y+1) = \frac{\lambda}{y+1} P(Y = y)\]</span></p>
+<p>Esta última propiedad es útil computacionalmente: permite calcular probabilidades de forma recursiva.</p>
+</section>
+<section id="interpretación-de-lambda" class="level4" data-number="5.3.1.4">
+<h4 data-number="5.3.1.4" class="anchored" data-anchor-id="interpretación-de-lambda"><span class="header-section-number">5.3.1.4</span> Interpretación de <span class="math inline">\(\lambda\)</span></h4>
+<p>El parámetro <span class="math inline">\(\lambda\)</span> es la <strong>intensidad</strong> o <strong>tasa</strong> del proceso:</p>
+<ul>
+<li>Si <span class="math inline">\(\lambda = 2\)</span>, en promedio ocurren 2 eventos por unidad de tiempo.</li>
+<li>Si <span class="math inline">\(\lambda = 0.5\)</span>, en promedio ocurre medio evento (o equivalentemente, 1 evento cada 2 unidades).</li>
+</ul>
+<p>Visualmente, cuando <span class="math inline">\(\lambda\)</span> es pequeño (ej. <span class="math inline">\(\lambda = 1\)</span>), la distribución está concentrada en valores bajos (muchos ceros). Cuando <span class="math inline">\(\lambda\)</span> es grande (ej. <span class="math inline">\(\lambda = 10\)</span>), la distribución se extiende más y parece más simétrica.</p>
+</section>
+</section>
+<section id="ejemplos-de-cálculo" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="ejemplos-de-cálculo"><span class="header-section-number">5.3.2</span> Ejemplos de cálculo</h3>
+<p>Supongamos que el número de accidentes laborales por mes en una fábrica sigue una distribución Poisson con <span class="math inline">\(\lambda = 2.5\)</span>.</p>
+<p><strong>Probabilidad de exactamente 3 accidentes:</strong> <span class="math display">\[P(Y = 3) = \frac{e^{-2.5} \cdot 2.5^3}{3!} = \frac{0.0821 \cdot 15.625}{6} = 0.2138\]</span></p>
+<p>Es decir, hay aproximadamente un 21.4% de probabilidad de observar exactamente 3 accidentes.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="modelo-de-regresión-de-poisson" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="modelo-de-regresión-de-poisson"><span class="header-section-number">5.4</span> Modelo de regresión de Poisson</h2>
+<section id="especificación-del-modelo" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="especificación-del-modelo"><span class="header-section-number">5.4.1</span> Especificación del modelo</h3>
+<p>El modelo de <strong>regresión de Poisson</strong> extiende la distribución de Poisson para permitir que el parámetro <span class="math inline">\(\lambda\)</span> dependa de variables explicativas.</p>
+<section id="forma-básica" class="level4" data-number="5.4.1.1">
+<h4 data-number="5.4.1.1" class="anchored" data-anchor-id="forma-básica"><span class="header-section-number">5.4.1.1</span> Forma básica</h4>
+<p>Sea <span class="math inline">\(y_i\)</span> el recuento observado para la unidad <span class="math inline">\(i\)</span>, y sea <span class="math inline">\(\mathbf{x}_i = (x_{i1}, \ldots, x_{iK})^T\)</span> el vector de variables explicativas.</p>
+<p><strong>Distribución condicional:</strong> <span class="math display">\[y_i | \mathbf{x}_i \sim \text{Poisson}(\lambda_i)\]</span></p>
+<p><strong>Función de esperanza condicional (no-lineal):</strong> <span class="math display">\[E[y_i | \mathbf{x}_i] = \lambda_i = e^{\mathbf{x}_i \boldsymbol{\beta}}\]</span></p>
+<p><strong>Forma logarítmica (lineal en parámetros):</strong> <span class="math display">\[\ln(\lambda_i) = \beta_0 + \beta_1 x_{i1} + \cdots + \beta_K x_{iK} = \mathbf{x}_i \boldsymbol{\beta}\]</span></p>
+</section>
+<section id="interpretación-de-la-forma-logarítmica" class="level4" data-number="5.4.1.2">
+<h4 data-number="5.4.1.2" class="anchored" data-anchor-id="interpretación-de-la-forma-logarítmica"><span class="header-section-number">5.4.1.2</span> Interpretación de la forma logarítmica</h4>
+<p>La forma logarítmica es crucial porque:</p>
+<ol type="1">
+<li><strong>Garantiza positividad</strong>: Como <span class="math inline">\(\lambda_i = e^{\mathbf{x}_i \boldsymbol{\beta}}\)</span> siempre es positivo (exponencial), nunca obtenemos predicciones negativas.</li>
+<li><strong>Link canónico</strong>: Es la “función de enlace” natural para la distribución Poisson.</li>
+<li><strong>Interpretación elasticidad</strong>: Un cambio de 1 unidad en <span class="math inline">\(x_j\)</span> aumenta <span class="math inline">\(\ln(\lambda_i)\)</span> en <span class="math inline">\(\beta_j\)</span>, lo que corresponde a un cambio multiplicativo de <span class="math inline">\(e^{\beta_j}\)</span> en <span class="math inline">\(\lambda_i\)</span>.</li>
+</ol>
+</section>
+</section>
+<section id="estimación-por-máxima-verosimilitud" class="level3" data-number="5.4.2">
+<h3 data-number="5.4.2" class="anchored" data-anchor-id="estimación-por-máxima-verosimilitud"><span class="header-section-number">5.4.2</span> Estimación por máxima verosimilitud</h3>
+<p>El modelo Poisson se estima por <strong>máxima verosimilitud</strong> (MV), no por MCO.</p>
+<section id="función-de-verosimilitud" class="level4" data-number="5.4.2.1">
+<h4 data-number="5.4.2.1" class="anchored" data-anchor-id="función-de-verosimilitud"><span class="header-section-number">5.4.2.1</span> Función de verosimilitud</h4>
+<p>Para una muestra de <span class="math inline">\(n\)</span> observaciones:</p>
+<p><span class="math display">\[L(\boldsymbol{\beta}) = \prod_{i=1}^{n} \frac{e^{-\lambda_i} \lambda_i^{y_i}}{y_i!}\]</span></p>
+</section>
+<section id="log-verosimilitud" class="level4" data-number="5.4.2.2">
+<h4 data-number="5.4.2.2" class="anchored" data-anchor-id="log-verosimilitud"><span class="header-section-number">5.4.2.2</span> Log-verosimilitud</h4>
+<p>Es más conveniente trabajar con la log-verosimilitud:</p>
+<p><span class="math display">\[\ell(\boldsymbol{\beta}) = \sum_{i=1}^{n} \left[ y_i \ln(\lambda_i) - \lambda_i - \ln(y_i!) \right]\]</span></p>
+<p>Sustituyendo <span class="math inline">\(\lambda_i = e^{\mathbf{x}_i \boldsymbol{\beta}}\)</span>:</p>
+<p><span class="math display">\[\ell(\boldsymbol{\beta}) = \sum_{i=1}^{n} \left[ y_i (\mathbf{x}_i \boldsymbol{\beta}) - e^{\mathbf{x}_i \boldsymbol{\beta}} - \ln(y_i!) \right]\]</span></p>
+</section>
+<section id="condiciones-de-primer-orden" class="level4" data-number="5.4.2.3">
+<h4 data-number="5.4.2.3" class="anchored" data-anchor-id="condiciones-de-primer-orden"><span class="header-section-number">5.4.2.3</span> Condiciones de primer orden</h4>
+<p>El estimador MV <span class="math inline">\(\hat{\boldsymbol{\beta}}\)</span> satisface:</p>
+<p><span class="math display">\[\frac{\partial \ell}{\partial \boldsymbol{\beta}} = \sum_{i=1}^{n} (y_i - \lambda_i) \mathbf{x}_i = \mathbf{0}\]</span></p>
+<p>Equivalentemente:</p>
+<p><span class="math display">\[\sum_{i=1}^{n} (y_i - \hat{\lambda}_i) x_{ij} = 0, \quad j = 0, 1, \ldots, K\]</span></p>
+<p>Esto significa que el residuo medio ponderado por cada variable explicativa debe ser cero.</p>
+</section>
+<section id="propiedades-del-estimador-mv" class="level4" data-number="5.4.2.4">
+<h4 data-number="5.4.2.4" class="anchored" data-anchor-id="propiedades-del-estimador-mv"><span class="header-section-number">5.4.2.4</span> Propiedades del estimador MV</h4>
+<p>Bajo especificación correcta del modelo Poisson:</p>
+<ol type="1">
+<li><strong>Consistencia</strong>: <span class="math inline">\(\hat{\boldsymbol{\beta}} \xrightarrow{p} \boldsymbol{\beta}_0\)</span> cuando <span class="math inline">\(n \to \infty\)</span>.</li>
+<li><strong>Normalidad asintótica</strong>: <span class="math inline">\(\sqrt{n}(\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}_0) \xrightarrow{d} N(0, \mathbf{I}^{-1})\)</span>, donde <span class="math inline">\(\mathbf{I}\)</span> es la matriz de información.</li>
+<li><strong>Eficiencia</strong>: Es el estimador de menor varianza entre estimadores consistentes.</li>
+</ol>
+<p>Sin embargo, estas propiedades dependen de que el modelo esté <strong>correctamente especificado</strong>. Si hay sobredispersión, los errores estándar seran demasiado pequeños.</p>
+</section>
+</section>
+<section id="interpretación-de-coeficientes" class="level3" data-number="5.4.3">
+<h3 data-number="5.4.3" class="anchored" data-anchor-id="interpretación-de-coeficientes"><span class="header-section-number">5.4.3</span> Interpretación de coeficientes</h3>
+<p>Esta es una sección crucial para la práctica.</p>
+<section id="efecto-marginal" class="level4" data-number="5.4.3.1">
+<h4 data-number="5.4.3.1" class="anchored" data-anchor-id="efecto-marginal"><span class="header-section-number">5.4.3.1</span> Efecto marginal</h4>
+<p>El <strong>efecto marginal</strong> de un cambio unitario en <span class="math inline">\(x_j\)</span> en la media condicional es:</p>
+<p><span class="math display">\[\frac{\partial E[y_i | \mathbf{x}_i]}{\partial x_{ij}} = \beta_j \cdot \lambda_i = \beta_j \cdot E[y_i | \mathbf{x}_i]\]</span></p>
+<p><strong>Nota importante</strong>: El efecto marginal <strong>no es constante</strong>; depende del nivel de <span class="math inline">\(\lambda_i\)</span> (o equivalentemente, del nivel de las otras variables).</p>
+<blockquote class="blockquote">
+<p><strong>Ejemplo</strong>: Si <span class="math inline">\(\hat{\beta}_{\text{edad}} = 0.03\)</span> en un modelo de visitas al médico, y la media predicha para un individuo es <span class="math inline">\(\hat{\lambda} = 4\)</span>, entonces aumentar 1 año de edad aumenta el número esperado de visitas en <span class="math inline">\(0.03 \times 4 = 0.12\)</span> visitas. Para otro individuo con <span class="math inline">\(\hat{\lambda} = 2\)</span>, el efecto sería solo <span class="math inline">\(0.03 \times 2 = 0.06\)</span> visitas.</p>
+</blockquote>
+</section>
+<section id="efecto-en-logaritmos-semi-elasticidad" class="level4" data-number="5.4.3.2">
+<h4 data-number="5.4.3.2" class="anchored" data-anchor-id="efecto-en-logaritmos-semi-elasticidad"><span class="header-section-number">5.4.3.2</span> Efecto en logaritmos (semi-elasticidad)</h4>
+<p>Como <span class="math inline">\(\ln(\lambda_i) = \mathbf{x}_i \boldsymbol{\beta}\)</span>:</p>
+<p><span class="math display">\[\frac{\partial \ln(\lambda_i)}{\partial x_{ij}} = \beta_j\]</span></p>
+<p>Esto se interpreta como: <strong>un cambio de 1 unidad en <span class="math inline">\(x_j\)</span> causa un cambio de <span class="math inline">\(100 \cdot \beta_j\)</span> por ciento en la media predicha</strong>.</p>
+<blockquote class="blockquote">
+<p><strong>Ejemplo</strong>: Si <span class="math inline">\(\hat{\beta}_{\text{edad}} = 0.03\)</span>, entonces cada año adicional de edad aumenta el número esperado de visitas al médico en un <span class="math inline">\(3\%\)</span> (aproximadamente; exactamente es <span class="math inline">\((e^{0.03} - 1) \times 100\% = 3.05\%\)</span>).</p>
+</blockquote>
+</section>
+<section id="elasticidad" class="level4" data-number="5.4.3.3">
+<h4 data-number="5.4.3.3" class="anchored" data-anchor-id="elasticidad"><span class="header-section-number">5.4.3.3</span> Elasticidad</h4>
+<p>Si <span class="math inline">\(x_j\)</span> es continua, la <strong>elasticidad</strong> es:</p>
+<p><span class="math display">\[\varepsilon_j = \frac{\partial E[y_i]}{\partial x_j} \cdot \frac{x_j}{E[y_i]} = \beta_j \cdot x_j\]</span></p>
+<p>Esto mide el <strong>cambio porcentual en la media</strong> resultante de un <strong>cambio porcentual de 1%</strong> en <span class="math inline">\(x_j\)</span>.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+</section>
+<section id="modelo-de-regresión-binomial-negativa" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="modelo-de-regresión-binomial-negativa"><span class="header-section-number">5.5</span> Modelo de regresión Binomial Negativa</h2>
+<section id="motivación-el-problema-de-la-sobredispersión" class="level3" data-number="5.5.1">
+<h3 data-number="5.5.1" class="anchored" data-anchor-id="motivación-el-problema-de-la-sobredispersión"><span class="header-section-number">5.5.1</span> Motivación: El problema de la sobredispersión</h3>
+<section id="cuando-poisson-falla" class="level4" data-number="5.5.1.1">
+<h4 data-number="5.5.1.1" class="anchored" data-anchor-id="cuando-poisson-falla"><span class="header-section-number">5.5.1.1</span> Cuando Poisson falla</h4>
+<p>En la práctica, los datos reales con frecuencia violan el supuesto de equidispersión de Poisson. Cuando <strong>observamos que la varianza muestral excede la media muestral</strong>, decimos que hay <strong>sobredispersión</strong>.</p>
+<p><span class="math display">\[\text{Var}(y_i) &gt; E[y_i]\]</span></p>
+</section>
+<section id="causas-de-la-sobredispersión" class="level4" data-number="5.5.1.2">
+<h4 data-number="5.5.1.2" class="anchored" data-anchor-id="causas-de-la-sobredispersión"><span class="header-section-number">5.5.1.2</span> Causas de la sobredispersión</h4>
+<p>Existen varias razones por las que podemos observar sobredispersión:</p>
+<ol type="1">
+<li><p><strong>Heterogeneidad no observada</strong>: Los individuos difieren en características que no observamos (predisposiciones genéticas, preferencias latentes, etc.). Esto introduce variabilidad adicional.</p></li>
+<li><p><strong>Variables omitidas</strong>: Si el modelo verdadero tiene más variables explicativas que las que incluimos, los residuos capturan esa variabilidad no modelada.</p></li>
+<li><p><strong>Datos agregados</strong>: Si los datos representan sumas sobre períodos o grupos, la variabilidad será mayor que la de datos individuales.</p></li>
+<li><p><strong>Errores de especificación</strong>: Forma funcional incorrecta del modelo, distribución asimétrica no capturada, etc.</p></li>
+<li><p><strong>Exceso de ceros</strong>: Muchos datos de recuento tienen proporción de ceros superior a la predicha por Poisson. Esto se trata con modelos hurdle o zero-inflated.</p></li>
+</ol>
+</section>
+<section id="consecuencias-de-ignorar-la-sobredispersión" class="level4" data-number="5.5.1.3">
+<h4 data-number="5.5.1.3" class="anchored" data-anchor-id="consecuencias-de-ignorar-la-sobredispersión"><span class="header-section-number">5.5.1.3</span> Consecuencias de ignorar la sobredispersión</h4>
+<p>Si estimamos un modelo Poisson cuando los datos presentan sobredispersión, las consecuencias son asimétricas. Los coeficientes estimados <span class="math inline">\(\hat{\boldsymbol{\beta}}\)</span> siguen siendo <strong>consistentes</strong>, lo que significa que convergen a sus valores verdaderos al aumentar la muestra. Esta es la buena noticia. La mala noticia es que los <strong>errores estándar quedan sesgados a la baja</strong>: el modelo Poisson, al imponer que la varianza sea igual a la media, subestima la verdadera dispersión de los datos y, en consecuencia, calcula errores estándar demasiado pequeños. Esto provoca que los intervalos de confianza resulten artificialmente estrechos y que los p-valores sean menores de lo que deberían. El resultado práctico es un exceso de <strong>falsos positivos</strong> (errores de Tipo I): el investigador concluye que una variable es significativa cuando en realidad no lo es, simplemente porque la inferencia está basada en una varianza infraestimada.</p>
+<p>Por esta razón, detectar y corregir la sobredispersión es un paso ineludible en el análisis de datos de recuento.</p>
+</section>
+</section>
+<section id="especificación-del-modelo-binomial-negativo" class="level3" data-number="5.5.2">
+<h3 data-number="5.5.2" class="anchored" data-anchor-id="especificación-del-modelo-binomial-negativo"><span class="header-section-number">5.5.2</span> Especificación del modelo Binomial Negativo</h3>
+<p>El modelo <strong>Binomial Negativo</strong> es una generalización del Poisson que permite sobredispersión.</p>
+<section id="forma-básica-1" class="level4" data-number="5.5.2.1">
+<h4 data-number="5.5.2.1" class="anchored" data-anchor-id="forma-básica-1"><span class="header-section-number">5.5.2.1</span> Forma básica</h4>
+<p>Se define el modelo condicional como:</p>
+<p><span class="math display">\[y_i | \mathbf{x}_i \sim \text{NB}(\lambda_i, \alpha)\]</span></p>
+<p>con función de esperanza condicional:</p>
+<p><span class="math display">\[E[y_i | \mathbf{x}_i] = \lambda_i = e^{\mathbf{x}_i \boldsymbol{\beta}}\]</span></p>
+<p>(igual que en Poisson) y función de varianza condicional:</p>
+<p><span class="math display">\[\text{Var}(y_i | \mathbf{x}_i) = \lambda_i + \alpha \lambda_i^2 = \lambda_i(1 + \alpha \lambda_i)\]</span></p>
+<p>donde <span class="math inline">\(\alpha \geq 0\)</span> es el <strong>parámetro de dispersión</strong>.</p>
+</section>
+<section id="relación-con-poisson" class="level4" data-number="5.5.2.2">
+<h4 data-number="5.5.2.2" class="anchored" data-anchor-id="relación-con-poisson"><span class="header-section-number">5.5.2.2</span> Relación con Poisson</h4>
+<p>Observemos qué ocurre en casos límite:</p>
+<ul>
+<li>Si <span class="math inline">\(\alpha = 0\)</span>: <span class="math inline">\(\text{Var}(y_i) = \lambda_i\)</span>, recuperamos el modelo Poisson (equidispersión).</li>
+<li>Si <span class="math inline">\(\alpha &gt; 0\)</span>: <span class="math inline">\(\text{Var}(y_i) = \lambda_i + \alpha \lambda_i^2 &gt; \lambda_i\)</span>, tenemos sobredispersión.</li>
+</ul>
+<p>Cuanto mayor sea <span class="math inline">\(\alpha\)</span>, mayor es la sobredispersión relativa.</p>
+</section>
+<section id="parametrización-alternativa" class="level4" data-number="5.5.2.3">
+<h4 data-number="5.5.2.3" class="anchored" data-anchor-id="parametrización-alternativa"><span class="header-section-number">5.5.2.3</span> Parametrización alternativa</h4>
+<p>A veces el NB se parametriza con el “tamaño” <span class="math inline">\(\theta = 1/\alpha\)</span>:</p>
+<p><span class="math display">\[\text{Var}(y_i) = \lambda_i + \frac{\lambda_i^2}{\theta}\]</span></p>
+<p>Con esta parametrización, cuanto <strong>menor</strong> sea <span class="math inline">\(\theta\)</span>, mayor es la sobredispersión (cuando <span class="math inline">\(\theta \to \infty\)</span>, recuperamos Poisson).</p>
+</section>
+</section>
+<section id="estimación-del-modelo-nb" class="level3" data-number="5.5.3">
+<h3 data-number="5.5.3" class="anchored" data-anchor-id="estimación-del-modelo-nb"><span class="header-section-number">5.5.3</span> Estimación del modelo NB</h3>
+<section id="log-verosimilitud-1" class="level4" data-number="5.5.3.1">
+<h4 data-number="5.5.3.1" class="anchored" data-anchor-id="log-verosimilitud-1"><span class="header-section-number">5.5.3.1</span> Log-verosimilitud</h4>
+<p>La función de log-verosimilitud del NB es más compleja que la del Poisson, pero el principio es el mismo: máxima verosimilitud.</p>
+<p>Los parámetros <span class="math inline">\(\boldsymbol{\beta}\)</span> y <span class="math inline">\(\alpha\)</span> se estiman simultáneamente maximizando:</p>
+<p><span class="math display">\[\ell(\boldsymbol{\beta}, \alpha) = \sum_{i=1}^{n} \left[ y_i \ln(\lambda_i) - (y_i + 1/\alpha)\ln(1 + \alpha \lambda_i) + \text{términos en factoriales} \right]\]</span></p>
+</section>
+<section id="propiedades" class="level4" data-number="5.5.3.2">
+<h4 data-number="5.5.3.2" class="anchored" data-anchor-id="propiedades"><span class="header-section-number">5.5.3.2</span> Propiedades</h4>
+<p>Bajo especificación correcta:</p>
+<ul>
+<li>El estimador MV es <strong>consistente, asintóticamente normal y eficiente</strong>.</li>
+<li>La <strong>matriz de covarianzas</strong> de <span class="math inline">\((\hat{\boldsymbol{\beta}}, \hat{\alpha})\)</span> se estima consistentemente usando el Hessiano.</li>
+</ul>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+</section>
+<section id="inferencia-estadística-y-comparación-de-modelos" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="inferencia-estadística-y-comparación-de-modelos"><span class="header-section-number">5.6</span> Inferencia estadística y comparación de modelos</h2>
+<p>En esta sección explicamos con detalle los principales contrastes de hipótesis para modelos de recuento. Cada test se presenta con su <strong>planteamiento formal</strong>, <strong>fórmula</strong>, <strong>ejemplo numérico resuelto paso a paso</strong> y <strong>criterio de decisión</strong>.</p>
+<p>Para los ejemplos usaremos unos resultados hipotéticos (pero realistas) de un modelo de <strong>visitas al médico</strong> (<span class="math inline">\(n = 4406\)</span>), que luego replicaremos con datos reales en la sección práctica:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Resultados hipotéticos del modelo Poisson (visitas al médico)</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;"><span class="math inline">\(\hat{\beta}\)</span></th>
+<th style="text-align: right;">Error estándar</th>
+<th style="text-align: right;">z</th>
+<th style="text-align: left;">p-valor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercepto)</td>
+<td style="text-align: right;">1.028</td>
+<td style="text-align: right;">0.065</td>
+<td style="text-align: right;">15.82</td>
+<td style="text-align: left;">&lt;0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">edad</td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: right;">4.75</td>
+<td style="text-align: left;">&lt;0.001</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">cronico</td>
+<td style="text-align: right;">0.245</td>
+<td style="text-align: right;">0.012</td>
+<td style="text-align: right;">20.42</td>
+<td style="text-align: left;">&lt;0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">seguro</td>
+<td style="text-align: right;">0.306</td>
+<td style="text-align: right;">0.043</td>
+<td style="text-align: right;">7.12</td>
+<td style="text-align: left;">&lt;0.001</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">educacion</td>
+<td style="text-align: right;">-0.028</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">-5.60</td>
+<td style="text-align: left;">&lt;0.001</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Además, supongamos las siguientes log-verosimilitudes:</p>
+<ul>
+<li>Modelo Poisson completo: <span class="math inline">\(\ell_{Poisson} = -12\,215.6\)</span> (con 5 parámetros: intercepto + 4 variables).</li>
+<li>Modelo NB completo: <span class="math inline">\(\ell_{NB} = -11\,478.3\)</span> (con 6 parámetros: 5 + <span class="math inline">\(\alpha\)</span>).</li>
+<li>Modelo Poisson sin <code>cronico</code> ni <code>seguro</code>: <span class="math inline">\(\ell_R = -12\,540.2\)</span> (con 3 parámetros).</li>
+<li>Modelo solo con constante: <span class="math inline">\(\ell_0 = -13\,890.1\)</span> (con 1 parámetro).</li>
+</ul>
+<section id="test-de-wald-significación-individual" class="level3" data-number="5.6.1">
+<h3 data-number="5.6.1" class="anchored" data-anchor-id="test-de-wald-significación-individual"><span class="header-section-number">5.6.1</span> Test de Wald (significación individual)</h3>
+<section id="planteamiento-del-contraste" class="level4" data-number="5.6.1.1">
+<h4 data-number="5.6.1.1" class="anchored" data-anchor-id="planteamiento-del-contraste"><span class="header-section-number">5.6.1.1</span> Planteamiento del contraste</h4>
+<p>El test de Wald evalúa si <strong>una variable individual</strong> contribuye significativamente al modelo.</p>
+<p><strong>Hipótesis:</strong></p>
+<ul>
+<li><span class="math inline">\(H_0: \beta_j = 0\)</span> (la variable <span class="math inline">\(x_j\)</span> <strong>no</strong> tiene efecto sobre el recuento esperado).</li>
+<li><span class="math inline">\(H_1: \beta_j \neq 0\)</span> (la variable <span class="math inline">\(x_j\)</span> <strong>sí</strong> tiene efecto).</li>
+</ul>
+<p><strong>Estadístico:</strong></p>
+<p><span class="math display">\[W_j = \frac{\hat{\beta}_j}{\text{se}(\hat{\beta}_j)}\]</span></p>
+<p><strong>Distribución bajo <span class="math inline">\(H_0\)</span>:</strong> <span class="math inline">\(W_j \sim^a N(0, 1)\)</span> (equivalentemente, <span class="math inline">\(W_j^2 \sim^a \chi^2_1\)</span>).</p>
+<p><strong>Regla de decisión (al nivel <span class="math inline">\(\alpha = 0.05\)</span>):</strong> Rechazamos <span class="math inline">\(H_0\)</span> si <span class="math inline">\(|W_j| &gt; z_{0.025} = 1.96\)</span>. Equivalentemente, rechazamos si el p-valor <span class="math inline">\(&lt; 0.05\)</span>.</p>
+</section>
+<section id="ejemplo-1-es-significativa-la-variable-cronico" class="level4" data-number="5.6.1.2">
+<h4 data-number="5.6.1.2" class="anchored" data-anchor-id="ejemplo-1-es-significativa-la-variable-cronico"><span class="header-section-number">5.6.1.2</span> Ejemplo 1: ¿Es significativa la variable <code>cronico</code>?</h4>
+<p>Datos del problema: <span class="math inline">\(\hat{\beta}_{\text{cronico}} = 0.245\)</span>, <span class="math inline">\(\text{se}(\hat{\beta}_{\text{cronico}}) = 0.012\)</span>.</p>
+<p><strong>Paso 1.</strong> Planteamos las hipótesis:</p>
+<ul>
+<li><span class="math inline">\(H_0: \beta_{\text{cronico}} = 0\)</span> (las condiciones crónicas no afectan las visitas).</li>
+<li><span class="math inline">\(H_1: \beta_{\text{cronico}} \neq 0\)</span> (sí afectan).</li>
+</ul>
+<p><strong>Paso 2.</strong> Calculamos el estadístico:</p>
+<p><span class="math display">\[W = \frac{0.245}{0.012} = 20.42\]</span></p>
+<p><strong>Paso 3.</strong> Comparamos con el valor crítico:</p>
+<p><span class="math display">\[|20.42| &gt; 1.96 \implies \text{Rechazamos } H_0\]</span></p>
+<p><strong>Paso 4.</strong> Conclusión: La variable <code>cronico</code> es <strong>altamente significativa</strong> (<span class="math inline">\(p &lt; 0.001\)</span>). Cada condición crónica adicional aumenta significativamente el número de visitas al médico.</p>
+</section>
+<section id="ejemplo-2-es-significativa-la-variable-educacion" class="level4" data-number="5.6.1.3">
+<h4 data-number="5.6.1.3" class="anchored" data-anchor-id="ejemplo-2-es-significativa-la-variable-educacion"><span class="header-section-number">5.6.1.3</span> Ejemplo 2: ¿Es significativa la variable <code>educacion</code>?</h4>
+<p>Datos: <span class="math inline">\(\hat{\beta}_{\text{educ}} = -0.028\)</span>, <span class="math inline">\(\text{se} = 0.005\)</span>.</p>
+<p><span class="math display">\[W = \frac{-0.028}{0.005} = -5.60\]</span></p>
+<p><span class="math display">\[|-5.60| &gt; 1.96 \implies \text{Rechazamos } H_0\]</span></p>
+<p>Conclusión: <code>educacion</code> es significativa (<span class="math inline">\(p &lt; 0.001\)</span>). El signo negativo indica que más años de educación se asocian con <strong>menos</strong> visitas al médico.</p>
+<blockquote class="blockquote">
+<p><strong>Nota importante:</strong> El test de Wald evalúa variables <strong>una a una</strong>. Para evaluar si un <strong>grupo de variables</strong> es conjuntamente significativo, necesitamos el test de razón de verosimilitud.</p>
+</blockquote>
+</section>
+</section>
+<section id="test-de-razón-de-verosimilitud-significación-conjunta" class="level3" data-number="5.6.2">
+<h3 data-number="5.6.2" class="anchored" data-anchor-id="test-de-razón-de-verosimilitud-significación-conjunta"><span class="header-section-number">5.6.2</span> Test de razón de verosimilitud (significación conjunta)</h3>
+<section id="planteamiento-del-contraste-1" class="level4" data-number="5.6.2.1">
+<h4 data-number="5.6.2.1" class="anchored" data-anchor-id="planteamiento-del-contraste-1"><span class="header-section-number">5.6.2.1</span> Planteamiento del contraste</h4>
+<p>El test LR compara un modelo <strong>completo</strong> (sin restricciones) con un modelo <strong>reducido</strong> (restringido) para evaluar si un grupo de variables contribuye significativamente.</p>
+<p><strong>Hipótesis:</strong></p>
+<ul>
+<li><span class="math inline">\(H_0: \beta_{j_1} = \beta_{j_2} = \cdots = \beta_{j_q} = 0\)</span> (las <span class="math inline">\(q\)</span> variables no aportan nada al modelo).</li>
+<li><span class="math inline">\(H_1:\)</span> al menos uno de los <span class="math inline">\(\beta_{j_k} \neq 0\)</span> (al menos una variable es relevante).</li>
+</ul>
+<p><strong>Estadístico:</strong></p>
+<p><span class="math display">\[LR = 2\left[\ell(\hat{\boldsymbol{\beta}}_U) - \ell(\hat{\boldsymbol{\beta}}_R)\right]\]</span></p>
+<p>donde <span class="math inline">\(\ell_U\)</span> es la log-verosimilitud del modelo completo y <span class="math inline">\(\ell_R\)</span> la del modelo reducido.</p>
+<p><strong>Distribución bajo <span class="math inline">\(H_0\)</span>:</strong> <span class="math inline">\(LR \sim^a \chi^2_q\)</span>, donde <span class="math inline">\(q\)</span> es el número de restricciones (variables eliminadas).</p>
+<p><strong>Regla de decisión:</strong> Rechazamos <span class="math inline">\(H_0\)</span> si <span class="math inline">\(LR &gt; \chi^2_{q, \alpha}\)</span>, donde <span class="math inline">\(\chi^2_{q, \alpha}\)</span> es el valor crítico de la distribución chi-cuadrado con <span class="math inline">\(q\)</span> grados de libertad al nivel <span class="math inline">\(\alpha\)</span>.</p>
+</section>
+<section id="ejemplo-son-cronico-y-seguro-conjuntamente-significativas" class="level4" data-number="5.6.2.2">
+<h4 data-number="5.6.2.2" class="anchored" data-anchor-id="ejemplo-son-cronico-y-seguro-conjuntamente-significativas"><span class="header-section-number">5.6.2.2</span> Ejemplo: ¿Son <code>cronico</code> y <code>seguro</code> conjuntamente significativas?</h4>
+<p>Datos del problema:</p>
+<ul>
+<li>Modelo completo (con <code>cronico</code> y <code>seguro</code>): <span class="math inline">\(\ell_U = -12\,215.6\)</span>, <span class="math inline">\(k_U = 5\)</span> parámetros.</li>
+<li>Modelo reducido (sin <code>cronico</code> ni <code>seguro</code>): <span class="math inline">\(\ell_R = -12\,540.2\)</span>, <span class="math inline">\(k_R = 3\)</span> parámetros.</li>
+<li>Número de restricciones: <span class="math inline">\(q = k_U - k_R = 5 - 3 = 2\)</span>.</li>
+</ul>
+<p><strong>Paso 1.</strong> Planteamos las hipótesis:</p>
+<ul>
+<li><span class="math inline">\(H_0: \beta_{\text{cronico}} = \beta_{\text{seguro}} = 0\)</span>.</li>
+<li><span class="math inline">\(H_1:\)</span> al menos uno es distinto de cero.</li>
+</ul>
+<p><strong>Paso 2.</strong> Calculamos el estadístico LR:</p>
+<p><span class="math display">\[LR = 2\left[(-12\,215.6) - (-12\,540.2)\right] = 2 \times 324.6 = 649.2\]</span></p>
+<p><strong>Paso 3.</strong> Buscamos el valor crítico <span class="math inline">\(\chi^2_{2, 0.05} = 5.991\)</span>:</p>
+<p><span class="math display">\[649.2 &gt; 5.991 \implies \text{Rechazamos } H_0\]</span></p>
+<p><strong>Paso 4.</strong> Conclusión: Las variables <code>cronico</code> y <code>seguro</code> son <strong>conjuntamente muy significativas</strong>. El estadístico (649.2) excede enormemente el valor crítico (5.99), lo que indica que su contribución al modelo es muy importante.</p>
+<blockquote class="blockquote">
+<p><strong>¿Cuándo usar LR en vez de Wald?</strong> El test LR es preferible cuando se quiere evaluar la significación <strong>conjunta</strong> de varias variables. Para variables individuales, ambos tests dan resultados muy similares, pero el LR es más fiable en muestras pequeñas.</p>
+</blockquote>
+</section>
+</section>
+<section id="test-de-sobredispersión-poisson-vs-binomial-negativo" class="level3" data-number="5.6.3">
+<h3 data-number="5.6.3" class="anchored" data-anchor-id="test-de-sobredispersión-poisson-vs-binomial-negativo"><span class="header-section-number">5.6.3</span> Test de sobredispersión: Poisson vs Binomial Negativo</h3>
+<section id="planteamiento-del-contraste-2" class="level4" data-number="5.6.3.1">
+<h4 data-number="5.6.3.1" class="anchored" data-anchor-id="planteamiento-del-contraste-2"><span class="header-section-number">5.6.3.1</span> Planteamiento del contraste</h4>
+<p>Este es uno de los tests más importantes en modelos de recuento. Evalúa si la <strong>varianza de los datos excede la media</strong> (sobredispersión), lo que invalidaría los errores estándar del modelo Poisson.</p>
+<p><strong>Hipótesis:</strong></p>
+<ul>
+<li><span class="math inline">\(H_0: \alpha = 0\)</span> (equidispersión → el modelo <strong>Poisson</strong> es adecuado).</li>
+<li><span class="math inline">\(H_1: \alpha &gt; 0\)</span> (sobredispersión → el modelo <strong>Binomial Negativo</strong> es necesario).</li>
+</ul>
+<p>Recordemos que en el NB: <span class="math inline">\(\text{Var}(y_i) = \lambda_i + \alpha \lambda_i^2\)</span>. Si <span class="math inline">\(\alpha = 0\)</span>, la varianza es <span class="math inline">\(\lambda_i\)</span> (Poisson).</p>
+</section>
+<section id="método-1-test-lr-poisson-vs-nb" class="level4" data-number="5.6.3.2">
+<h4 data-number="5.6.3.2" class="anchored" data-anchor-id="método-1-test-lr-poisson-vs-nb"><span class="header-section-number">5.6.3.2</span> Método 1: Test LR (Poisson vs NB)</h4>
+<p><strong>Estadístico:</strong></p>
+<p><span class="math display">\[LR = 2\left[\ell_{NB} - \ell_{Poisson}\right]\]</span></p>
+<p><strong>Distribución bajo <span class="math inline">\(H_0\)</span>:</strong> Aproximadamente <span class="math inline">\(\chi^2_1\)</span> (un grado de libertad porque solo se restringe <span class="math inline">\(\alpha\)</span>).</p>
+</section>
+<section id="ejemplo-de-cálculo" class="level4" data-number="5.6.3.3">
+<h4 data-number="5.6.3.3" class="anchored" data-anchor-id="ejemplo-de-cálculo"><span class="header-section-number">5.6.3.3</span> Ejemplo de cálculo</h4>
+<p>Datos:</p>
+<ul>
+<li><span class="math inline">\(\ell_{Poisson} = -12\,215.6\)</span></li>
+<li><span class="math inline">\(\ell_{NB} = -11\,478.3\)</span></li>
+</ul>
+<p><strong>Paso 1.</strong> Calculamos:</p>
+<p><span class="math display">\[LR = 2\left[(-11\,478.3) - (-12\,215.6)\right] = 2 \times 737.3 = 1\,474.6\]</span></p>
+<p><strong>Paso 2.</strong> Valor crítico <span class="math inline">\(\chi^2_{1, 0.05} = 3.841\)</span>:</p>
+<p><span class="math display">\[1\,474.6 \gg 3.841 \implies \text{Rechazamos } H_0 \text{ rotundamente}\]</span></p>
+<p><strong>Paso 3.</strong> Conclusión: La sobredispersión es <strong>masiva</strong>. El modelo Poisson es completamente inadecuado para estos datos; el Binomial Negativo es muy superior.</p>
+</section>
+<section id="método-2-estadístico-de-dispersión-de-pearson" class="level4" data-number="5.6.3.4">
+<h4 data-number="5.6.3.4" class="anchored" data-anchor-id="método-2-estadístico-de-dispersión-de-pearson"><span class="header-section-number">5.6.3.4</span> Método 2: Estadístico de dispersión de Pearson</h4>
+<p>Una forma rápida y visual de detectar sobredispersión:</p>
+<p><span class="math display">\[\text{Dispersión} = \frac{\sum_{i=1}^{n} \frac{(y_i - \hat{\lambda}_i)^2}{\hat{\lambda}_i}}{n - k}\]</span></p>
+<p><strong>Regla práctica:</strong></p>
+<ul>
+<li><span class="math inline">\(\approx 1\)</span>: equidispersión (Poisson OK).</li>
+<li><span class="math inline">\(&gt; 1.5\)</span>: sobredispersión moderada.</li>
+<li><span class="math inline">\(&gt; 2\)</span>: sobredispersión importante → usar NB o quasi-Poisson.</li>
+</ul>
+</section>
+<section id="método-3-test-de-cameron-y-trivedi-1990" class="level4" data-number="5.6.3.5">
+<h4 data-number="5.6.3.5" class="anchored" data-anchor-id="método-3-test-de-cameron-y-trivedi-1990"><span class="header-section-number">5.6.3.5</span> Método 3: Test de Cameron y Trivedi (1990)</h4>
+<p>Contrasta formalmente la equidispersión regresando una función de los residuos:</p>
+<p><span class="math display">\[\frac{(y_i - \hat{\lambda}_i)^2 - y_i}{\hat{\lambda}_i} = \alpha_0 + \alpha_1 \hat{\lambda}_i + \varepsilon_i\]</span></p>
+<ul>
+<li><span class="math inline">\(H_0: \alpha_1 = 0\)</span> (equidispersión).</li>
+<li><span class="math inline">\(H_1: \alpha_1 &gt; 0\)</span> (sobredispersión).</li>
+</ul>
+<p>Se contrasta con un test <span class="math inline">\(t\)</span> ordinario sobre <span class="math inline">\(\hat{\alpha}_1\)</span>. En R: <code>dispersiontest(modelo_poisson)</code> del paquete <code>AER</code>.</p>
+</section>
+</section>
+<section id="medidas-de-bondad-de-ajuste" class="level3" data-number="5.6.4">
+<h3 data-number="5.6.4" class="anchored" data-anchor-id="medidas-de-bondad-de-ajuste"><span class="header-section-number">5.6.4</span> Medidas de bondad de ajuste</h3>
+<p>En modelos de regresión lineal clásica, el coeficiente de determinación <span class="math inline">\(R^2\)</span> mide la proporción de variabilidad explicada por el modelo. Sin embargo, en modelos de recuento (Poisson, Binomial Negativo), <strong>el <span class="math inline">\(R^2\)</span> clásico no es apropiado</strong> por dos razones fundamentales:</p>
+<ol type="1">
+<li><strong>La función media condicional es no lineal</strong>: <span class="math inline">\(E[y_i | \mathbf{x}_i] = \exp(\mathbf{x}_i \boldsymbol{\beta})\)</span>, por lo que la descomposición <span class="math inline">\(TSS = ESS + RSS\)</span> no se mantiene.</li>
+<li><strong>Heterocedasticidad inherente</strong>: en Poisson, <span class="math inline">\(\text{Var}(y_i) = \lambda_i = E[y_i]\)</span>; los residuos no son homocedásticos.</li>
+</ol>
+<p>Por ello, se han desarrollado medidas alternativas de bondad de ajuste específicas para modelos de recuento, que presentamos a continuación de menor a mayor sofisticación.</p>
+<section id="desviación-deviance" class="level4" data-number="5.6.4.1">
+<h4 data-number="5.6.4.1" class="anchored" data-anchor-id="desviación-deviance"><span class="header-section-number">5.6.4.1</span> Desviación (Deviance)</h4>
+<p>La <strong>desviación</strong> (deviance) es la medida fundamental de bondad de ajuste en modelos lineales generalizados. Compara el modelo estimado con el <strong>modelo saturado</strong> (aquel que tiene tantos parámetros como observaciones y ajusta perfectamente los datos).</p>
+<section id="definición-formal" class="level5" data-number="5.6.4.1.1">
+<h5 data-number="5.6.4.1.1" class="anchored" data-anchor-id="definición-formal"><span class="header-section-number">5.6.4.1.1</span> Definición formal</h5>
+<p>Para una observación individual <span class="math inline">\(i\)</span>, la <strong>contribución a la desviación</strong> es:</p>
+<p><span class="math display">\[d_i = 2\left[y_i \ln\left(\frac{y_i}{\hat{\lambda}_i}\right) - (y_i - \hat{\lambda}_i)\right]\]</span></p>
+<p>donde por convención <span class="math inline">\(0 \cdot \ln(0) = 0\)</span>. Nótese que <span class="math inline">\(d_i \geq 0\)</span> siempre, y <span class="math inline">\(d_i = 0\)</span> solo cuando <span class="math inline">\(y_i = \hat{\lambda}_i\)</span> (ajuste perfecto).</p>
+<p>La <strong>desviación total</strong> (o deviance residual) del modelo es la suma:</p>
+<p><span class="math display">\[D = \sum_{i=1}^{n} d_i = 2\sum_{i=1}^{n}\left[y_i \ln\left(\frac{y_i}{\hat{\lambda}_i}\right) - (y_i - \hat{\lambda}_i)\right]\]</span></p>
+<p><strong>Interpretación intuitiva:</strong> La desviación mide cuánto “se pierde” al usar el modelo estimado en lugar del modelo saturado. Es análoga a la suma de cuadrados residual (RSS) en regresión lineal, pero para modelos GLM.</p>
+</section>
+<section id="desviación-nula-y-desviación-residual" class="level5" data-number="5.6.4.1.2">
+<h5 data-number="5.6.4.1.2" class="anchored" data-anchor-id="desviación-nula-y-desviación-residual"><span class="header-section-number">5.6.4.1.2</span> Desviación nula y desviación residual</h5>
+<ul>
+<li><strong>Desviación nula</strong> (<span class="math inline">\(D_0\)</span>): desviación del modelo que solo incluye la constante (sin variables explicativas). Mide la variabilidad total a explicar.</li>
+<li><strong>Desviación residual</strong> (<span class="math inline">\(D\)</span>): desviación del modelo completo con las <span class="math inline">\(k\)</span> variables. Mide la variabilidad <strong>no explicada</strong> por el modelo.</li>
+</ul>
+<p>La diferencia <span class="math inline">\(D_0 - D\)</span> mide cuánta variabilidad explican las variables incluidas.</p>
+</section>
+<section id="test-de-bondad-de-ajuste-basado-en-la-desviación" class="level5" data-number="5.6.4.1.3">
+<h5 data-number="5.6.4.1.3" class="anchored" data-anchor-id="test-de-bondad-de-ajuste-basado-en-la-desviación"><span class="header-section-number">5.6.4.1.3</span> Test de bondad de ajuste basado en la desviación</h5>
+<p>Si el modelo Poisson es correcto, la desviación residual sigue <strong>aproximadamente</strong> una distribución chi-cuadrado:</p>
+<p><span class="math display">\[D \sim \chi^2(n - k) \quad \text{(bajo } H_0 \text{: modelo correctamente especificado)}\]</span></p>
+<p><strong>Contraste:</strong></p>
+<ul>
+<li><span class="math inline">\(H_0\)</span>: El modelo se ajusta adecuadamente a los datos.</li>
+<li><span class="math inline">\(H_1\)</span>: El modelo no se ajusta bien (posible sobredispersión o mala especificación).</li>
+<li><strong>Criterio:</strong> Rechazar <span class="math inline">\(H_0\)</span> si <span class="math inline">\(D &gt; \chi^2_{n-k, \alpha}\)</span>.</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Precaución:</strong> Este test tiene baja potencia en muestras pequeñas y es sensible a la presencia de muchos ceros. Un rechazo puede deberse a sobredispersión (no necesariamente a una mala elección de variables).</p>
+</blockquote>
+</section>
+<section id="ejemplo-de-cálculo-manual" class="level5" data-number="5.6.4.1.4">
+<h5 data-number="5.6.4.1.4" class="anchored" data-anchor-id="ejemplo-de-cálculo-manual"><span class="header-section-number">5.6.4.1.4</span> Ejemplo de cálculo manual</h5>
+<p>Supongamos nuestro modelo Poisson con <span class="math inline">\(n = 4{,}406\)</span> observaciones y <span class="math inline">\(k = 5\)</span> parámetros.</p>
+<p><strong>Datos reportados por R:</strong></p>
+<ul>
+<li>Desviación nula: <span class="math inline">\(D_0 = 8{,}127.5\)</span> con <span class="math inline">\(n - 1 = 4{,}405\)</span> grados de libertad.</li>
+<li>Desviación residual: <span class="math inline">\(D = 6{,}531.2\)</span> con <span class="math inline">\(n - k = 4{,}401\)</span> grados de libertad.</li>
+</ul>
+<p><strong>Test:</strong></p>
+<p><span class="math display">\[D = 6{,}531.2 \quad \text{vs} \quad \chi^2_{4401, 0.05} \approx 4{,}401 + 2\sqrt{2 \times 4{,}401} \approx 4{,}538.8\]</span></p>
+<p><span class="math display">\[6{,}531.2 \gg 4{,}538.8 \implies \text{Rechazamos } H_0\]</span></p>
+<p><strong>Conclusión:</strong> El modelo Poisson <strong>no</strong> se ajusta bien. La desviación residual es mucho mayor que los grados de libertad, lo cual indica <strong>sobredispersión</strong> (la varianza observada supera la predicha por Poisson). La razón <span class="math inline">\(D/(n-k) = 6{,}531.2/4{,}401 = 1.484\)</span> confirma que la varianza es un 48% mayor que la media.</p>
+<blockquote class="blockquote">
+<p><strong>Regla rápida:</strong> Si <span class="math inline">\(D/(n-k) \approx 1\)</span>, el modelo Poisson es adecuado. Si <span class="math inline">\(D/(n-k) \gg 1\)</span>, hay sobredispersión y se debería considerar el modelo Binomial Negativo.</p>
+</blockquote>
+</section>
+</section>
+<section id="estadístico-chi2-de-pearson" class="level4" data-number="5.6.4.2">
+<h4 data-number="5.6.4.2" class="anchored" data-anchor-id="estadístico-chi2-de-pearson"><span class="header-section-number">5.6.4.2</span> Estadístico <span class="math inline">\(\chi^2\)</span> de Pearson</h4>
+<p>El estadístico chi-cuadrado de Pearson es la alternativa clásica a la desviación. Mientras que la desviación se basa en la log-verosimilitud, el estadístico de Pearson se basa directamente en la <strong>diferencia entre valores observados y esperados</strong>.</p>
+<section id="definición" class="level5" data-number="5.6.4.2.1">
+<h5 data-number="5.6.4.2.1" class="anchored" data-anchor-id="definición"><span class="header-section-number">5.6.4.2.1</span> Definición</h5>
+<p><span class="math display">\[X^2 = \sum_{i=1}^{n} \frac{(y_i - \hat{\lambda}_i)^2}{\hat{\lambda}_i}\]</span></p>
+<p>Este es el <strong>estadístico clásico de Pearson</strong>, idéntico conceptualmente al <span class="math inline">\(\chi^2\)</span> usado en tablas de contingencia. Bajo <span class="math inline">\(H_0\)</span> (modelo correcto):</p>
+<p><span class="math display">\[X^2 \sim \chi^2(n - k)\]</span></p>
+</section>
+<section id="relación-con-la-desviación" class="level5" data-number="5.6.4.2.2">
+<h5 data-number="5.6.4.2.2" class="anchored" data-anchor-id="relación-con-la-desviación"><span class="header-section-number">5.6.4.2.2</span> Relación con la desviación</h5>
+<p>Ambas medidas convergen a la misma distribución asintóticamente, pero difieren en muestras finitas:</p>
+<ul>
+<li>La <strong>desviación</strong> pondera más las observaciones con <span class="math inline">\(y_i\)</span> grande.</li>
+<li>El <strong><span class="math inline">\(\chi^2\)</span> de Pearson</strong> es más sensible a observaciones con <span class="math inline">\(\hat{\lambda}_i\)</span> pequeño (donde un residuo incluso moderado genera un cociente grande).</li>
+</ul>
+<p>En la práctica, ambas suelen dar resultados similares. Los programas como R reportan la desviación por defecto, pero el <span class="math inline">\(\chi^2\)</span> de Pearson se obtiene fácilmente:</p>
+<p>En R, el estadístico se calcula con <code>sum(residuals(modelo, type = "pearson")^2)</code> y su p-valor con <code>pchisq(X2, df = modelo$df.residual, lower.tail = FALSE)</code>.</p>
+</section>
+<section id="ejemplo-de-cálculo-manual-1" class="level5" data-number="5.6.4.2.3">
+<h5 data-number="5.6.4.2.3" class="anchored" data-anchor-id="ejemplo-de-cálculo-manual-1"><span class="header-section-number">5.6.4.2.3</span> Ejemplo de cálculo manual</h5>
+<p>Con <span class="math inline">\(X^2 = 6{,}582.7\)</span> y <span class="math inline">\(n - k = 4{,}401\)</span>:</p>
+<p><span class="math display">\[\frac{X^2}{n-k} = \frac{6{,}582.7}{4{,}401} = 1.495\]</span></p>
+<p>Dado que <span class="math inline">\(1.495 &gt; 1\)</span>, se confirma la presencia de sobredispersión. Este valor es consistente con el obtenido vía desviación (<span class="math inline">\(1.484\)</span>), lo cual es habitual.</p>
+</section>
+</section>
+<section id="medidas-de-r2-para-modelos-de-recuento" class="level4" data-number="5.6.4.3">
+<h4 data-number="5.6.4.3" class="anchored" data-anchor-id="medidas-de-r2-para-modelos-de-recuento"><span class="header-section-number">5.6.4.3</span> Medidas de <span class="math inline">\(R^2\)</span> para modelos de recuento</h4>
+<p>Aunque el <span class="math inline">\(R^2\)</span> clásico no es aplicable, se han propuesto diversas adaptaciones. Presentamos tres, de menor a mayor sofisticación.</p>
+<section id="r2-basado-en-residuos-estandarizados" class="level5" data-number="5.6.4.3.1">
+<h5 data-number="5.6.4.3.1" class="anchored" data-anchor-id="r2-basado-en-residuos-estandarizados"><span class="header-section-number">5.6.4.3.1</span> <span class="math inline">\(R^2\)</span> basado en residuos estandarizados</h5>
+<p>Una primera aproximación, propuesta como extensión directa del <span class="math inline">\(R^2\)</span> lineal:</p>
+<p><span class="math display">\[R^2_{res} = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{\lambda}_i)^2 / \hat{\lambda}_i}{\sum_{i=1}^{n} (y_i - \bar{y})^2 / \bar{y}}\]</span></p>
+<p>Esta medida compara el ajuste del modelo completo (numerador) con el de un modelo que solo incluye la constante (denominador).</p>
+<p><strong>Ventajas:</strong> Intuitivo, análogo al <span class="math inline">\(R^2\)</span> clásico.</p>
+<p><strong>Limitaciones:</strong></p>
+<ul>
+<li>Puede ser <strong>negativo</strong> (si el modelo ajusta peor que la media).</li>
+<li>Puede <strong>aumentar</strong> al eliminar variables relevantes.</li>
+</ul>
+</section>
+<section id="pseudo-r2-de-mcfadden" class="level5" data-number="5.6.4.3.2">
+<h5 data-number="5.6.4.3.2" class="anchored" data-anchor-id="pseudo-r2-de-mcfadden"><span class="header-section-number">5.6.4.3.2</span> Pseudo <span class="math inline">\(R^2\)</span> de McFadden</h5>
+<p>Es la medida más utilizada en la práctica:</p>
+<p><span class="math display">\[R^2_{McF} = 1 - \frac{\ell(\hat{\boldsymbol{\beta}})}{\ell(\hat{\beta}_0)}\]</span></p>
+<p>donde <span class="math inline">\(\ell(\hat{\boldsymbol{\beta}})\)</span> es la log-verosimilitud del modelo completo y <span class="math inline">\(\ell(\hat{\beta}_0)\)</span> es la del modelo solo con constante.</p>
+<p><strong>Interpretación:</strong> Proporción de la log-verosimilitud explicada por las variables del modelo. Está acotado superiormente por 1 (ajuste perfecto), pero <strong>nunca alcanza 1</strong> en la práctica, porque <span class="math inline">\(\ell &lt; 0\)</span> siempre.</p>
+<p><strong>Ejemplo de cálculo:</strong></p>
+<p>Con <span class="math inline">\(\ell(\hat{\boldsymbol{\beta}}) = -11{,}478.3\)</span> (NB completo) y <span class="math inline">\(\ell(\hat{\beta}_0) = -13{,}890.1\)</span> (solo constante):</p>
+<p><span class="math display">\[R^2_{McF} = 1 - \frac{-11{,}478.3}{-13{,}890.1} = 1 - 0.8263 = 0.1737\]</span></p>
+<p><strong>Interpretación:</strong> El modelo explica aproximadamente un 17.4% de la variación en la log-verosimilitud. En modelos de recuento con datos microeconómicos, <strong>valores entre 0.10 y 0.25 son habituales y aceptables</strong>.</p>
+<blockquote class="blockquote">
+<p><strong>Referencia:</strong> En regresión lineal, un <span class="math inline">\(R^2 = 0.17\)</span> se consideraría bajo. Pero en modelos de recuento, la heterogeneidad individual no observada hace que las predicciones puntuales sean intrínsecamente más difíciles, por lo que estos valores son normales y no indican un modelo deficiente.</p>
+</blockquote>
+</section>
+<section id="r2-de-cameron-y-windmeijer-1993" class="level5" data-number="5.6.4.3.3">
+<h5 data-number="5.6.4.3.3" class="anchored" data-anchor-id="r2-de-cameron-y-windmeijer-1993"><span class="header-section-number">5.6.4.3.3</span> <span class="math inline">\(R^2\)</span> de Cameron y Windmeijer (1993)</h5>
+<p>Cameron y Windmeijer propusieron una medida basada en la desviación que está <strong>acotada entre 0 y 1</strong>:</p>
+<p><span class="math display">\[R^2_{Dev} = \frac{D_0 - D}{D_0^*}\]</span></p>
+<p>donde:</p>
+<ul>
+<li><span class="math inline">\(D_0\)</span>: desviación del modelo nulo (solo constante).</li>
+<li><span class="math inline">\(D\)</span>: desviación del modelo completo.</li>
+<li><span class="math inline">\(D_0^*\)</span>: desviación máxima posible (mejora máxima sobre un ajuste perfecto).</li>
+</ul>
+<p>Esta medida es equivalente al pseudo-<span class="math inline">\(R^2\)</span> reportado por muchos paquetes estadísticos y puede reescribirse como:</p>
+<p><span class="math display">\[R^2_{Dev} = 1 - \frac{D}{D_0}\]</span></p>
+<p><strong>Ejemplo de cálculo:</strong></p>
+<p>Con <span class="math inline">\(D_0 = 8{,}127.5\)</span> y <span class="math inline">\(D = 6{,}531.2\)</span>:</p>
+<p><span class="math display">\[R^2_{Dev} = 1 - \frac{6{,}531.2}{8{,}127.5} = 1 - 0.8035 = 0.1965\]</span></p>
+<p>El modelo reduce la desviación en un 19.7% respecto al modelo nulo.</p>
+<p><strong>Ventajas sobre McFadden:</strong> Está acotada entre 0 y 1 y aumenta monótonamente al añadir variables relevantes, lo que la hace más interpretable.</p>
+</section>
+</section>
+<section id="criterio-de-información-de-akaike-aic" class="level4" data-number="5.6.4.4">
+<h4 data-number="5.6.4.4" class="anchored" data-anchor-id="criterio-de-información-de-akaike-aic"><span class="header-section-number">5.6.4.4</span> Criterio de Información de Akaike (AIC)</h4>
+<section id="fundamento-teórico" class="level5" data-number="5.6.4.4.1">
+<h5 data-number="5.6.4.4.1" class="anchored" data-anchor-id="fundamento-teórico"><span class="header-section-number">5.6.4.4.1</span> Fundamento teórico</h5>
+<p>El AIC fue propuesto por Akaike (1973) basándose en la <strong>divergencia de Kullback-Leibler (K-L)</strong>, que mide la “distancia” entre la distribución verdadera (desconocida) de los datos y la distribución estimada por nuestro modelo.</p>
+<p>Akaike demostró que un estimador asintóticamente insesgado de la divergencia K-L esperada es:</p>
+<p><span class="math display">\[\text{AIC} = 2k - 2\ell(\hat{\boldsymbol{\beta}})\]</span></p>
+<p>donde:</p>
+<ul>
+<li><span class="math inline">\(k\)</span> = número de parámetros estimados (incluida la constante).</li>
+<li><span class="math inline">\(\ell(\hat{\boldsymbol{\beta}})\)</span> = log-verosimilitud evaluada en los estimadores de máxima verosimilitud.</li>
+</ul>
+</section>
+<section id="interpretación-de-los-componentes" class="level5" data-number="5.6.4.4.2">
+<h5 data-number="5.6.4.4.2" class="anchored" data-anchor-id="interpretación-de-los-componentes"><span class="header-section-number">5.6.4.4.2</span> Interpretación de los componentes</h5>
+<p>El AIC equilibra dos objetivos contrapuestos:</p>
+<ul>
+<li><strong><span class="math inline">\(-2\ell(\hat{\boldsymbol{\beta}})\)</span>: Bondad de ajuste.</strong> Cuanto mayor la verosimilitud, menor este término. Mide lo bien que el modelo se ajusta a los datos observados.</li>
+<li><strong><span class="math inline">\(2k\)</span>: Penalización por complejidad.</strong> Cada parámetro adicional suma 2 al AIC. Previene el sobreajuste: un modelo con muchas variables puede ajustar bien los datos de entrenamiento pero predecir mal datos nuevos.</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Intuición:</strong> El AIC busca el modelo que mejor <strong>predecirá</strong> datos futuros generados por el mismo proceso, no el que mejor ajuste los datos actuales.</p>
+</blockquote>
+</section>
+<section id="ejemplo-detallado-de-cálculo-manual" class="level5" data-number="5.6.4.4.3">
+<h5 data-number="5.6.4.4.3" class="anchored" data-anchor-id="ejemplo-detallado-de-cálculo-manual"><span class="header-section-number">5.6.4.4.3</span> Ejemplo detallado de cálculo manual</h5>
+<p><strong>Modelo Poisson</strong> (<span class="math inline">\(k = 5\)</span>, <span class="math inline">\(\ell = -12{,}215.6\)</span>):</p>
+<p><span class="math display">\[\text{AIC}_{Poisson} = 2(5) - 2(-12{,}215.6) = 10 + 24{,}431.2 = 24{,}441.2\]</span></p>
+<p>Desglose: penalización = 10 (por 5 parámetros), ajuste = 24,431.2 (peor ajuste → mayor valor).</p>
+<p><strong>Modelo Binomial Negativo</strong> (<span class="math inline">\(k = 6\)</span>, <span class="math inline">\(\ell = -11{,}478.3\)</span>):</p>
+<p><span class="math display">\[\text{AIC}_{NB} = 2(6) - 2(-11{,}478.3) = 12 + 22{,}956.6 = 22{,}968.6\]</span></p>
+<p>Desglose: penalización = 12 (un parámetro más, <span class="math inline">\(\alpha\)</span>), ajuste = 22,956.6 (mejor ajuste).</p>
+<p><strong>Comparación:</strong></p>
+<p><span class="math display">\[\Delta \text{AIC} = 24{,}441.2 - 22{,}968.6 = 1{,}472.6\]</span></p>
+<blockquote class="blockquote">
+<p><strong>Regla práctica de Burnham y Anderson (2002):</strong></p>
+<ul>
+<li><span class="math inline">\(\Delta \text{AIC} &lt; 2\)</span>: ambos modelos son igualmente plausibles.</li>
+<li><span class="math inline">\(2 &lt; \Delta \text{AIC} &lt; 7\)</span>: el modelo con menor AIC es moderadamente mejor.</li>
+<li><span class="math inline">\(\Delta \text{AIC} &gt; 10\)</span>: el modelo con mayor AIC tiene <strong>soporte prácticamente nulo</strong>.</li>
+</ul>
+<p>En nuestro ejemplo, <span class="math inline">\(\Delta = 1{,}472.6 \gg 10\)</span>: el NB es <strong>abrumadoramente</strong> superior.</p>
+</blockquote>
+</section>
+<section id="limitaciones-del-aic" class="level5" data-number="5.6.4.4.4">
+<h5 data-number="5.6.4.4.4" class="anchored" data-anchor-id="limitaciones-del-aic"><span class="header-section-number">5.6.4.4.4</span> Limitaciones del AIC</h5>
+<ol type="1">
+<li><strong>No tiene interpretación absoluta</strong>: solo sirve para comparar modelos ajustados a los <strong>mismos datos</strong>.</li>
+<li><strong>Tiende a seleccionar modelos complejos</strong> en muestras grandes, porque la penalización <span class="math inline">\(2k\)</span> no crece con <span class="math inline">\(n\)</span>.</li>
+<li><strong>No indica si el modelo es “bueno”</strong>: un modelo con el menor AIC puede seguir siendo inadecuado.</li>
+</ol>
+</section>
+</section>
+<section id="criterio-de-información-bayesiano-bic" class="level4" data-number="5.6.4.5">
+<h4 data-number="5.6.4.5" class="anchored" data-anchor-id="criterio-de-información-bayesiano-bic"><span class="header-section-number">5.6.4.5</span> Criterio de Información Bayesiano (BIC)</h4>
+<section id="fundamento-teórico-1" class="level5" data-number="5.6.4.5.1">
+<h5 data-number="5.6.4.5.1" class="anchored" data-anchor-id="fundamento-teórico-1"><span class="header-section-number">5.6.4.5.1</span> Fundamento teórico</h5>
+<p>El BIC (también llamado criterio de Schwarz, 1978) surge de la <strong>selección bayesiana de modelos</strong>. Aproxima el logaritmo del factor de Bayes, que mide la evidencia relativa a favor de un modelo sobre otro.</p>
+<p><span class="math display">\[\text{BIC} = k \ln(n) - 2\ell(\hat{\boldsymbol{\beta}})\]</span></p>
+</section>
+<section id="diferencia-clave-con-el-aic" class="level5" data-number="5.6.4.5.2">
+<h5 data-number="5.6.4.5.2" class="anchored" data-anchor-id="diferencia-clave-con-el-aic"><span class="header-section-number">5.6.4.5.2</span> Diferencia clave con el AIC</h5>
+<p>La penalización del BIC es <span class="math inline">\(k \ln(n)\)</span> en lugar de <span class="math inline">\(2k\)</span>. Puesto que <span class="math inline">\(\ln(n) &gt; 2\)</span> cuando <span class="math inline">\(n &gt; 7\)</span> (es decir, <strong>casi siempre en la práctica</strong>):</p>
+<p><span class="math display">\[\text{Penalización BIC} = k \ln(n) &gt; 2k = \text{Penalización AIC} \quad \text{para } n &gt; 7\]</span></p>
+<p>Esto significa que el BIC <strong>penaliza más la complejidad</strong> y tiende a seleccionar modelos más parsimoniosos (con menos variables) que el AIC.</p>
+</section>
+<section id="ejemplo-detallado-de-cálculo-manual-1" class="level5" data-number="5.6.4.5.3">
+<h5 data-number="5.6.4.5.3" class="anchored" data-anchor-id="ejemplo-detallado-de-cálculo-manual-1"><span class="header-section-number">5.6.4.5.3</span> Ejemplo detallado de cálculo manual</h5>
+<p>Con <span class="math inline">\(n = 4{,}406\)</span>, <span class="math inline">\(\ln(4{,}406) = 8.39\)</span>:</p>
+<p><strong>Modelo Poisson</strong> (<span class="math inline">\(k = 5\)</span>): <span class="math display">\[\text{BIC}_{Poisson} = 5 \times 8.39 - 2(-12{,}215.6) = 41.95 + 24{,}431.2 = 24{,}473.2\]</span></p>
+<p><strong>Modelo NB</strong> (<span class="math inline">\(k = 6\)</span>): <span class="math display">\[\text{BIC}_{NB} = 6 \times 8.39 - 2(-11{,}478.3) = 50.34 + 22{,}956.6 = 23{,}006.9\]</span></p>
+<p><strong>Comparación:</strong> <span class="math inline">\(\Delta \text{BIC} = 24{,}473.2 - 23{,}006.9 = 1{,}466.3\)</span></p>
+<blockquote class="blockquote">
+<p><strong>Escala de evidencia de Kass y Raftery (1995):</strong></p>
+<ul>
+<li><span class="math inline">\(\Delta \text{BIC} &lt; 2\)</span>: evidencia débil (apenas vale la pena mencionarlo).</li>
+<li><span class="math inline">\(2 &lt; \Delta \text{BIC} &lt; 6\)</span>: evidencia positiva.</li>
+<li><span class="math inline">\(6 &lt; \Delta \text{BIC} &lt; 10\)</span>: evidencia fuerte.</li>
+<li><span class="math inline">\(\Delta \text{BIC} &gt; 10\)</span>: evidencia <strong>muy fuerte</strong>.</li>
+</ul>
+<p>En nuestro ejemplo, <span class="math inline">\(\Delta \text{BIC} = 1{,}466.3 \gg 10\)</span>: evidencia <strong>abrumadora</strong> a favor del NB.</p>
+</blockquote>
+</section>
+<section id="cuándo-usar-aic-y-cuándo-bic" class="level5" data-number="5.6.4.5.4">
+<h5 data-number="5.6.4.5.4" class="anchored" data-anchor-id="cuándo-usar-aic-y-cuándo-bic"><span class="header-section-number">5.6.4.5.4</span> ¿Cuándo usar AIC y cuándo BIC?</h5>
+<ul>
+<li><strong>AIC</strong>: Cuando el objetivo es <strong>predicción</strong>. El AIC selecciona el modelo que minimiza el error de predicción esperado.</li>
+<li><strong>BIC</strong>: Cuando el objetivo es <strong>identificar el modelo verdadero</strong>. Si el verdadero modelo está entre los candidatos, el BIC lo selecciona con probabilidad <span class="math inline">\(\to 1\)</span> cuando <span class="math inline">\(n \to \infty\)</span> (propiedad de consistencia).</li>
+<li><strong>En la práctica</strong>: Si ambos criterios coinciden, la decisión es clara. Si discrepan, el AIC suele preferir un modelo más complejo y el BIC uno más parsimonioso. En microeconometría, se reportan ambos.</li>
+</ul>
+</section>
+</section>
+<section id="tabla-resumen-de-medidas-de-bondad-de-ajuste" class="level4" data-number="5.6.4.6">
+<h4 data-number="5.6.4.6" class="anchored" data-anchor-id="tabla-resumen-de-medidas-de-bondad-de-ajuste"><span class="header-section-number">5.6.4.6</span> Tabla resumen de medidas de bondad de ajuste</h4>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Resumen de medidas de bondad de ajuste para modelos de recuento</caption>
+<colgroup>
+<col style="width: 15%">
+<col style="width: 53%">
+<col style="width: 19%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Medida</th>
+<th style="text-align: left;">Fórmula</th>
+<th style="text-align: left;">Uso principal</th>
+<th style="text-align: left;">Ejemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Desviación residual (<span class="math inline">\(D\)</span>)</td>
+<td style="text-align: left;"><span class="math inline">\(2\sum[y_i \cdot \ln(y_i/\hat{\lambda}_i) - (y_i - \hat{\lambda}_i)]\)</span></td>
+<td style="text-align: left;">Test GOF: <span class="math inline">\(D \sim \chi^2(n-k)\)</span></td>
+<td style="text-align: left;">6.531,2 (ratio 1,48)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\chi^2\)</span> de Pearson</td>
+<td style="text-align: left;"><span class="math inline">\(\sum(y_i - \hat{\lambda}_i)^2 / \hat{\lambda}_i\)</span></td>
+<td style="text-align: left;">Test GOF: <span class="math inline">\(X^2 \sim \chi^2(n-k)\)</span></td>
+<td style="text-align: left;">6.582,7 (ratio 1,50)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(R^2\)</span> residual</td>
+<td style="text-align: left;"><span class="math inline">\(1 - [\sum(y_i - \hat{\lambda}_i)^2/\hat{\lambda}_i] \;/\; [\sum(y_i - \bar{y})^2/\bar{y}]\)</span></td>
+<td style="text-align: left;">Ajuste relativo (puede ser &lt; 0)</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(R^2\)</span> McFadden</td>
+<td style="text-align: left;"><span class="math inline">\(1 - \ell(\hat{\beta})/\ell(\hat{\beta}_0)\)</span></td>
+<td style="text-align: left;">Proporción de <span class="math inline">\(\ell\)</span> explicada</td>
+<td style="text-align: left;">0,174</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(R^2\)</span> Cameron-Windmeijer</td>
+<td style="text-align: left;"><span class="math inline">\(1 - D/D_0\)</span></td>
+<td style="text-align: left;">Ajuste relativo (0 a 1)</td>
+<td style="text-align: left;">0,197</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AIC</td>
+<td style="text-align: left;"><span class="math inline">\(2k - 2\ell\)</span></td>
+<td style="text-align: left;">Comparar modelos (menor = mejor)</td>
+<td style="text-align: left;">22.968,6 (NB)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BIC</td>
+<td style="text-align: left;"><span class="math inline">\(k \cdot \ln(n) - 2\ell\)</span></td>
+<td style="text-align: left;">Comparar modelos (penaliza más)</td>
+<td style="text-align: left;">23.006,9 (NB)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</section>
+<section id="procedimiento-completo-de-comparación-poisson-vs-binomial-negativo" class="level3" data-number="5.6.5">
+<h3 data-number="5.6.5" class="anchored" data-anchor-id="procedimiento-completo-de-comparación-poisson-vs-binomial-negativo"><span class="header-section-number">5.6.5</span> Procedimiento completo de comparación Poisson vs Binomial Negativo</h3>
+<p>En la práctica, la comparación de modelos sigue estos <strong>cinco pasos</strong>:</p>
+<ol type="1">
+<li><p><strong>Estimar el modelo Poisson</strong> y calcular el estadístico de dispersión de Pearson. Si <span class="math inline">\(\approx 1\)</span>, Poisson puede ser suficiente; si <span class="math inline">\(&gt; 1.5\)</span>, hay indicios de sobredispersión.</p></li>
+<li><p><strong>Estimar el modelo Binomial Negativo</strong> con las mismas variables explicativas.</p></li>
+<li><p><strong>Test LR formal</strong>: Calcular <span class="math inline">\(LR = 2(\ell_{NB} - \ell_{Poisson})\)</span>. Si <span class="math inline">\(p &lt; 0.05\)</span>, la sobredispersión es significativa.</p></li>
+<li><p><strong>Comparar AIC y BIC</strong>: El modelo con valores menores es preferido. Si la diferencia es grande (<span class="math inline">\(\Delta &gt; 10\)</span>), la evidencia es clara.</p></li>
+<li><p><strong>Decisión</strong>: Si los pasos 3 y 4 coinciden → la decisión es clara. Si discrepan (raro), priorizar el test LR para modelos anidados.</p></li>
+</ol>
+</section>
+<section id="tablas-resumen" class="level3" data-number="5.6.6">
+<h3 data-number="5.6.6" class="anchored" data-anchor-id="tablas-resumen"><span class="header-section-number">5.6.6</span> Tablas resumen</h3>
+<p>Los contrastes y medidas de diagnóstico para modelos de recuento se organizan en tres grupos: tests de significación, tests de sobredispersión y medidas de bondad de ajuste.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Tests de significación de variables</caption>
+<colgroup>
+<col style="width: 15%">
+<col style="width: 37%">
+<col style="width: 18%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Test</th>
+<th style="text-align: left;"><span class="math inline">\(H_0\)</span></th>
+<th style="text-align: left;">Distribución</th>
+<th style="text-align: left;">Criterio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Wald</td>
+<td style="text-align: left;"><span class="math inline">\(\beta_j = 0\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(z \sim N(0,1)\)</span></td>
+<td style="text-align: left;">Rechazar si <span class="math inline">\(p &lt; 0{,}05\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LR (conjunto)</td>
+<td style="text-align: left;"><span class="math inline">\(\beta_1 = \cdots = \beta_q = 0\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\chi^2(q)\)</span></td>
+<td style="text-align: left;">Rechazar si <span class="math inline">\(p &lt; 0{,}05\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Tests de sobredispersión (Poisson vs Binomial Negativo)</caption>
+<colgroup>
+<col style="width: 27%">
+<col style="width: 21%">
+<col style="width: 51%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Test</th>
+<th style="text-align: left;"><span class="math inline">\(H_0\)</span></th>
+<th style="text-align: left;">Criterio de decisión</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">LR: NB vs Poisson</td>
+<td style="text-align: left;"><span class="math inline">\(\alpha = 0\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(LR &gt; 3{,}84 \Rightarrow\)</span> NB</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dispersión de Pearson</td>
+<td style="text-align: left;">Dispersión <span class="math inline">\(= 1\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(&gt; 1{,}5 \Rightarrow\)</span> sobredispersión</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cameron-Trivedi</td>
+<td style="text-align: left;"><span class="math inline">\(\alpha_1 = 0\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(p &lt; 0{,}05 \Rightarrow\)</span> sobredispersión</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Medidas de bondad de ajuste y comparación de modelos</caption>
+<colgroup>
+<col style="width: 21%">
+<col style="width: 43%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Medida</th>
+<th style="text-align: left;">Fórmula</th>
+<th style="text-align: left;">Interpretación</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">AIC</td>
+<td style="text-align: left;"><span class="math inline">\(2k - 2\ell\)</span></td>
+<td style="text-align: left;">Menor es mejor</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">BIC</td>
+<td style="text-align: left;"><span class="math inline">\(k \cdot \ln(n) - 2\ell\)</span></td>
+<td style="text-align: left;">Menor es mejor (penaliza más)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Pseudo <span class="math inline">\(R^2\)</span> McFadden</td>
+<td style="text-align: left;"><span class="math inline">\(1 - \ell(\hat{\beta})/\ell(\hat{\beta}_0)\)</span></td>
+<td style="text-align: left;">Mayor es mejor (0,10–0,25 típico)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<blockquote class="blockquote">
+<p><strong>Consejo práctico:</strong> En un informe o trabajo, reporta siempre: (1) el test de Wald para cada variable individual (sale directamente del <code>summary()</code>), (2) el test LR para comparar Poisson vs NB, (3) AIC y BIC de ambos modelos, y (4) el pseudo <span class="math inline">\(R^2\)</span>. Con estos cuatro elementos, el lector puede evaluar completamente la especificación del modelo.</p>
+</blockquote>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="extensiones-y-temas-avanzados" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="extensiones-y-temas-avanzados"><span class="header-section-number">5.7</span> Extensiones y temas avanzados</h2>
+<section id="sobredispersión-detección-y-corrección" class="level3" data-number="5.7.1">
+<h3 data-number="5.7.1" class="anchored" data-anchor-id="sobredispersión-detección-y-corrección"><span class="header-section-number">5.7.1</span> Sobredispersión: detección y corrección</h3>
+<section id="diagnósticos-de-sobredispersión" class="level4" data-number="5.7.1.1">
+<h4 data-number="5.7.1.1" class="anchored" data-anchor-id="diagnósticos-de-sobredispersión"><span class="header-section-number">5.7.1.1</span> Diagnósticos de sobredispersión</h4>
+<p><strong>1. Estadístico de dispersión de Pearson:</strong> <span class="math display">\[\text{Disp} = \frac{\sum_i (y_i - \hat{\lambda}_i)^2 / \hat{\lambda}_i}{n - k}\]</span></p>
+<p>Si &gt; 1 → sobredispersión. Si &gt;&gt; 1 → importante.</p>
+<p><strong>2. Deviance/grados de libertad:</strong> <span class="math display">\[\text{Deviance Ratio} = \frac{D}{n-k}\]</span></p>
+<p>Similares resultados (cercano a 1 → ajuste bueno).</p>
+</section>
+<section id="correcciones-de-la-sobredispersión" class="level4" data-number="5.7.1.2">
+<h4 data-number="5.7.1.2" class="anchored" data-anchor-id="correcciones-de-la-sobredispersión"><span class="header-section-number">5.7.1.2</span> Correcciones de la sobredispersión</h4>
+<p>Cuando se detecta sobredispersión, existen tres estrategias principales. La primera y más recomendada es estimar un <strong>modelo Binomial Negativo</strong>, que incorpora un parámetro de dispersión <span class="math inline">\(\alpha\)</span> que permite que la varianza exceda la media. Es el enfoque estándar en la literatura econométrica y se estima en R con <code>MASS::glm.nb()</code>.</p>
+<p>La segunda opción es el modelo <strong>Quasi-Poisson</strong>, que mantiene la estructura del modelo Poisson pero ajusta los errores estándar multiplicándolos por un factor de dispersión estimado a partir de los datos. No requiere especificar una nueva distribución, sino que utiliza un enfoque de cuasi-verosimilitud. En R se estima con <code>family = quasipoisson</code>.</p>
+<p>La tercera opción consiste en mantener el modelo Poisson pero calcular <strong>errores estándar robustos</strong> (tipo sandwich), que son válidos incluso cuando la varianza no coincide con la media. En R se obtienen combinando <code>coeftest()</code> del paquete <code>lmtest</code> con <code>vcovHC()</code> del paquete <code>sandwich</code>.</p>
+</section>
+</section>
+<section id="datos-con-exceso-de-ceros" class="level3" data-number="5.7.2">
+<h3 data-number="5.7.2" class="anchored" data-anchor-id="datos-con-exceso-de-ceros"><span class="header-section-number">5.7.2</span> Datos con exceso de ceros</h3>
+<p>En muchos contextos económicos, los datos de recuento presentan una proporción de observaciones con valor cero considerablemente mayor de la que predeciría un modelo Poisson o Binomial Negativo. Este fenómeno se denomina <strong>exceso de ceros</strong> (zero inflation) y aparece cuando existen dos procesos generadores de datos superpuestos: uno que determina si el evento puede ocurrir en absoluto, y otro que gobierna cuántas veces ocurre condicionado a que sea posible. Por ejemplo, en el gasto en ocio, algunas personas nunca gastan (cero estructural, por preferencias o restricciones), mientras que las que sí gastan presentan un recuento variable. De forma similar, en el número de hijos, hay parejas que han decidido no tener hijos (cero deliberado) frente a las que simplemente aún no los han tenido (cero circunstancial).</p>
+<p>Para modelar estos datos existen dos familias de modelos. Los modelos <strong>Zero-Inflated</strong> (ZIP para Poisson, ZINB para Binomial Negativo) asumen que los ceros provienen de dos fuentes: una masa puntual en cero (modelada con un Logit) y el proceso de recuento habitual. Los modelos <strong>Hurdle</strong> adoptan un enfoque secuencial: primero modelan si <span class="math inline">\(y &gt; 0\)</span> o no (con un modelo binario), y luego, condicionado a <span class="math inline">\(y &gt; 0\)</span>, modelan el recuento con una distribución truncada en cero. Ambos enfoques se implementan en R con el paquete <code>pscl</code>.</p>
+</section>
+<section id="variables-de-offset" class="level3" data-number="5.7.3">
+<h3 data-number="5.7.3" class="anchored" data-anchor-id="variables-de-offset"><span class="header-section-number">5.7.3</span> Variables de offset</h3>
+<p>Para modelar <strong>tasas</strong> en lugar de recuentos absolutos, usamos variables de offset.</p>
+<p>Ejemplo: Si <span class="math inline">\(y_i\)</span> son accidentes y queremos ajustar por horas trabajadas:</p>
+<p><span class="math display">\[\ln(\lambda_i / \text{horas}_i) = \mathbf{x}_i \boldsymbol{\beta}\]</span></p>
+<p>equivalentemente:</p>
+<p><span class="math display">\[\ln(\lambda_i) = \ln(\text{horas}_i) + \mathbf{x}_i \boldsymbol{\beta}\]</span></p>
+<p>En R: <code>glm(..., offset = log(horas), ...)</code></p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="resumen-lo-esencial-en-10-puntos" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="resumen-lo-esencial-en-10-puntos"><span class="header-section-number">5.8</span> Resumen: lo esencial en 10 puntos</h2>
+<ol type="1">
+<li><p>Los <strong>datos de recuento</strong> toman valores enteros no negativos (<span class="math inline">\(y \in \{0, 1, 2, \ldots\}\)</span>). Ejemplos: visitas al médico, patentes, accidentes laborales.</p></li>
+<li><p>La <strong>distribución de Poisson</strong> es el punto de partida natural. Su propiedad fundamental es la <strong>equidispersión</strong>: <span class="math inline">\(E[Y] = \text{Var}(Y) = \lambda\)</span>.</p></li>
+<li><p>El <strong>modelo de regresión de Poisson</strong> especifica <span class="math inline">\(\ln(\lambda_i) = \mathbf{x}_i \boldsymbol{\beta}\)</span>. La función exponencial garantiza que <span class="math inline">\(\lambda_i &gt; 0\)</span> siempre.</p></li>
+<li><p>Los coeficientes se interpretan como <strong>semi-elasticidades</strong>: un cambio de 1 unidad en <span class="math inline">\(x_j\)</span> multiplica la media esperada por <span class="math inline">\(e^{\beta_j}\)</span>. Esto equivale a un cambio porcentual de <span class="math inline">\((e^{\beta_j} - 1) \times 100\%\)</span>.</p></li>
+<li><p>El <strong>efecto marginal</strong> no es constante: <span class="math inline">\(\partial E[y] / \partial x_j = \beta_j \cdot \lambda_i\)</span>. Depende del nivel de <span class="math inline">\(\lambda_i\)</span>.</p></li>
+<li><p>En datos reales, la varianza frecuentemente <strong>excede la media</strong> (sobredispersión). Si se ignora, los errores estándar del Poisson son demasiado pequeños y se generan falsos positivos.</p></li>
+<li><p>El <strong>modelo Binomial Negativo</strong> corrige la sobredispersión añadiendo un parámetro de dispersión <span class="math inline">\(\alpha\)</span>: <span class="math inline">\(\text{Var}(y_i) = \lambda_i + \alpha \lambda_i^2\)</span>. Cuando <span class="math inline">\(\alpha = 0\)</span>, se recupera el Poisson.</p></li>
+<li><p>El <strong>test LR de sobredispersión</strong> compara Poisson con NB: <span class="math inline">\(LR = 2(\ell_{NB} - \ell_{Poisson}) \sim \chi^2_1\)</span>. Si se rechaza <span class="math inline">\(H_0\)</span>, el NB es preferible.</p></li>
+<li><p>La bondad de ajuste se evalúa con la <strong>desviación</strong> (<span class="math inline">\(D/(n-k) \approx 1\)</span> indica buen ajuste), el <strong>pseudo-<span class="math inline">\(R^2\)</span> de McFadden</strong> (0.10–0.25 típico en recuento) y los criterios <strong>AIC</strong> y <strong>BIC</strong> (menor es mejor).</p></li>
+<li><p>Para datos con <strong>exceso de ceros</strong>, se utilizan modelos Zero-Inflated (ZIP/ZINB) o modelos Hurdle, que distinguen entre ceros estructurales y ceros del proceso de recuento.</p></li>
+</ol>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="funciones-esenciales-en-r" class="level2" data-number="5.9">
+<h2 data-number="5.9" class="anchored" data-anchor-id="funciones-esenciales-en-r"><span class="header-section-number">5.9</span> Funciones esenciales en R</h2>
+<section id="estimación-de-modelos" class="level3" data-number="5.9.1">
+<h3 data-number="5.9.1" class="anchored" data-anchor-id="estimación-de-modelos"><span class="header-section-number">5.9.1</span> Estimación de modelos</h3>
+<ul>
+<li><code>glm(y ~ x1 + x2, family = poisson(link = "log"), data = datos)</code> — modelo de regresión Poisson.</li>
+<li><code>MASS::glm.nb(y ~ x1 + x2, data = datos)</code> — modelo Binomial Negativo (estima <span class="math inline">\(\alpha\)</span> automáticamente).</li>
+<li><code>glm(..., family = quasipoisson)</code> — modelo Quasi-Poisson (corrige errores estándar por sobredispersión).</li>
+</ul>
+</section>
+<section id="extracción-de-resultados" class="level3" data-number="5.9.2">
+<h3 data-number="5.9.2" class="anchored" data-anchor-id="extracción-de-resultados"><span class="header-section-number">5.9.2</span> Extracción de resultados</h3>
+<ul>
+<li><code>summary(modelo)</code> — tabla de coeficientes, errores estándar, z-valores y p-valores.</li>
+<li><code>coef(modelo)</code> — vector de coeficientes <span class="math inline">\(\hat{\boldsymbol{\beta}}\)</span>.</li>
+<li><code>exp(coef(modelo))</code> — coeficientes exponenciados (tasas de incidencia, IRR).</li>
+<li><code>confint(modelo)</code> — intervalos de confianza.</li>
+<li><code>vcov(modelo)</code> — matriz de varianzas-covarianzas.</li>
+</ul>
+</section>
+<section id="bondad-de-ajuste-y-comparación" class="level3" data-number="5.9.3">
+<h3 data-number="5.9.3" class="anchored" data-anchor-id="bondad-de-ajuste-y-comparación"><span class="header-section-number">5.9.3</span> Bondad de ajuste y comparación</h3>
+<ul>
+<li><code>logLik(modelo)</code> — log-verosimilitud.</li>
+<li><code>AIC(modelo)</code>, <code>BIC(modelo)</code> — criterios de información.</li>
+<li><code>deviance(modelo)</code> — desviación residual.</li>
+<li><code>modelo$df.residual</code> — grados de libertad residuales.</li>
+<li><code>residuals(modelo, type = "pearson")</code> — residuos de Pearson (para el estadístico <span class="math inline">\(\chi^2\)</span>).</li>
+<li><code>residuals(modelo, type = "deviance")</code> — residuos de la desviación.</li>
+</ul>
+</section>
+<section id="test-de-razón-de-verosimilitud-manual" class="level3" data-number="5.9.4">
+<h3 data-number="5.9.4" class="anchored" data-anchor-id="test-de-razón-de-verosimilitud-manual"><span class="header-section-number">5.9.4</span> Test de razón de verosimilitud (manual)</h3>
+<ul>
+<li><code>lr &lt;- 2 * (logLik(m_completo) - logLik(m_reducido))</code> — estadístico LR.</li>
+<li><code>pchisq(lr, df = diferencia_parametros, lower.tail = FALSE)</code> — p-valor.</li>
+</ul>
+</section>
+<section id="predicción" class="level3" data-number="5.9.5">
+<h3 data-number="5.9.5" class="anchored" data-anchor-id="predicción"><span class="header-section-number">5.9.5</span> Predicción</h3>
+<ul>
+<li><code>predict(modelo, newdata = df, type = "response")</code> — predicción del valor esperado <span class="math inline">\(\hat{\lambda}\)</span>.</li>
+<li><code>predict(modelo, newdata = df, type = "link")</code> — predicción del predictor lineal <span class="math inline">\(\mathbf{x}\hat{\boldsymbol{\beta}}\)</span>.</li>
+</ul>
+</section>
+<section id="modelos-con-exceso-de-ceros" class="level3" data-number="5.9.6">
+<h3 data-number="5.9.6" class="anchored" data-anchor-id="modelos-con-exceso-de-ceros"><span class="header-section-number">5.9.6</span> Modelos con exceso de ceros</h3>
+<ul>
+<li><code>pscl::zeroinfl(y ~ x1 + x2 | z1 + z2, dist = "poisson", data = datos)</code> — Zero-Inflated Poisson.</li>
+<li><code>pscl::zeroinfl(..., dist = "negbin")</code> — Zero-Inflated Binomial Negativo.</li>
+<li><code>pscl::hurdle(y ~ x1 + x2, dist = "poisson", data = datos)</code> — modelo Hurdle.</li>
+</ul>
+</section>
+<section id="offset-tasas" class="level3" data-number="5.9.7">
+<h3 data-number="5.9.7" class="anchored" data-anchor-id="offset-tasas"><span class="header-section-number">5.9.7</span> Offset (tasas)</h3>
+<ul>
+<li><code>glm(y ~ x1 + x2, family = poisson, offset = log(exposicion), data = datos)</code> — modelo para tasas.</li>
+</ul>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="código-r-del-capítulo" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="código-r-del-capítulo">Código R del capítulo</h3>
+<p>El script completo de este capítulo (<code>T04_mECO_Script_Recuento.R</code>) está disponible en el repositorio de material complementario del manual:</p>
+<p><strong><a href="https://github.com/carlanta/MicroEconometrics">https://github.com/carlanta/MicroEconometrics</a></strong></p>
+<p>El alumno puede descargar el script directamente desde la carpeta <code>scripts/</code> del repositorio y ejecutarlo en RStudio de forma interactiva.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-page-right">
+  <div class="nav-page nav-page-previous">
+      <a href="./03-tobit.html" class="pagination-link" aria-label="Modelos para Datos Censurados (Tobit)">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Modelos para Datos Censurados (Tobit)</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./05-panel.html" class="pagination-link" aria-label="Datos de Panel">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Datos de Panel</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
