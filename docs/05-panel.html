@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; Datos de Panel – Manual de Microeconometría</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./04-recuento.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-panel.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Datos de Panel</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Manual de Microeconometría</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prólogo</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00-fundamentos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Fundamentos de Probabilidad, Inferencia y Econometría</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-vd-limitada.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Datos con Variable Dependiente Limitada</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-eleccion-discreta.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Modelos de Elección Discreta</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-tobit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Modelos para Datos Censurados (Tobit)</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-recuento.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Modelos para Datos de Recuento</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-panel.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Datos de Panel</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bibliografía</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content column-page-right" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Datos de Panel</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-right">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introducción-por-qué-datos-de-panel" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="introducción-por-qué-datos-de-panel"><span class="header-section-number">6.1</span> Introducción: ¿por qué datos de panel?</h2>
+<p>En los temas anteriores hemos trabajado con datos de <strong>corte transversal</strong>: una única observación por individuo en un momento determinado del tiempo. Este capítulo da un paso fundamental al incorporar la <strong>dimensión temporal</strong>: los datos de panel (también llamados datos longitudinales) contienen observaciones de los mismos <span class="math inline">\(n\)</span> individuos (personas, empresas, países) a lo largo de <span class="math inline">\(T\)</span> períodos de tiempo.</p>
+<p>Esta estructura aporta ventajas decisivas frente al corte transversal. La más importante es la capacidad de <strong>controlar la heterogeneidad no observada</strong>. En muchas aplicaciones económicas, existen características individuales que afectan al comportamiento pero que no podemos medir directamente: la habilidad innata de un trabajador, la cultura organizativa de una empresa, la calidad institucional de un país. Si estas características están correlacionadas con las variables explicativas, la estimación por MCO en corte transversal produce resultados sesgados e inconsistentes. Los datos de panel permiten resolver este problema explotando la variación temporal de cada individuo.</p>
+<p>Además, al combinar la variación <em>entre</em> individuos (variación <em>between</em>) con la variación <em>dentro</em> de cada individuo a lo largo del tiempo (variación <em>within</em>), los datos de panel proporcionan más información, mayor variabilidad y, en consecuencia, estimadores más precisos. También permiten estudiar efectos dinámicos: cómo cambian las variables de un individuo a lo largo del tiempo.</p>
+<p>El modelo econométrico que desarrollaremos en este capítulo es:</p>
+<p><span class="math display">\[y_{it} = \alpha_i + \mathbf{x}_{it}'\boldsymbol{\beta} + \varepsilon_{it}\]</span></p>
+<p>donde <span class="math inline">\(\alpha_i\)</span> es un efecto individual que captura la heterogeneidad no observada. La pregunta central del tema es <strong>cómo tratar</strong> <span class="math inline">\(\alpha_i\)</span>: si como un parámetro fijo a estimar (efectos fijos) o como una variable aleatoria (efectos aleatorios). Esta elección determina el estimador apropiado y condiciona toda la inferencia posterior.</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="conceptos-básicos" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="conceptos-básicos"><span class="header-section-number">6.2</span> Conceptos básicos</h2>
+<section id="estructura-de-los-datos" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="estructura-de-los-datos"><span class="header-section-number">6.2.1</span> Estructura de los datos</h3>
+<p>Un conjunto de datos de panel tiene dos índices. El primero, <span class="math inline">\(i = 1, \ldots, n\)</span>, identifica al <strong>individuo</strong> (persona, empresa, país, región). El segundo, <span class="math inline">\(t = 1, \ldots, T_i\)</span>, identifica el <strong>período</strong> de tiempo (año, trimestre, mes). Cada observación se denota <span class="math inline">\((y_{it}, \mathbf{x}_{it})\)</span> y contiene tanto la variable dependiente como las variables explicativas del individuo <span class="math inline">\(i\)</span> en el período <span class="math inline">\(t\)</span>. El número total de observaciones es <span class="math inline">\(N = \sum_{i=1}^n T_i\)</span>.</p>
+</section>
+<section id="panel-corto-y-panel-largo" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="panel-corto-y-panel-largo"><span class="header-section-number">6.2.2</span> Panel corto y panel largo</h3>
+<p>En función de la relación entre <span class="math inline">\(n\)</span> y <span class="math inline">\(T\)</span>, los paneles se clasifican en dos categorías. Un <strong>panel corto</strong> (o micropanel) tiene muchos individuos observados durante pocos períodos (<span class="math inline">\(n\)</span> grande, <span class="math inline">\(T\)</span> pequeño). Es la estructura habitual en microeconometría: por ejemplo, 5.000 trabajadores observados durante 5 años. Un <strong>panel largo</strong> (o macropanel) presenta la situación inversa: pocos individuos con muchos períodos (<span class="math inline">\(n\)</span> pequeño, <span class="math inline">\(T\)</span> grande). Es típico de la macroeconometría: por ejemplo, 30 países observados durante 50 años.</p>
+<p>En este curso nos centramos en <strong>paneles cortos</strong>, donde las propiedades asintóticas de los estimadores se derivan haciendo <span class="math inline">\(n \to \infty\)</span> con <span class="math inline">\(T\)</span> fijo.</p>
+</section>
+<section id="panel-balanceado-y-no-balanceado" class="level3" data-number="6.2.3">
+<h3 data-number="6.2.3" class="anchored" data-anchor-id="panel-balanceado-y-no-balanceado"><span class="header-section-number">6.2.3</span> Panel balanceado y no balanceado</h3>
+<p>Un panel es <strong>balanceado</strong> cuando todos los individuos se observan exactamente en los mismos <span class="math inline">\(T\)</span> períodos, de modo que el número total de observaciones es <span class="math inline">\(n \times T\)</span>. Un panel es <strong>no balanceado</strong> cuando algunos individuos tienen más observaciones que otros, habitualmente porque abandonan la muestra antes del final del estudio (fenómeno conocido como <strong>atrición</strong>). Los estimadores de panel se adaptan sin dificultad a paneles no balanceados, pero la atrición puede introducir sesgo de selección si la salida de la muestra está relacionada con la variable dependiente.</p>
+</section>
+<section id="descomposición-de-la-variación-within-between-y-overall" class="level3" data-number="6.2.4">
+<h3 data-number="6.2.4" class="anchored" data-anchor-id="descomposición-de-la-variación-within-between-y-overall"><span class="header-section-number">6.2.4</span> Descomposición de la variación: within, between y overall</h3>
+<p>Esta descomposición es fundamental para comprender qué información explotan los distintos estimadores y constituye una de las ideas más importantes del análisis de datos de panel.</p>
+<p>Para cualquier variable <span class="math inline">\(x_{it}\)</span>, podemos escribir:</p>
+<p><span class="math display">\[x_{it} = \underbrace{\bar{x}_i}_{\text{componente between}} + \underbrace{(x_{it} - \bar{x}_i)}_{\text{componente within}}\]</span></p>
+<p>donde <span class="math inline">\(\bar{x}_i = \frac{1}{T} \sum_{t=1}^T x_{it}\)</span> es la media temporal del individuo <span class="math inline">\(i\)</span>.</p>
+<p>La <strong>variación between</strong> mide las diferencias entre las medias de los distintos individuos: ¿ganan más las empresas grandes que las pequeñas? La <strong>variación within</strong> mide los cambios a lo largo del tiempo dentro de cada individuo: ¿ha aumentado la facturación de esta empresa concreta respecto a su propia media? La <strong>variación overall</strong> es la variación total, que combina ambas fuentes.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Descomposición within/between: tres empresas, tres años</caption>
+<colgroup>
+<col style="width: 10%">
+<col style="width: 7%">
+<col style="width: 23%">
+<col style="width: 23%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Empresa</th>
+<th style="text-align: center;">Año</th>
+<th style="text-align: right;">Ingresos (<span class="math inline">\(x_{it}\)</span>)</th>
+<th style="text-align: right;">Media (<span class="math inline">\(\bar{x}_i\)</span>)</th>
+<th style="text-align: right;">Within (<span class="math inline">\(x_{it} - \bar{x}_i\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">2021</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">-5</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">2022</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">2023</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">2021</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">210</td>
+<td style="text-align: right;">-10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">2022</td>
+<td style="text-align: right;">210</td>
+<td style="text-align: right;">210</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">2023</td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">210</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">2021</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">2022</td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">-10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">2023</td>
+<td style="text-align: right;">160</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">10</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>En este ejemplo, la variación between se aprecia en las diferencias entre medias (105, 210, 150): las empresas tienen niveles de ingresos muy distintos. La variación within se aprecia en la columna derecha: la empresa A oscila <span class="math inline">\(\{-5, +5, 0\}\)</span> alrededor de su media de 105, mientras que la empresa C oscila <span class="math inline">\(\{-10, +10, 0\}\)</span> con mayor amplitud.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="fl">4.5</span>, <span class="dv">3</span>, <span class="dv">1</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">3.2</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">80</span>, <span class="dv">240</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Año"</span>, <span class="at">ylab =</span> <span class="st">"Ingresos (miles EUR)"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Variación within vs between"</span>, <span class="at">xaxt =</span> <span class="st">"n"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">labels =</span> <span class="dv">2021</span><span class="sc">:</span><span class="dv">2023</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#2980B9"</span>, <span class="st">"#E67E22"</span>, <span class="st">"#27AE60"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>medias <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">105</span>, <span class="dv">210</span>, <span class="dv">150</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ingresos <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">110</span>, <span class="dv">105</span>), <span class="fu">c</span>(<span class="dv">200</span>, <span class="dv">210</span>, <span class="dv">220</span>), <span class="fu">c</span>(<span class="dv">150</span>, <span class="dv">140</span>, <span class="dv">160</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) {</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, ingresos[[i]], <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> cols[i], <span class="at">lwd =</span> <span class="fl">2.5</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> medias[i], <span class="at">col =</span> cols[i], <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"Empresa A (media = 105)"</span>, <span class="st">"Empresa B (media = 210)"</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"Empresa C (media = 150)"</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> cols, <span class="at">lwd =</span> <span class="fl">2.5</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.85</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="do">## Anotación between</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(<span class="fl">3.15</span>, medias[<span class="dv">1</span>], <span class="fl">3.15</span>, medias[<span class="dv">3</span>], <span class="at">code =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"grey40"</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">3.25</span>, <span class="fu">mean</span>(<span class="fu">c</span>(medias[<span class="dv">1</span>], medias[<span class="dv">3</span>])), <span class="st">"between"</span>, <span class="at">cex =</span> <span class="fl">0.75</span>, <span class="at">col =</span> <span class="st">"grey40"</span>, <span class="at">srt =</span> <span class="dv">90</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-panel_files/figure-html/t05-grafico-within-between-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Descomposición visual: la distancia entre las líneas discontinuas es la variación between; las oscilaciones de cada línea alrededor de su media son la variación within.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Esta descomposición tiene implicaciones directas para la estimación. El estimador de <strong>efectos fijos</strong> (within) utiliza exclusivamente la variación within, eliminando las diferencias entre individuos. El estimador <strong>between</strong> utiliza solo las medias individuales. El estimador de <strong>efectos aleatorios</strong> combina ambas fuentes de forma óptima bajo ciertos supuestos.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="el-modelo-general-de-datos-de-panel" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="el-modelo-general-de-datos-de-panel"><span class="header-section-number">6.3</span> El modelo general de datos de panel</h2>
+<section id="especificación" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="especificación"><span class="header-section-number">6.3.1</span> Especificación</h3>
+<p>El modelo lineal de datos de panel se formula como:</p>
+<p><span class="math display">\[y_{it} = \alpha_i + \mathbf{x}_{it}'\boldsymbol{\beta} + \varepsilon_{it}, \qquad i = 1, \ldots, n; \quad t = 1, \ldots, T\]</span></p>
+<p>donde:</p>
+<ul>
+<li><span class="math inline">\(y_{it}\)</span> es la variable dependiente del individuo <span class="math inline">\(i\)</span> en el período <span class="math inline">\(t\)</span>.</li>
+<li><span class="math inline">\(\mathbf{x}_{it}\)</span> es un vector <span class="math inline">\(k \times 1\)</span> de variables explicativas que varían tanto entre individuos como a lo largo del tiempo.</li>
+<li><span class="math inline">\(\boldsymbol{\beta}\)</span> es el vector de coeficientes de interés, común a todos los individuos y períodos.</li>
+<li><span class="math inline">\(\alpha_i\)</span> es el <strong>efecto individual</strong> no observado, constante en el tiempo para cada individuo.</li>
+<li><span class="math inline">\(\varepsilon_{it}\)</span> es la perturbación idiosincrática, con <span class="math inline">\(E[\varepsilon_{it}] = 0\)</span> y <span class="math inline">\(\text{Var}(\varepsilon_{it}) = \sigma_\varepsilon^2\)</span>.</li>
+</ul>
+<p>El efecto individual <span class="math inline">\(\alpha_i\)</span> captura todas las características del individuo <span class="math inline">\(i\)</span> que son constantes en el tiempo y que no están incluidas en <span class="math inline">\(\mathbf{x}_{it}\)</span>: la habilidad innata de un trabajador, la localización geográfica de una empresa, la cultura institucional de un país. Es la pieza central del análisis de panel.</p>
+</section>
+<section id="efectos-fijos-o-efectos-aleatorios" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="efectos-fijos-o-efectos-aleatorios"><span class="header-section-number">6.3.2</span> ¿Efectos fijos o efectos aleatorios?</h3>
+<p>La distinción fundamental del análisis de panel reside en cómo se trata el efecto individual <span class="math inline">\(\alpha_i\)</span>. Existen dos enfoques.</p>
+<p>En el enfoque de <strong>efectos fijos</strong> (EF), se trata <span class="math inline">\(\alpha_i\)</span> como un parámetro desconocido a estimar (o, de forma equivalente, a eliminar mediante transformación). No se hace ningún supuesto sobre la relación entre <span class="math inline">\(\alpha_i\)</span> y las variables explicativas <span class="math inline">\(\mathbf{x}_{it}\)</span>: se permite que estén correlacionados. Esta es la opción conservadora y robusta.</p>
+<p>En el enfoque de <strong>efectos aleatorios</strong> (EA), se trata <span class="math inline">\(\alpha_i\)</span> como una variable aleatoria extraída de una distribución con media cero y varianza <span class="math inline">\(\sigma_\alpha^2\)</span>. El supuesto clave es que <span class="math inline">\(\alpha_i\)</span> <strong>no está correlacionado</strong> con las variables explicativas: <span class="math inline">\(E[\alpha_i | \mathbf{x}_{i1}, \ldots, \mathbf{x}_{iT}] = 0\)</span>. Esta condición es fuerte y, si se viola, el estimador de efectos aleatorios es inconsistente.</p>
+<p>La elección entre ambos enfoques se resuelve empíricamente con el <strong>test de Hausman</strong>, que se desarrolla más adelante.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="estimador-pooled-ols" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="estimador-pooled-ols"><span class="header-section-number">6.4</span> Estimador Pooled OLS</h2>
+<section id="concepto" class="level3" data-number="6.4.1">
+<h3 data-number="6.4.1" class="anchored" data-anchor-id="concepto"><span class="header-section-number">6.4.1</span> Concepto</h3>
+<p>El estimador Pooled OLS (MCO agrupado) es el enfoque más sencillo: <strong>ignora la estructura de panel</strong> y trata todas las <span class="math inline">\(nT\)</span> observaciones como si fueran un único corte transversal. El modelo que estima es:</p>
+<p><span class="math display">\[y_{it} = \alpha + \mathbf{x}_{it}'\boldsymbol{\beta} + u_{it}\]</span></p>
+<p>donde <span class="math inline">\(u_{it} = \alpha_i + \varepsilon_{it}\)</span> es un error compuesto que incluye tanto el efecto individual como la perturbación idiosincrática.</p>
+</section>
+<section id="cuándo-es-válido" class="level3" data-number="6.4.2">
+<h3 data-number="6.4.2" class="anchored" data-anchor-id="cuándo-es-válido"><span class="header-section-number">6.4.2</span> Cuándo es válido</h3>
+<p>Pooled OLS produce estimaciones consistentes de <span class="math inline">\(\boldsymbol{\beta}\)</span> en dos situaciones. La primera es que no exista heterogeneidad individual (<span class="math inline">\(\alpha_i = \alpha\)</span> para todo <span class="math inline">\(i\)</span>), de modo que los individuos son homogéneos y el panel se comporta como un corte transversal grande. La segunda es que el efecto individual exista pero sea estrictamente independiente de las variables explicativas (<span class="math inline">\(\text{Cov}(\alpha_i, \mathbf{x}_{it}) = 0\)</span>), que es el supuesto de efectos aleatorios.</p>
+</section>
+<section id="el-problema-fundamental" class="level3" data-number="6.4.3">
+<h3 data-number="6.4.3" class="anchored" data-anchor-id="el-problema-fundamental"><span class="header-section-number">6.4.3</span> El problema fundamental</h3>
+<p>Si el efecto individual <span class="math inline">\(\alpha_i\)</span> está correlacionado con alguna de las variables explicativas — lo cual es frecuente en la práctica —, Pooled OLS es <strong>inconsistente</strong>. El error compuesto <span class="math inline">\(u_{it} = \alpha_i + \varepsilon_{it}\)</span> queda correlacionado con <span class="math inline">\(\mathbf{x}_{it}\)</span>, violando la exogeneidad estricta de MCO. La consecuencia es un sesgo por variable omitida: <span class="math inline">\(\alpha_i\)</span> actúa como una variable relevante no incluida en el modelo.</p>
+<p>Además, incluso cuando Pooled OLS es consistente, los errores estándar clásicos son <strong>incorrectos</strong> porque el error compuesto <span class="math inline">\(u_{it}\)</span> presenta autocorrelación dentro de cada individuo (el componente <span class="math inline">\(\alpha_i\)</span> es común a todos los períodos de un mismo individuo). Por esta razón, siempre que se reporte un modelo Pooled OLS en datos de panel, deben utilizarse <strong>errores estándar agrupados</strong> (<em>clustered</em>) por individuo.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="modelo-de-efectos-fijos-estimador-within" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="modelo-de-efectos-fijos-estimador-within"><span class="header-section-number">6.5</span> Modelo de efectos fijos (estimador within)</h2>
+<section id="intuición" class="level3" data-number="6.5.1">
+<h3 data-number="6.5.1" class="anchored" data-anchor-id="intuición"><span class="header-section-number">6.5.1</span> Intuición</h3>
+<p>La idea del estimador de efectos fijos es elegante en su sencillez: si el efecto individual <span class="math inline">\(\alpha_i\)</span> contamina la estimación porque es constante en el tiempo y está correlacionado con los regresores, la solución es <strong>eliminarlo</strong>. Para ello se aplica la <strong>transformación within</strong>, que consiste en restar a cada observación la media temporal del individuo:</p>
+<p><span class="math display">\[y_{it} - \bar{y}_i = (\mathbf{x}_{it} - \bar{\mathbf{x}}_i)'\boldsymbol{\beta} + (\varepsilon_{it} - \bar{\varepsilon}_i)\]</span></p>
+<p>Al restar las medias, el efecto individual <span class="math inline">\(\alpha_i\)</span> desaparece de la ecuación (porque <span class="math inline">\(\alpha_i - \alpha_i = 0\)</span>). Las variables transformadas se denotan con tilde: <span class="math inline">\(\tilde{y}_{it} = y_{it} - \bar{y}_i\)</span>, <span class="math inline">\(\tilde{\mathbf{x}}_{it} = \mathbf{x}_{it} - \bar{\mathbf{x}}_i\)</span>. El modelo transformado es:</p>
+<p><span class="math display">\[\tilde{y}_{it} = \tilde{\mathbf{x}}_{it}'\boldsymbol{\beta} + \tilde{\varepsilon}_{it}\]</span></p>
+<p>El estimador de efectos fijos es simplemente MCO aplicado a estos datos transformados:</p>
+<p><span class="math display">\[\hat{\boldsymbol{\beta}}_{EF} = \left(\sum_{i=1}^{n}\sum_{t=1}^{T} \tilde{\mathbf{x}}_{it}\tilde{\mathbf{x}}_{it}'\right)^{-1} \left(\sum_{i=1}^{n}\sum_{t=1}^{T} \tilde{\mathbf{x}}_{it}\tilde{y}_{it}\right)\]</span></p>
+</section>
+<section id="ejemplo-numérico-paso-a-paso" class="level3" data-number="6.5.2">
+<h3 data-number="6.5.2" class="anchored" data-anchor-id="ejemplo-numérico-paso-a-paso"><span class="header-section-number">6.5.2</span> Ejemplo numérico paso a paso</h3>
+<p>Para comprender la mecánica del estimador, consideremos un panel mínimo con 2 individuos y 3 períodos. El modelo es <span class="math inline">\(y_{it} = \alpha_i + \beta x_{it} + \varepsilon_{it}\)</span>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Ejemplo numérico: transformación within con 2 individuos y 3 períodos</caption>
+<colgroup>
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 19%">
+<col style="width: 19%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><span class="math inline">\(i\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(t\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(y_{it}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(x_{it}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\bar{y}_i\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\bar{x}_i\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\tilde{y}_{it}\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\tilde{x}_{it}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">-2</td>
+<td style="text-align: center;">-1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">20</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">22</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">-2</td>
+<td style="text-align: center;">-1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">22</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">22</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">24</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">22</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><strong>Paso 1.</strong> Calculamos las medias temporales: <span class="math inline">\(\bar{y}_1 = (10+12+14)/3 = 12\)</span>, <span class="math inline">\(\bar{x}_1 = (2+3+4)/3 = 3\)</span>; <span class="math inline">\(\bar{y}_2 = 22\)</span>, <span class="math inline">\(\bar{x}_2 = 6\)</span>.</p>
+<p><strong>Paso 2.</strong> Restamos las medias (transformación within): <span class="math inline">\(\tilde{y}_{11} = 10 - 12 = -2\)</span>, <span class="math inline">\(\tilde{x}_{11} = 2 - 3 = -1\)</span>, etc.</p>
+<p><strong>Paso 3.</strong> Estimamos <span class="math inline">\(\beta\)</span> por MCO sobre los datos transformados:</p>
+<p><span class="math display">\[\hat{\beta}_{EF} = \frac{\sum \tilde{x}_{it}\tilde{y}_{it}}{\sum \tilde{x}_{it}^2} = \frac{(-1)(-2) + (0)(0) + (1)(2) + (-1)(-2) + (0)(0) + (1)(2)}{1 + 0 + 1 + 1 + 0 + 1} = \frac{8}{4} = 2\]</span></p>
+<p>El efecto estimado es <span class="math inline">\(\hat{\beta}_{EF} = 2\)</span>: cada unidad adicional de <span class="math inline">\(x\)</span> se asocia con un aumento de 2 unidades en <span class="math inline">\(y\)</span>, una vez controlada la heterogeneidad individual. Obsérvese que los efectos individuales (<span class="math inline">\(\alpha_1\)</span> y <span class="math inline">\(\alpha_2\)</span>) no aparecen en el cálculo: han sido eliminados por la transformación.</p>
+</section>
+<section id="propiedades" class="level3" data-number="6.5.3">
+<h3 data-number="6.5.3" class="anchored" data-anchor-id="propiedades"><span class="header-section-number">6.5.3</span> Propiedades</h3>
+<p>El estimador de efectos fijos es <strong>consistente</strong> independientemente de que <span class="math inline">\(\alpha_i\)</span> esté o no correlacionado con <span class="math inline">\(\mathbf{x}_{it}\)</span>. Esta robustez es su gran fortaleza y la razón por la que es la opción por defecto en microeconometría aplicada.</p>
+<p>Sin embargo, el estimador de efectos fijos tiene una <strong>limitación importante</strong>: no puede identificar el efecto de variables que no varían en el tiempo para cada individuo (sexo, raza, región de nacimiento, sector de actividad si es constante). Esto se debe a que la transformación within elimina todo lo que es constante en <span class="math inline">\(t\)</span>: si <span class="math inline">\(z_i\)</span> no varía en el tiempo, entonces <span class="math inline">\(\tilde{z}_{it} = z_i - z_i = 0\)</span>, y la variable desaparece de la regresión transformada.</p>
+</section>
+<section id="equivalencia-con-variables-dummy-lsdv" class="level3" data-number="6.5.4">
+<h3 data-number="6.5.4" class="anchored" data-anchor-id="equivalencia-con-variables-dummy-lsdv"><span class="header-section-number">6.5.4</span> Equivalencia con variables dummy (LSDV)</h3>
+<p>Existe una forma equivalente de obtener el estimador de efectos fijos: incluir una variable dummy para cada individuo en la regresión original. Este enfoque se denomina LSDV (<em>Least Squares Dummy Variables</em>):</p>
+<p><span class="math display">\[y_{it} = \sum_{j=1}^{n} \alpha_j d_{ij} + \mathbf{x}_{it}'\boldsymbol{\beta} + \varepsilon_{it}\]</span></p>
+<p>Ambos métodos producen exactamente el mismo <span class="math inline">\(\hat{\boldsymbol{\beta}}\)</span>. La ventaja de LSDV es que además estima los efectos individuales <span class="math inline">\(\hat{\alpha}_i\)</span>. Su inconveniente es que, con muchos individuos, requiere estimar un número elevado de parámetros (uno por individuo), lo que es computacionalmente costoso.</p>
+</section>
+<section id="el-r2-en-datos-de-panel" class="level3" data-number="6.5.5">
+<h3 data-number="6.5.5" class="anchored" data-anchor-id="el-r2-en-datos-de-panel"><span class="header-section-number">6.5.5</span> El <span class="math inline">\(R^2\)</span> en datos de panel</h3>
+<p>En datos de panel existen tres medidas de <span class="math inline">\(R^2\)</span> que corresponden a las tres fuentes de variación. El <span class="math inline">\(R^2\)</span> within mide qué proporción de la variación temporal (within) de <span class="math inline">\(y\)</span> explica el modelo. El <span class="math inline">\(R^2\)</span> between mide la capacidad del modelo para explicar las diferencias entre medias individuales. El <span class="math inline">\(R^2\)</span> overall es una medida global de ajuste. El estimador de efectos fijos maximiza el <span class="math inline">\(R^2\)</span> within.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="estimador-en-primeras-diferencias" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="estimador-en-primeras-diferencias"><span class="header-section-number">6.6</span> Estimador en primeras diferencias</h2>
+<p>Una alternativa al estimador within para eliminar el efecto individual <span class="math inline">\(\alpha_i\)</span> consiste en tomar <strong>primeras diferencias</strong> de la ecuación original:</p>
+<p><span class="math display">\[y_{it} - y_{i,t-1} = (\mathbf{x}_{it} - \mathbf{x}_{i,t-1})'\boldsymbol{\beta} + (\varepsilon_{it} - \varepsilon_{i,t-1})\]</span></p>
+<p><span class="math display">\[\Delta y_{it} = \Delta \mathbf{x}_{it}'\boldsymbol{\beta} + \Delta \varepsilon_{it}\]</span></p>
+<p>Al restar la observación del período anterior, el efecto individual <span class="math inline">\(\alpha_i\)</span> desaparece (porque <span class="math inline">\(\alpha_i - \alpha_i = 0\)</span>), de forma análoga a la transformación within. La diferencia es que aquí se resta el período previo, no la media temporal.</p>
+<p>Cuando el panel tiene solo dos períodos (<span class="math inline">\(T = 2\)</span>), los estimadores de primeras diferencias y de efectos fijos son <strong>idénticos</strong>. Cuando <span class="math inline">\(T &gt; 2\)</span> y los errores son independientes e idénticamente distribuidos, el estimador within es más eficiente que primeras diferencias. Sin embargo, si se sospecha que los errores siguen un paseo aleatorio, primeras diferencias puede ser preferible porque produce errores <span class="math inline">\(\Delta \varepsilon_{it}\)</span> que no están autocorrelacionados.</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="modelo-de-efectos-aleatorios-gls" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="modelo-de-efectos-aleatorios-gls"><span class="header-section-number">6.7</span> Modelo de efectos aleatorios (GLS)</h2>
+<section id="el-supuesto-clave" class="level3" data-number="6.7.1">
+<h3 data-number="6.7.1" class="anchored" data-anchor-id="el-supuesto-clave"><span class="header-section-number">6.7.1</span> El supuesto clave</h3>
+<p>El modelo de efectos aleatorios trata <span class="math inline">\(\alpha_i\)</span> como una variable aleatoria con <span class="math inline">\(E[\alpha_i] = 0\)</span> y <span class="math inline">\(\text{Var}(\alpha_i) = \sigma_\alpha^2\)</span>. El supuesto fundamental es la <strong>ausencia de correlación</strong> entre el efecto individual y las variables explicativas:</p>
+<p><span class="math display">\[E[\alpha_i | \mathbf{x}_{i1}, \ldots, \mathbf{x}_{iT}] = 0\]</span></p>
+<p>Este supuesto es fuerte. Significa que la heterogeneidad no observada no está relacionada con ninguna de las variables del modelo. En la práctica, esta condición se viola con frecuencia: por ejemplo, la habilidad innata (no observada) está correlacionada con la educación (observada).</p>
+</section>
+<section id="la-transformación-cuasi-within" class="level3" data-number="6.7.2">
+<h3 data-number="6.7.2" class="anchored" data-anchor-id="la-transformación-cuasi-within"><span class="header-section-number">6.7.2</span> La transformación cuasi-within</h3>
+<p>El estimador de efectos aleatorios se obtiene mediante una transformación que resta una <strong>fracción</strong> <span class="math inline">\(\theta\)</span> de la media individual, en lugar de restarla completamente como en efectos fijos:</p>
+<p><span class="math display">\[y_{it} - \theta\bar{y}_i = (1-\theta)\alpha + (\mathbf{x}_{it} - \theta\bar{\mathbf{x}}_i)'\boldsymbol{\beta} + \text{error transformado}\]</span></p>
+<p>El parámetro <span class="math inline">\(\theta\)</span> se calcula a partir de las varianzas de los dos componentes del error:</p>
+<p><span class="math display">\[\theta = 1 - \sqrt{\frac{\sigma_\varepsilon^2}{\sigma_\varepsilon^2 + T\sigma_\alpha^2}}\]</span></p>
+<p>La interpretación de <span class="math inline">\(\theta\)</span> es reveladora. Cuando <span class="math inline">\(\sigma_\alpha^2\)</span> es muy grande (mucha heterogeneidad individual), <span class="math inline">\(\theta\)</span> se acerca a 1 y el estimador de efectos aleatorios converge al de efectos fijos (se resta casi toda la media). Cuando <span class="math inline">\(\sigma_\alpha^2\)</span> es muy pequeña (poca heterogeneidad), <span class="math inline">\(\theta\)</span> se acerca a 0 y el estimador converge a Pooled OLS. El estimador de efectos aleatorios es, por tanto, un <strong>promedio ponderado</strong> entre efectos fijos y Pooled OLS, donde los pesos dependen de la importancia relativa de la heterogeneidad individual.</p>
+</section>
+<section id="ventajas-e-inconvenientes" class="level3" data-number="6.7.3">
+<h3 data-number="6.7.3" class="anchored" data-anchor-id="ventajas-e-inconvenientes"><span class="header-section-number">6.7.3</span> Ventajas e inconvenientes</h3>
+<p>La ventaja principal del estimador de efectos aleatorios es que, a diferencia del estimador within, <strong>puede estimar el efecto de variables invariantes en el tiempo</strong> (sexo, región, sector). Esto se debe a que la transformación no elimina completamente la media individual.</p>
+<p>El inconveniente es que, si el supuesto de no correlación entre <span class="math inline">\(\alpha_i\)</span> y <span class="math inline">\(\mathbf{x}_{it}\)</span> no se cumple, el estimador es <strong>inconsistente</strong>. En la práctica, cuando hay duda, la opción segura es siempre efectos fijos.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="test-de-hausman-efectos-fijos-o-aleatorios" class="level2" data-number="6.8">
+<h2 data-number="6.8" class="anchored" data-anchor-id="test-de-hausman-efectos-fijos-o-aleatorios"><span class="header-section-number">6.8</span> Test de Hausman: ¿efectos fijos o aleatorios?</h2>
+<section id="lógica-del-test" class="level3" data-number="6.8.1">
+<h3 data-number="6.8.1" class="anchored" data-anchor-id="lógica-del-test"><span class="header-section-number">6.8.1</span> Lógica del test</h3>
+<p>El test de Hausman (1978) proporciona un criterio formal para elegir entre efectos fijos y efectos aleatorios. Su lógica es la siguiente.</p>
+<p>Bajo la hipótesis nula (<span class="math inline">\(H_0\)</span>: el supuesto de efectos aleatorios es correcto, es decir, <span class="math inline">\(\alpha_i\)</span> no está correlacionado con <span class="math inline">\(\mathbf{x}_{it}\)</span>), ambos estimadores — EF y EA — son consistentes. El de efectos aleatorios es, además, más eficiente. Bajo la hipótesis alternativa (<span class="math inline">\(H_1\)</span>: el supuesto se viola), solo el estimador de efectos fijos sigue siendo consistente; el de efectos aleatorios no.</p>
+<p>Si ambos estimadores son consistentes, deberían producir resultados similares. Si difieren significativamente, es evidencia de que <span class="math inline">\(\alpha_i\)</span> está correlacionado con los regresores, lo que invalida el estimador de efectos aleatorios.</p>
+</section>
+<section id="el-estadístico" class="level3" data-number="6.8.2">
+<h3 data-number="6.8.2" class="anchored" data-anchor-id="el-estadístico"><span class="header-section-number">6.8.2</span> El estadístico</h3>
+<p>El estadístico de Hausman mide la distancia entre ambos estimadores, ponderada por la diferencia de sus matrices de varianzas:</p>
+<p><span class="math display">\[H = (\hat{\boldsymbol{\beta}}_{EF} - \hat{\boldsymbol{\beta}}_{EA})'\left[\widehat{\text{Var}}(\hat{\boldsymbol{\beta}}_{EF}) - \widehat{\text{Var}}(\hat{\boldsymbol{\beta}}_{EA})\right]^{-1}(\hat{\boldsymbol{\beta}}_{EF} - \hat{\boldsymbol{\beta}}_{EA})\]</span></p>
+<p>Bajo <span class="math inline">\(H_0\)</span>, el estadístico sigue asintóticamente una distribución <span class="math inline">\(\chi^2\)</span> con <span class="math inline">\(k\)</span> grados de libertad, donde <span class="math inline">\(k\)</span> es el número de coeficientes comparados (sin incluir la constante ni los efectos individuales).</p>
+</section>
+<section id="regla-de-decisión" class="level3" data-number="6.8.3">
+<h3 data-number="6.8.3" class="anchored" data-anchor-id="regla-de-decisión"><span class="header-section-number">6.8.3</span> Regla de decisión</h3>
+<p>La regla de decisión es directa:</p>
+<ul>
+<li>Si el p-valor del test es <strong>inferior a 0.05</strong>, se rechaza <span class="math inline">\(H_0\)</span>: hay evidencia de correlación entre <span class="math inline">\(\alpha_i\)</span> y <span class="math inline">\(\mathbf{x}_{it}\)</span>, y debe utilizarse el estimador de <strong>efectos fijos</strong>.</li>
+<li>Si el p-valor es <strong>superior a 0.05</strong>, no se rechaza <span class="math inline">\(H_0\)</span>: el estimador de <strong>efectos aleatorios</strong> es adecuado (y preferible por ser más eficiente).</li>
+</ul>
+</section>
+<section id="ejemplo-numérico" class="level3" data-number="6.8.4">
+<h3 data-number="6.8.4" class="anchored" data-anchor-id="ejemplo-numérico"><span class="header-section-number">6.8.4</span> Ejemplo numérico</h3>
+<p>Supongamos que estimamos un modelo de salarios con datos de panel y obtenemos:</p>
+<p><span class="math display">\[\hat{\beta}_{EF}^{\text{educación}} = 0.065 \qquad \hat{\beta}_{EA}^{\text{educación}} = 0.092\]</span></p>
+<p>Los coeficientes difieren considerablemente. El test de Hausman arroja <span class="math inline">\(H = 18.7\)</span> con <span class="math inline">\(k = 4\)</span> grados de libertad, lo que corresponde a un p-valor de 0.0009. Se rechaza <span class="math inline">\(H_0\)</span> con contundencia: la habilidad no observada (<span class="math inline">\(\alpha_i\)</span>) está correlacionada con la educación, y debe utilizarse el estimador de efectos fijos.</p>
+<p>En R, el test se calcula con <code>phtest(modelo_fe, modelo_re)</code> del paquete <code>plm</code>.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="diagnóstico-en-datos-de-panel" class="level2" data-number="6.9">
+<h2 data-number="6.9" class="anchored" data-anchor-id="diagnóstico-en-datos-de-panel"><span class="header-section-number">6.9</span> Diagnóstico en datos de panel</h2>
+<p>Una vez seleccionado el estimador apropiado, es necesario verificar que los supuestos del modelo se cumplen. Los diagnósticos en datos de panel se organizan en torno a cuatro cuestiones.</p>
+<section id="hay-efectos-individuales-test-f" class="level3" data-number="6.9.1">
+<h3 data-number="6.9.1" class="anchored" data-anchor-id="hay-efectos-individuales-test-f"><span class="header-section-number">6.9.1</span> ¿Hay efectos individuales? (Test F)</h3>
+<p>Antes de aplicar efectos fijos, conviene confirmar que la heterogeneidad individual existe. El <strong>test F de efectos individuales</strong> contrasta:</p>
+<p><span class="math display">\[H_0: \alpha_1 = \alpha_2 = \cdots = \alpha_n \qquad \text{(no hay heterogeneidad; Pooled OLS es suficiente)}\]</span></p>
+<p>Si se rechaza <span class="math inline">\(H_0\)</span>, los efectos individuales son significativos y Pooled OLS es inadecuado. En R se calcula con <code>pFtest(modelo_fe, modelo_pooled)</code>.</p>
+</section>
+<section id="hay-efectos-aleatorios-test-de-breusch-pagan" class="level3" data-number="6.9.2">
+<h3 data-number="6.9.2" class="anchored" data-anchor-id="hay-efectos-aleatorios-test-de-breusch-pagan"><span class="header-section-number">6.9.2</span> ¿Hay efectos aleatorios? (Test de Breusch-Pagan)</h3>
+<p>De forma análoga, el <strong>test LM de Breusch-Pagan</strong> contrasta si la varianza del efecto individual es significativamente distinta de cero:</p>
+<p><span class="math display">\[H_0: \sigma_\alpha^2 = 0 \qquad \text{(no hay efectos aleatorios; Pooled OLS es suficiente)}\]</span></p>
+<p>En R se calcula con <code>plmtest(modelo_pooled, type = "bp")</code>.</p>
+</section>
+<section id="hay-autocorrelación-serial" class="level3" data-number="6.9.3">
+<h3 data-number="6.9.3" class="anchored" data-anchor-id="hay-autocorrelación-serial"><span class="header-section-number">6.9.3</span> ¿Hay autocorrelación serial?</h3>
+<p>El <strong>test de Wooldridge</strong> evalúa si los errores idiosincrásticos <span class="math inline">\(\varepsilon_{it}\)</span> están autocorrelacionados a lo largo del tiempo. La autocorrelación serial invalida los errores estándar clásicos y requiere correcciones (errores robustos agrupados o estimadores específicos).</p>
+<p><span class="math display">\[H_0: \text{no hay autocorrelación de primer orden en } \varepsilon_{it}\]</span></p>
+<p>En R: <code>pwartest(modelo_fe)</code>.</p>
+</section>
+<section id="hay-heterocedasticidad" class="level3" data-number="6.9.4">
+<h3 data-number="6.9.4" class="anchored" data-anchor-id="hay-heterocedasticidad"><span class="header-section-number">6.9.4</span> ¿Hay heterocedasticidad?</h3>
+<p>La heterocedasticidad en datos de panel puede manifestarse de dos formas: varianzas distintas entre individuos (<span class="math inline">\(\sigma_i^2 \neq \sigma_j^2\)</span>) o varianzas que dependen de las variables explicativas. El test de <strong>Breusch-Pagan</strong> adaptado a panel detecta estas situaciones.</p>
+</section>
+<section id="errores-robustos-agrupados" class="level3" data-number="6.9.5">
+<h3 data-number="6.9.5" class="anchored" data-anchor-id="errores-robustos-agrupados"><span class="header-section-number">6.9.5</span> Errores robustos agrupados</h3>
+<p>En la práctica, la recomendación estándar es reportar siempre <strong>errores estándar agrupados</strong> (<em>clustered</em>) por individuo, que corrigen simultáneamente por heterocedasticidad y por autocorrelación dentro de cada individuo:</p>
+<p>En R: <code>coeftest(modelo, vcov = vcovHC(modelo, type = "HC1", cluster = "group"))</code></p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="ejemplo-práctico-completo-en-r" class="level2" data-number="6.10">
+<h2 data-number="6.10" class="anchored" data-anchor-id="ejemplo-práctico-completo-en-r"><span class="header-section-number">6.10</span> Ejemplo práctico completo en R</h2>
+<section id="los-datos" class="level3" data-number="6.10.1">
+<h3 data-number="6.10.1" class="anchored" data-anchor-id="los-datos"><span class="header-section-number">6.10.1</span> Los datos</h3>
+<p>Utilizamos el dataset clásico de <strong>Grunfeld</strong> (1958), que contiene datos de inversión de 10 grandes empresas estadounidenses observadas durante 20 años (1935-1954). Las variables son:</p>
+<ul>
+<li><code>inv</code>: inversión bruta de la empresa (variable dependiente).</li>
+<li><code>value</code>: valor de mercado de la empresa.</li>
+<li><code>capital</code>: stock de capital (planta y equipos).</li>
+</ul>
+<p>El modelo que estimaremos es:</p>
+<p><span class="math display">\[\text{inv}_{it} = \alpha_i + \beta_1 \, \text{value}_{it} + \beta_2 \, \text{capital}_{it} + \varepsilon_{it}\]</span></p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Estadísticos descriptivos del dataset Grunfeld (n=10 empresas, T=20 años)</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Media</th>
+<th style="text-align: right;">D.E.</th>
+<th style="text-align: right;">Mín.</th>
+<th style="text-align: right;">Máx.</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">inv</td>
+<td style="text-align: right;">146.0</td>
+<td style="text-align: right;">216.9</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">1486.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">1081.7</td>
+<td style="text-align: right;">1314.5</td>
+<td style="text-align: right;">58.1</td>
+<td style="text-align: right;">6241.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">capital</td>
+<td style="text-align: right;">276.0</td>
+<td style="text-align: right;">301.1</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: right;">2226.3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="estimación-de-los-tres-modelos" class="level3" data-number="6.10.2">
+<h3 data-number="6.10.2" class="anchored" data-anchor-id="estimación-de-los-tres-modelos"><span class="header-section-number">6.10.2</span> Estimación de los tres modelos</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Comparación de coeficientes: Pooled, EF y EA</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: right;">Pooled OLS</th>
+<th style="text-align: right;">Efectos Fijos</th>
+<th style="text-align: right;">Efectos Aleatorios</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">0.1156</td>
+<td style="text-align: right;">0.1101</td>
+<td style="text-align: right;">0.1098</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">capital</td>
+<td style="text-align: right;">0.2307</td>
+<td style="text-align: right;">0.3101</td>
+<td style="text-align: right;">0.3081</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="test-de-hausman" class="level3" data-number="6.10.3">
+<h3 data-number="6.10.3" class="anchored" data-anchor-id="test-de-hausman"><span class="header-section-number">6.10.3</span> Test de Hausman</h3>
+<p>El test de Hausman arroja un estadístico <span class="math inline">\(H = 2.33\)</span> con p-valor =0.3119. No se rechaza <span class="math inline">\(H_0\)</span>: el estimador de <strong>efectos aleatorios</strong> es adecuado.</p>
+</section>
+<section id="diagnósticos" class="level3" data-number="6.10.4">
+<h3 data-number="6.10.4" class="anchored" data-anchor-id="diagnósticos"><span class="header-section-number">6.10.4</span> Diagnósticos</h3>
+<p>El test F de efectos individuales arroja un estadístico <span class="math inline">\(F = 49.18\)</span> con p-valor =0.0000, lo que confirma que los efectos individuales son altamente significativos: las 10 empresas difieren sustancialmente entre sí.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ef <span class="ot">&lt;-</span> <span class="fu">fixef</span>(mod_fe)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="fl">4.5</span>, <span class="dv">3</span>, <span class="dv">1</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">sort</span>(ef), <span class="at">col =</span> <span class="st">"#2980B9"</span>, <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">las =</span> <span class="dv">2</span>, <span class="at">ylab =</span> <span class="st">"Efecto fijo estimado"</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">"Efectos individuales de las 10 empresas"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"grey50"</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-panel_files/figure-html/t05-grafico-efectos-fijos-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Efectos fijos individuales estimados: cada empresa tiene un nivel de inversión base distinto.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="extensiones" class="level2" data-number="6.11">
+<h2 data-number="6.11" class="anchored" data-anchor-id="extensiones"><span class="header-section-number">6.11</span> Extensiones</h2>
+<section id="efectos-fijos-bidireccionales" class="level3" data-number="6.11.1">
+<h3 data-number="6.11.1" class="anchored" data-anchor-id="efectos-fijos-bidireccionales"><span class="header-section-number">6.11.1</span> Efectos fijos bidireccionales</h3>
+<p>En muchas aplicaciones es conveniente incluir efectos fijos tanto <strong>individuales</strong> como <strong>temporales</strong>:</p>
+<p><span class="math display">\[y_{it} = \alpha_i + \lambda_t + \mathbf{x}_{it}'\boldsymbol{\beta} + \varepsilon_{it}\]</span></p>
+<p>Los efectos temporales <span class="math inline">\(\lambda_t\)</span> capturan perturbaciones comunes a todos los individuos en un período determinado: crisis económicas, cambios legislativos, fluctuaciones macroeconómicas. En R se implementan añadiendo <code>factor(año)</code> a la fórmula o con la opción <code>effect = "twoways"</code> en <code>plm()</code>.</p>
+</section>
+<section id="difference-in-differences-did" class="level3" data-number="6.11.2">
+<h3 data-number="6.11.2" class="anchored" data-anchor-id="difference-in-differences-did"><span class="header-section-number">6.11.2</span> Difference-in-Differences (DiD)</h3>
+<p>El diseño de Diferencias en Diferencias es una de las aplicaciones más importantes de los datos de panel en evaluación de políticas. El modelo estándar es:</p>
+<p><span class="math display">\[y_{it} = \alpha + \gamma \cdot \text{tratado}_i + \delta \cdot \text{post}_t + \tau \cdot (\text{tratado}_i \times \text{post}_t) + \varepsilon_{it}\]</span></p>
+<p>El coeficiente <span class="math inline">\(\tau\)</span> estima el <strong>efecto causal del tratamiento</strong> bajo el supuesto de <strong>tendencias paralelas</strong>: en ausencia del tratamiento, el grupo tratado habría evolucionado de forma paralela al grupo de control.</p>
+</section>
+<section id="paneles-dinámicos" class="level3" data-number="6.11.3">
+<h3 data-number="6.11.3" class="anchored" data-anchor-id="paneles-dinámicos"><span class="header-section-number">6.11.3</span> Paneles dinámicos</h3>
+<p>Cuando la variable dependiente actual depende de su propio valor pasado (<span class="math inline">\(y_{it} = \rho y_{i,t-1} + \mathbf{x}_{it}'\boldsymbol{\beta} + \alpha_i + \varepsilon_{it}\)</span>), el estimador de efectos fijos es sesgado en paneles cortos (sesgo de Nickell). La solución estándar es el estimador de <strong>Arellano-Bond</strong> (1991), que utiliza valores retardados como instrumentos tras tomar primeras diferencias. En R se implementa con <code>pgmm()</code> del paquete <code>plm</code>.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="resumen-lo-esencial-en-10-puntos" class="level2" data-number="6.12">
+<h2 data-number="6.12" class="anchored" data-anchor-id="resumen-lo-esencial-en-10-puntos"><span class="header-section-number">6.12</span> Resumen: lo esencial en 10 puntos</h2>
+<ol type="1">
+<li><p>Los <strong>datos de panel</strong> observan a los mismos individuos a lo largo del tiempo. Su estructura bidimensional (<span class="math inline">\(i, t\)</span>) permite controlar la heterogeneidad no observada.</p></li>
+<li><p>La variación total se descompone en <strong>within</strong> (cambios dentro de cada individuo) y <strong>between</strong> (diferencias entre individuos). Los estimadores de panel explotan una u otra según sus supuestos.</p></li>
+<li><p>El <strong>modelo general</strong> es <span class="math inline">\(y_{it} = \alpha_i + \mathbf{x}_{it}'\boldsymbol{\beta} + \varepsilon_{it}\)</span>, donde <span class="math inline">\(\alpha_i\)</span> es el efecto individual no observado.</p></li>
+<li><p><strong>Pooled OLS</strong> ignora la estructura de panel. Es inconsistente si <span class="math inline">\(\alpha_i\)</span> está correlacionado con <span class="math inline">\(\mathbf{x}_{it}\)</span>.</p></li>
+<li><p>El estimador de <strong>efectos fijos</strong> (within) elimina <span class="math inline">\(\alpha_i\)</span> restando las medias individuales. Es consistente siempre, pero no identifica variables invariantes en el tiempo.</p></li>
+<li><p>El estimador de <strong>efectos aleatorios</strong> supone <span class="math inline">\(\text{Cov}(\alpha_i, \mathbf{x}_{it}) = 0\)</span> y combina variación within y between. Es más eficiente que EF si el supuesto se cumple, pero inconsistente si se viola.</p></li>
+<li><p>El <strong>test de Hausman</strong> compara EF y EA. Si rechaza <span class="math inline">\(H_0\)</span> (<span class="math inline">\(p &lt; 0.05\)</span>), usar efectos fijos. Si no rechaza, efectos aleatorios es preferible.</p></li>
+<li><p>Los <strong>diagnósticos</strong> esenciales son: test F (existencia de efectos), test LM de Breusch-Pagan, test de Wooldridge (autocorrelación) y errores robustos agrupados.</p></li>
+<li><p>Los <strong>efectos fijos bidireccionales</strong> añaden dummies temporales para controlar perturbaciones comunes a todos los individuos.</p></li>
+<li><p>En <strong>paneles dinámicos</strong> (<span class="math inline">\(y_{i,t-1}\)</span> como regresor), el estimador within es sesgado. Se utiliza GMM (Arellano-Bond, Blundell-Bond).</p></li>
+</ol>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="funciones-esenciales-en-r" class="level2" data-number="6.13">
+<h2 data-number="6.13" class="anchored" data-anchor-id="funciones-esenciales-en-r"><span class="header-section-number">6.13</span> Funciones esenciales en R</h2>
+<section id="estimación" class="level3" data-number="6.13.1">
+<h3 data-number="6.13.1" class="anchored" data-anchor-id="estimación"><span class="header-section-number">6.13.1</span> Estimación</h3>
+<ul>
+<li><code>plm(y ~ x1 + x2, data = datos_panel, model = "pooling")</code> — Pooled OLS<br>
+</li>
+<li><code>plm(y ~ x1 + x2, data = datos_panel, model = "within")</code> — efectos fijos<br>
+</li>
+<li><code>plm(y ~ x1 + x2, data = datos_panel, model = "random")</code> — efectos aleatorios<br>
+</li>
+<li><code>plm(y ~ x1 + x2, data = datos_panel, model = "fd")</code> — primeras diferencias</li>
+</ul>
+</section>
+<section id="efectos-individuales" class="level3" data-number="6.13.2">
+<h3 data-number="6.13.2" class="anchored" data-anchor-id="efectos-individuales"><span class="header-section-number">6.13.2</span> Efectos individuales</h3>
+<ul>
+<li><code>fixef(modelo_fe)</code> — efectos fijos estimados<br>
+</li>
+<li><code>ranef(modelo_re)</code> — efectos aleatorios predichos</li>
+</ul>
+</section>
+<section id="tests" class="level3" data-number="6.13.3">
+<h3 data-number="6.13.3" class="anchored" data-anchor-id="tests"><span class="header-section-number">6.13.3</span> Tests</h3>
+<ul>
+<li><code>pFtest(modelo_fe, modelo_pooled)</code> — F: pooled vs EF<br>
+</li>
+<li><code>plmtest(modelo_pooled, type = "bp")</code> — LM: pooled vs EA<br>
+</li>
+<li><code>phtest(modelo_fe, modelo_re)</code> — Hausman</li>
+</ul>
+</section>
+<section id="diagnóstico" class="level3" data-number="6.13.4">
+<h3 data-number="6.13.4" class="anchored" data-anchor-id="diagnóstico"><span class="header-section-number">6.13.4</span> Diagnóstico</h3>
+<ul>
+<li><code>pwartest(modelo_fe)</code> — autocorrelación (Wooldridge)<br>
+</li>
+<li><code>pbgtest(modelo_fe)</code> — autocorrelación (Breusch-Godfrey)<br>
+</li>
+<li><code>pcdtest(modelo_fe, test = "cd")</code> — dependencia transversal</li>
+</ul>
+</section>
+<section id="errores-robustos" class="level3" data-number="6.13.5">
+<h3 data-number="6.13.5" class="anchored" data-anchor-id="errores-robustos"><span class="header-section-number">6.13.5</span> Errores robustos</h3>
+<ul>
+<li><code>coeftest(modelo, vcov = vcovHC(modelo, type = "HC1", cluster = "group"))</code></li>
+</ul>
+</section>
+<section id="paneles-dinámicos-1" class="level3" data-number="6.13.6">
+<h3 data-number="6.13.6" class="anchored" data-anchor-id="paneles-dinámicos-1"><span class="header-section-number">6.13.6</span> Paneles dinámicos</h3>
+<ul>
+<li><code>pgmm(y ~ lag(y, 1) + x1 | lag(y, 2:99), data = datos_panel, effect = "twoways", model = "twosteps")</code></li>
+</ul>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="código-r-del-capítulo" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="código-r-del-capítulo">Código R del capítulo</h3>
+<p>El script completo de este capítulo (<code>T05_mECO_Script_Panel.R</code>) está disponible en el repositorio de material complementario del manual:</p>
+<p><a href="https://github.com/carlanta/MicroEconometrics"><strong>https://github.com/carlanta/MicroEconometrics</strong></a></p>
+<p>El alumno puede descargar el script directamente desde la carpeta <code>scripts/</code> del repositorio y ejecutarlo en RStudio de forma interactiva.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-page-right">
+  <div class="nav-page nav-page-previous">
+      <a href="./04-recuento.html" class="pagination-link" aria-label="Modelos para Datos de Recuento">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Modelos para Datos de Recuento</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="Bibliografía">
+        <span class="nav-page-text">Bibliografía</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
