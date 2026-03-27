@@ -1,0 +1,10 @@
+# Ignorar TODO por defecto
+*
+
+# Permitir solo lo que va al repo de GitHub
+!README.md
+!scripts/
+!scripts/*.R
+!data/
+!data/*.csv
+!.gitignore
