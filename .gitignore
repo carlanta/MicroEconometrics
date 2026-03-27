@@ -1,6 +1,18 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
+_book/
+*.qmd
+*.R
+*.Rproj
+*.csv
+*.bib
+*.tex
+backup/
+GitHubToken
 
 /.quarto/
+.Rproj.user
+
+# Allow scripts and data folders for the repo
+!scripts/
+!scripts/*.R
+!data/
+!data/*.csv
