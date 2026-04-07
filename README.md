@@ -35,13 +35,52 @@ Si este libro consigue que algún alumno más disfrute aprendiendo microeconomet
 
 **Capítulo 0 — Fundamentos de Probabilidad, Inferencia y Econometría**
 
+- Repaso de probabilidad: distribuciones, densidad y acumulada
+- Estimación e inferencia: MLE, propiedades asintóticas
+- Contrastes de hipótesis: Likelihood Ratio, Wald y Lagrange Multiplier
+- Repaso del Modelo Lineal (MCO)
+- Especificación y diagnóstico del modelo
+- Conceptos avanzados: variable latente, función de enlace, modelo índice
+
 **Capítulo 1 — Datos con Variable Dependiente Limitada**
+
+- Taxonomía de variables dependientes limitadas (binarias, multinomiales, censuradas, recuento)
+- Variables binarias: Bernoulli, Binomial, variable latente
+- Variables multinomiales: modelos de elección múltiple
+- Variables continuas limitadas: censura vs. truncamiento
+- El análisis exploratorio de datos (EDA) como primer paso sistemático
+- Casos prácticos: EDA de datos de mercado laboral, gasto en seguros y visitas al médico
 
 **Capítulo 2 — Elección Discreta (MPL, Logit y Probit)**
 
+- El Modelo Lineal de Probabilidad (MPL) y sus limitaciones
+- El modelo Probit: formulación, estimación MLE e interpretación
+- El modelo Logit: formulación, estimación e interpretación
+- Efectos marginales: AME, MEM, MER
+- Odds ratios (Logit)
+- Bondad de ajuste: Pseudo-R² de McFadden, tabla de clasificación
+- Contrastes: LR, Wald
+- Comparación MPL vs Probit vs Logit
+- Tres casos prácticos completos con scripts interactivos
+
 **Capítulo 3 — Modelos para Datos Censurados (Tobit)**
 
+- Datos censurados y truncados: conceptos y consecuencias
+- El modelo Tobit tipo I: formulación, estimación MLE
+- Por qué MCO falla con datos censurados: demostración del sesgo
+- Interpretación de coeficientes y efectos marginales
+- Pruebas de especificación: normalidad, homocedasticidad
+- Extensiones: Tobit generalizado, modelo de selección de Heckman
+- Tres casos prácticos completos con scripts interactivos
+
 **Capítulo 4 — Modelos para Datos de Recuento (Poisson y Binomial Negativa)**
+
+- La distribución de Poisson y el supuesto de equidispersión
+- Modelo de regresión de Poisson: formulación, MLE, IRR
+- Sobredispersión: diagnóstico y el modelo Binomial Negativa (NB2)
+- Inferencia: significación individual, conjunta, AIC, BIC, test de Vuong
+- Extensiones: ZIP, ZINB, modelos hurdle
+- Tres casos prácticos completos con scripts interactivos
 
 **Capítulo 5 — Datos de Panel**
 
