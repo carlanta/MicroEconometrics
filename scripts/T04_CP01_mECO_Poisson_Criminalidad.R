@@ -16,8 +16,21 @@ pausa <- function(msg="\n>>> Pulsa ENTER para continuar...") {
 pkgs <- c("AER","MASS")
 for (p in pkgs) if (!requireNamespace(p,quietly=TRUE)) install.packages(p,quiet=TRUE)
 suppressPackageStartupMessages({ library(AER); library(MASS) })
-DATA_DIR <- "../data"; OUTPUT_DIR <- "output"
-if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR)
+.get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  for (a in args) {
+    if (startsWith(a, "--file=")) return(dirname(normalizePath(substring(a, 8))))
+  }
+  for (i in seq_len(sys.nframe())) {
+    ofile <- tryCatch(sys.frame(i)$ofile, error = function(e) NULL)
+    if (!is.null(ofile)) return(dirname(normalizePath(ofile)))
+  }
+  return(normalizePath("."))
+}
+.sdir <- .get_script_dir()
+DATA_DIR <- normalizePath(file.path(.sdir, "..", "data"), mustWork=FALSE)
+OUTPUT_DIR <- normalizePath(file.path(.sdir, "..", "output"), mustWork=FALSE)
+if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR, recursive=TRUE)
 
 cat("\n================================================================\n")
 cat("  CP01 — Delitos por Municipio: Poisson y Binomial Negativa\n")
@@ -51,8 +64,7 @@ cat(sprintf("  alpha estimado:  %.4f\n", dt_c$estimate))
 cat(sprintf("  Estadístico z:   %.3f\n", dt_c$statistic))
 cat(sprintf("  p-valor:         %.6f\n\n", dt_c$p.value))
 if (dt_c$p.value < 0.05)
-  cat("  ✓ SOBREDISPERSIÓN CONFIRMADA (p<0.05). La NB es necesaria.\n\n")
-else
+  cat("  ✓ SOBREDISPERSIÓN CONFIRMADA (p<0.05). La NB es necesaria.\n\n") else
   cat("  ✗ No se rechaza equidispersión. Poisson podría ser suficiente.\n\n")
 pausa()
 

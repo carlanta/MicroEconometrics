@@ -16,8 +16,19 @@ pausa <- function(msg="\n>>> Pulsa ENTER para continuar...") {
 pkgs <- c("AER","lmtest")
 for (p in pkgs) if (!requireNamespace(p,quietly=TRUE)) install.packages(p,quiet=TRUE)
 suppressPackageStartupMessages({ library(AER); library(lmtest) })
-DATA_DIR <- "../data"; OUTPUT_DIR <- "output"
-if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR)
+.get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  for (a in args) {
+    if (startsWith(a, "--file=")) return(dirname(normalizePath(substring(a, 8))))
+  }
+  for (i in seq_len(sys.nframe())) {
+    ofile <- tryCatch(sys.frame(i)$ofile, error = function(e) NULL)
+    if (!is.null(ofile)) return(dirname(normalizePath(ofile)))
+  }
+  return(normalizePath("."))
+}
+.sdir <- .get_script_dir()
+DATA_DIR <- normalizePath(file.path(.sdir, "..", "data"), mustWork=FALSE)
 
 cat("\n================================================================\n")
 cat("  CP02 — Donaciones Benéficas: Modelo Tobit\n")
@@ -47,7 +58,7 @@ pausa()
 cat("\n--- ESTIMACIÓN MCO vs TOBIT ---\n\n")
 fml_d <- donacion ~ ingreso + edad + religiosidad + educacion + tiene_hijos + sexo
 mco_d <- lm(fml_d, data=donaciones)
-tob_d <- tobit(fml_d, left=0, data=donaciones)
+tob_d <- AER::tobit(fml_d, left=0, data=donaciones)
 
 ct_d  <- coef(summary(tob_d))
 vars_d <- c("ingreso","edad","religiosidad","educacion","tiene_hijos","sexo")
@@ -95,7 +106,7 @@ pausa()
 
 cat("\n--- BONDAD DEL AJUSTE ---\n\n")
 ll_0 <- as.numeric(logLik(glm(as.integer(donacion>0)~1, family=binomial, data=donaciones))) * 0
-ll_n  <- as.numeric(logLik(tobit(donacion~1, left=0, data=donaciones)))
+ll_n  <- as.numeric(logLik(AER::tobit(donacion~1, left=0, data=donaciones)))
 ll_m  <- as.numeric(logLik(tob_d))
 r2_mf <- 1 - ll_m/ll_n
 lr_st <- -2*(ll_n - ll_m)

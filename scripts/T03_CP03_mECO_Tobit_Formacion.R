@@ -16,8 +16,21 @@ pausa <- function(msg="\n>>> Pulsa ENTER para continuar...") {
 pkgs <- c("AER","lmtest")
 for (p in pkgs) if (!requireNamespace(p,quietly=TRUE)) install.packages(p,quiet=TRUE)
 suppressPackageStartupMessages({ library(AER); library(lmtest) })
-DATA_DIR <- "../data"; OUTPUT_DIR <- "output"
-if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR)
+.get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  for (a in args) {
+    if (startsWith(a, "--file=")) return(dirname(normalizePath(substring(a, 8))))
+  }
+  for (i in seq_len(sys.nframe())) {
+    ofile <- tryCatch(sys.frame(i)$ofile, error = function(e) NULL)
+    if (!is.null(ofile)) return(dirname(normalizePath(ofile)))
+  }
+  return(normalizePath("."))
+}
+.sdir <- .get_script_dir()
+DATA_DIR <- normalizePath(file.path(.sdir, "..", "data"), mustWork=FALSE)
+OUTPUT_DIR <- normalizePath(file.path(.sdir, "..", "output"), mustWork=FALSE)
+if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR, recursive=TRUE)
 
 cat("\n================================================================\n")
 cat("  CP03 — Gasto en Formación Profesional: Modelo Tobit\n")
@@ -63,7 +76,7 @@ cat("\n--- ESTIMACIÓN MCO vs TOBIT ---\n\n")
 fml_f <- gasto_formacion ~ educacion + ingreso + edad + sector_privado +
           desempleo_previo + sexo + antiguedad
 mco_f <- lm(fml_f, data=formacion)
-tob_f <- tobit(fml_f, left=0, data=formacion)
+tob_f <- AER::tobit(fml_f, left=0, data=formacion)
 
 ct_f   <- coef(summary(tob_f))
 vars_f <- c("educacion","ingreso","edad","sector_privado","desempleo_previo","sexo","antiguedad")
@@ -107,7 +120,7 @@ cat(sprintf("  · Sexo: las mujeres invierten %.2f€/mes %s que los hombres,\n"
 cat("    una diferencia que puede reflejar menor disponibilidad de tiempo.\n")
 
 cat("\n--- BONDAD DEL AJUSTE ---\n\n")
-ll_n <- as.numeric(logLik(tobit(gasto_formacion~1, left=0, data=formacion)))
+ll_n <- as.numeric(logLik(AER::tobit(gasto_formacion~1, left=0, data=formacion)))
 ll_m <- as.numeric(logLik(tob_f))
 cat(sprintf("  McFadden R²: %.4f\n", 1-ll_m/ll_n))
 cat(sprintf("  AIC:         %.2f\n", AIC(tob_f)))

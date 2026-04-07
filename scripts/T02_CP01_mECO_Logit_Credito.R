@@ -19,9 +19,22 @@ pausa <- function(msg="\n>>> Pulsa ENTER para continuar...") {
 pkgs <- c("lmtest","sandwich")
 for (p in pkgs) if (!requireNamespace(p, quietly=TRUE)) install.packages(p, quiet=TRUE)
 suppressPackageStartupMessages({ library(lmtest); library(sandwich) })
+.get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  for (a in args) {
+    if (startsWith(a, "--file=")) return(dirname(normalizePath(substring(a, 8))))
+  }
+  for (i in seq_len(sys.nframe())) {
+    ofile <- tryCatch(sys.frame(i)$ofile, error = function(e) NULL)
+    if (!is.null(ofile)) return(dirname(normalizePath(ofile)))
+  }
+  return(normalizePath("."))
+}
+.sdir <- .get_script_dir()
+DATA_DIR <- normalizePath(file.path(.sdir, "..", "data"), mustWork=FALSE)
+OUTPUT_DIR <- normalizePath(file.path(.sdir, "..", "output"), mustWork=FALSE)
+if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR, recursive=TRUE)
 
-DATA_DIR <- "../data"; OUTPUT_DIR <- "output"
-if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR)
 
 # -------------------------------------------------------------------------- #
 # 1. CARGA Y EDA BREVE                                                        #

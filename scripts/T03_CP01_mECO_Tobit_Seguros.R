@@ -17,8 +17,21 @@ pausa <- function(msg="\n>>> Pulsa ENTER para continuar...") {
 pkgs <- c("AER","lmtest","kableExtra")
 for (p in pkgs) if (!requireNamespace(p,quietly=TRUE)) install.packages(p,quiet=TRUE)
 suppressPackageStartupMessages({ library(AER); library(lmtest) })
-DATA_DIR <- "../data"; OUTPUT_DIR <- "output"
-if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR)
+.get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  for (a in args) {
+    if (startsWith(a, "--file=")) return(dirname(normalizePath(substring(a, 8))))
+  }
+  for (i in seq_len(sys.nframe())) {
+    ofile <- tryCatch(sys.frame(i)$ofile, error = function(e) NULL)
+    if (!is.null(ofile)) return(dirname(normalizePath(ofile)))
+  }
+  return(normalizePath("."))
+}
+.sdir <- .get_script_dir()
+DATA_DIR <- normalizePath(file.path(.sdir, "..", "data"), mustWork=FALSE)
+OUTPUT_DIR <- normalizePath(file.path(.sdir, "..", "output"), mustWork=FALSE)
+if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR, recursive=TRUE)
 
 # ── 1. CARGA Y EDA ───────────────────────────────────────────────────────────
 cat("\n================================================================\n")
@@ -51,7 +64,7 @@ cat("================================================================\n\n")
 
 fml <- gasto_seguros ~ renta + edad + num_miembros + educacion + zona_urbana + cronico
 mco <- lm(fml, data=seguros)
-tob <- tobit(fml, left=0, data=seguros)
+tob <- AER::tobit(fml, left=0, data=seguros)
 
 cat("--- MCO (con datos censurados — estimaciones SESGADAS) ---\n\n")
 ct_m <- coef(summary(mco))
@@ -151,14 +164,12 @@ bp_pval <- 1-pchisq(bp_stat,5)
 
 cat(sprintf("  Jarque-Bera (normalidad): JB=%.3f, p=%.4f\n", jb_stat, jb_pval))
 if (jb_pval>0.05)
-  cat("  → No se rechaza la normalidad. Supuesto SATISFECHO.\n\n")
-else
+  cat("  → No se rechaza la normalidad. Supuesto SATISFECHO.\n\n") else
   cat("  → Se rechaza la normalidad. Considerar transformación log(y).\n\n")
 
 cat(sprintf("  Breusch-Pagan (homoced.): BP=%.3f, p=%.4f\n", bp_stat, bp_pval))
 if (bp_pval>0.05)
-  cat("  → No se rechaza la homocedasticidad. Supuesto SATISFECHO.\n\n")
-else
+  cat("  → No se rechaza la homocedasticidad. Supuesto SATISFECHO.\n\n") else
   cat("  → Indicios de heterocedasticidad. Los errores estándar pueden\n")
   cat("    no ser válidos. Considerar Tobit heterocedástico.\n\n")
 
