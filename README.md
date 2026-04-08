@@ -135,41 +135,41 @@ Si este libro consigue que algún alumno más disfrute aprendiendo microeconomet
 
 Cada script es autocontenido: instala automáticamente los paquetes necesarios, detecta su propia ubicación para encontrar los datos (funciona tanto con `source()` como con `Rscript`), presenta los outputs con interpretaciones narrativas en la consola y guarda gráficos en la carpeta `output/` del proyecto. Las paradas interactivas (`readline`) permiten seguir el análisis paso a paso.
 
-| Script | Tema | Contenido |
-|--------|------|-----------|
-| `T00_mECO_Script_Fundamentos.R` | 0 | Fundamentos de probabilidad e inferencia |
-| `T01_mECO_Script_VD_Limitada.R` | 1 | Variable dependiente limitada: taxonomía |
-| `T01_CP01_mECO_EDA_Empleo.R` | 1 CP1 | EDA: mercado laboral (variable binaria) |
-| `T01_CP02_mECO_EDA_Gasto.R` | 1 CP2 | EDA: gasto en seguros (variable censurada) |
-| `T01_CP03_mECO_EDA_Visitas.R` | 1 CP3 | EDA: visitas al médico (variable de recuento) |
-| `T02_mECO_Script_Eleccion_Discreta.R` | 2 | Elección discreta: MPL, Logit, Probit |
-| `T02_CP01_mECO_Logit_Credito.R` | 2 CP1 | Logit: concesión de crédito bancario |
-| `T02_CP02_mECO_Logit_Compra.R` | 2 CP2 | Logit: compra online |
-| `T02_CP03_mECO_Logit_Matricula.R` | 2 CP3 | Logit: matrícula universitaria |
-| `T03_mECO_Script_Tobit.R` | 3 | Modelo Tobit: censura y variable latente |
-| `T03_CP01_mECO_Tobit_Seguros.R` | 3 CP1 | Tobit: gasto en seguros médicos |
-| `T03_CP02_mECO_Tobit_Donaciones.R` | 3 CP2 | Tobit: donaciones benéficas |
-| `T03_CP03_mECO_Tobit_Formacion.R` | 3 CP3 | Tobit: gasto en formación |
-| `T04_mECO_Script_Recuento.R` | 4 | Poisson y Binomial Negativa |
-| `T04_CP01_mECO_Poisson_Criminalidad.R` | 4 CP1 | Poisson/NB: delitos por municipio |
-| `T04_CP02_mECO_NB_Accidentes.R` | 4 CP2 | NB: accidentes de tráfico |
-| `T04_CP03_mECO_NB_Publicaciones.R` | 4 CP3 | NB: publicaciones académicas |
-| `T05_mECO_Script_Panel.R` | 5 | Panel: Pooled, EF, EA con datos de Grunfeld |
-| `T05_CP01_mECO_Panel_Inversion.R` | 5 CP1 | Panel: inversión empresarial (80 empresas × 10 años) |
-| `T05_CP02_mECO_Panel_Desempleo.R` | 5 CP2 | Panel: desempleo regional (50 provincias × 15 años) |
-| `T05_CP03_mECO_Panel_Salarios.R` | 5 CP3 | Panel: salarios y formación (500 trabajadores × 5 años) |
-| `T06_mECO_Script_Instrumentales.R` | 6 | IV/MC2E: simulación didáctica con parámetros conocidos |
-| `T06_CP01_mECO_IV_Educacion.R` | 6 CP1 | IV: retorno de la educación (2 instrumentos, Sargan) |
-| `T06_CP02_mECO_IV_Crecimiento.R` | 6 CP2 | IV: gasto público y crecimiento (id. exacta) |
-| `T06_CP03_mECO_IV_Demanda.R` | 6 CP3 | IV: curva de demanda (simultaneidad, Sargan) |
-| `T07_mECO_Script_Duracion.R` | 7 | Duración: KM, Cox, Weibull, log-normal |
-| `T07_CP01_mECO_Duracion_Desempleo.R` | 7 CP1 | Duración: desempleo (800 individuos, censura 30%) |
-| `T07_CP02_mECO_Duracion_Empresas.R` | 7 CP2 | Duración: supervivencia empresarial (600 empresas) |
-| `T07_CP03_mECO_Duracion_Impago.R` | 7 CP3 | Duración: impago crediticio (1000 créditos, censura 67%) |
-| `T08_mECO_Script_Cualitativos.R` | 8 | Dummies, ANOVA/ANCOVA, multinomial, ordenado |
-| `T08_CP01_mECO_Multinomial_Transporte.R` | 8 CP1 | Multinomial: elección de transporte (3 alternativas) |
-| `T08_CP02_mECO_Ordenado_Satisfaccion.R` | 8 CP2 | Probit/Logit ordenado: satisfacción laboral (5 niveles) |
-| `T08_CP03_mECO_Multinomial_SitLaboral.R` | 8 CP3 | Multinomial: situación laboral (empleado/desempleado/inactivo) |
+| Script | Descripción |
+|--------|-------------|
+| `T00_mECO_Script_Fundamentos.R` | **T0** — Fundamentos de probabilidad e inferencia |
+| `T01_mECO_Script_VD_Limitada.R` | **T1** — Variable dependiente limitada: taxonomía |
+| `T01_CP01_mECO_EDA_Empleo.R` | **T1 CP1** — EDA: mercado laboral (variable binaria) |
+| `T01_CP02_mECO_EDA_Gasto.R` | **T1 CP2** — EDA: gasto en seguros (variable censurada) |
+| `T01_CP03_mECO_EDA_Visitas.R` | **T1 CP3** — EDA: visitas al médico (variable de recuento) |
+| `T02_mECO_Script_Eleccion_Discreta.R` | **T2** — Elección discreta: MPL, Logit, Probit |
+| `T02_CP01_mECO_Logit_Credito.R` | **T2 CP1** — Logit: concesión de crédito bancario |
+| `T02_CP02_mECO_Logit_Compra.R` | **T2 CP2** — Logit: compra online |
+| `T02_CP03_mECO_Logit_Matricula.R` | **T2 CP3** — Logit: matrícula universitaria |
+| `T03_mECO_Script_Tobit.R` | **T3** — Modelo Tobit: censura y variable latente |
+| `T03_CP01_mECO_Tobit_Seguros.R` | **T3 CP1** — Tobit: gasto en seguros médicos |
+| `T03_CP02_mECO_Tobit_Donaciones.R` | **T3 CP2** — Tobit: donaciones benéficas |
+| `T03_CP03_mECO_Tobit_Formacion.R` | **T3 CP3** — Tobit: gasto en formación |
+| `T04_mECO_Script_Recuento.R` | **T4** — Poisson y Binomial Negativa |
+| `T04_CP01_mECO_Poisson_Criminalidad.R` | **T4 CP1** — Poisson/NB: delitos por municipio |
+| `T04_CP02_mECO_NB_Accidentes.R` | **T4 CP2** — NB: accidentes de tráfico |
+| `T04_CP03_mECO_NB_Publicaciones.R` | **T4 CP3** — NB: publicaciones académicas |
+| `T05_mECO_Script_Panel.R` | **T5** — Panel: Pooled, EF, EA con datos de Grunfeld |
+| `T05_CP01_mECO_Panel_Inversion.R` | **T5 CP1** — Panel: inversión empresarial (80 empresas × 10 años) |
+| `T05_CP02_mECO_Panel_Desempleo.R` | **T5 CP2** — Panel: desempleo regional (50 provincias × 15 años) |
+| `T05_CP03_mECO_Panel_Salarios.R` | **T5 CP3** — Panel: salarios y formación (500 trabajadores × 5 años) |
+| `T06_mECO_Script_Instrumentales.R` | **T6** — IV/MC2E: simulación didáctica con parámetros conocidos |
+| `T06_CP01_mECO_IV_Educacion.R` | **T6 CP1** — IV: retorno de la educación (2 instrumentos, Sargan) |
+| `T06_CP02_mECO_IV_Crecimiento.R` | **T6 CP2** — IV: gasto público y crecimiento (id. exacta) |
+| `T06_CP03_mECO_IV_Demanda.R` | **T6 CP3** — IV: curva de demanda (simultaneidad, Sargan) |
+| `T07_mECO_Script_Duracion.R` | **T7** — Duración: KM, Cox, Weibull, log-normal |
+| `T07_CP01_mECO_Duracion_Desempleo.R` | **T7 CP1** — Duración: desempleo (800 individuos, censura 30%) |
+| `T07_CP02_mECO_Duracion_Empresas.R` | **T7 CP2** — Duración: supervivencia empresarial (600 empresas) |
+| `T07_CP03_mECO_Duracion_Impago.R` | **T7 CP3** — Duración: impago crediticio (1000 créditos, censura 67%) |
+| `T08_mECO_Script_Cualitativos.R` | **T8** — Dummies, ANOVA/ANCOVA, multinomial, ordenado |
+| `T08_CP01_mECO_Multinomial_Transporte.R` | **T8 CP1** — Multinomial: elección de transporte (3 alternativas) |
+| `T08_CP02_mECO_Ordenado_Satisfaccion.R` | **T8 CP2** — Probit/Logit ordenado: satisfacción laboral (5 niveles) |
+| `T08_CP03_mECO_Multinomial_SitLaboral.R` | **T8 CP3** — Multinomial: situación laboral (empleado/desempleado/inactivo) |
 
 ---
 
@@ -177,30 +177,30 @@ Cada script es autocontenido: instala automáticamente los paquetes necesarios, 
 
 | Dataset | Tema | Descripción |
 |---------|------|-------------|
-| `T01_CP01_empleo_basico.RData` | 1 | Participación laboral (binaria) |
-| `T01_CP02_gasto_hogar.RData` | 1 | Gasto en seguros médicos (censurada) |
-| `T01_CP03_visitas_medico.RData` | 1 | Visitas al médico (recuento) |
-| `T02_CP01_credito_bancario.RData` | 2 | Concesión de crédito |
-| `T02_CP02_compra_online.RData` | 2 | Compra online |
-| `T02_CP03_matricula_universidad.RData` | 2 | Matrícula universitaria |
-| `T03_CP01_gasto_seguros.RData` | 3 | Gasto en seguros médicos |
-| `T03_CP02_donaciones.RData` | 3 | Donaciones benéficas |
-| `T03_CP03_gasto_formacion.RData` | 3 | Gasto en formación empresarial |
-| `T04_CP01_criminalidad.RData` | 4 | Delitos por municipio |
-| `T04_CP02_accidentes.RData` | 4 | Accidentes de tráfico |
-| `T04_CP03_publicaciones.RData` | 4 | Publicaciones académicas |
-| `T05_CP01_inversion_empresas.RData` | 5 | Panel: inversión empresarial (80×10) |
-| `T05_CP02_desempleo_regional.RData` | 5 | Panel: desempleo provincial (50×15) |
-| `T05_CP03_salarios_formacion.RData` | 5 | Panel: salarios y formación (500×5) |
-| `T06_CP01_retorno_educacion.RData` | 6 | Retorno educación con instrumentos |
-| `T06_CP02_crecimiento_paises.RData` | 6 | Gasto público y crecimiento (60×20) |
-| `T06_CP03_oferta_demanda.RData` | 6 | Mercado simulado (oferta-demanda) |
-| `T07_CP01_duracion_desempleo.RData` | 7 | Duración desempleo con censura |
-| `T07_CP02_supervivencia_empresas.RData` | 7 | Supervivencia empresarial |
-| `T07_CP03_impago_crediticio.RData` | 7 | Impago crediticio (credit scoring) |
-| `T08_CP01_transporte.RData` | 8 | Elección de transporte (3 alternativas) |
-| `T08_CP02_satisfaccion_laboral.RData` | 8 | Satisfacción laboral ordinal (1-5) |
-| `T08_CP03_situacion_laboral.RData` | 8 | Situación laboral (3 categorías) |
+| `T01_CP01_empleo_basico.RData` | **T1** — Participación laboral (binaria) |
+| `T01_CP02_gasto_hogar.RData` | **T1** — Gasto en seguros médicos (censurada) |
+| `T01_CP03_visitas_medico.RData` | **T1** — Visitas al médico (recuento) |
+| `T02_CP01_credito_bancario.RData` | **T2** — Concesión de crédito |
+| `T02_CP02_compra_online.RData` | **T2** — Compra online |
+| `T02_CP03_matricula_universidad.RData` | **T2** — Matrícula universitaria |
+| `T03_CP01_gasto_seguros.RData` | **T3** — Gasto en seguros médicos |
+| `T03_CP02_donaciones.RData` | **T3** — Donaciones benéficas |
+| `T03_CP03_gasto_formacion.RData` | **T3** — Gasto en formación empresarial |
+| `T04_CP01_criminalidad.RData` | **T4** — Delitos por municipio |
+| `T04_CP02_accidentes.RData` | **T4** — Accidentes de tráfico |
+| `T04_CP03_publicaciones.RData` | **T4** — Publicaciones académicas |
+| `T05_CP01_inversion_empresas.RData` | **T5** — Panel: inversión empresarial (80×10) |
+| `T05_CP02_desempleo_regional.RData` | **T5** — Panel: desempleo provincial (50×15) |
+| `T05_CP03_salarios_formacion.RData` | **T5** — Panel: salarios y formación (500×5) |
+| `T06_CP01_retorno_educacion.RData` | **T6** — Retorno educación con instrumentos |
+| `T06_CP02_crecimiento_paises.RData` | **T6** — Gasto público y crecimiento (60×20) |
+| `T06_CP03_oferta_demanda.RData` | **T6** — Mercado simulado (oferta-demanda) |
+| `T07_CP01_duracion_desempleo.RData` | **T7** — Duración desempleo con censura |
+| `T07_CP02_supervivencia_empresas.RData` | **T7** — Supervivencia empresarial |
+| `T07_CP03_impago_crediticio.RData` | **T7** — Impago crediticio (credit scoring) |
+| `T08_CP01_transporte.RData` | **T8** — Elección de transporte (3 alternativas) |
+| `T08_CP02_satisfaccion_laboral.RData` | **T8** — Satisfacción laboral ordinal (1-5) |
+| `T08_CP03_situacion_laboral.RData` | **T8** — Situación laboral (3 categorías) |
 
 Todos los datasets se generan con `set.seed(2026)` para reproducibilidad completa.
 
