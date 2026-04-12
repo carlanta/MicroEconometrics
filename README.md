@@ -14,7 +14,7 @@ carlos@cwconsultores.com
 ### Publicación
 
 Este manual está publicado por **Digital Reasons** (www.digitalreasons.es).
-
+**Enlace de compra del Manual** (https://amzn.eu/d/07dtTOs0)
 ---
 
 ### Prólogo
